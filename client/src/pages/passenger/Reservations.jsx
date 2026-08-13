@@ -1,0 +1,172 @@
+import { useEffect, useState } from 'react';
+import { BookingMap } from '../../components/maps/BookingMap.jsx';
+import BookingForm from '../../components/rides/BookingForm.jsx';
+import useGeolocation from '../../hooks/useGeolocation.js';
+import { nearbyDrivers, driverEta } from '../../services/rideService.js';
+
+const DEFAULT_CENTER = [39.203, -76.857]; // Howard County, MD
+
+export default function Reservations() {
+  const { position } = useGeolocation();
+  const [pickup, setPickup] = useState(
+    position ? { lat: position.lat, lng: position.lng, address: 'Current location' } : null
+  );
+  const [dropoff, setDropoff] = useState(null);
+  const [drivers, setDrivers] = useState([]);
+  const [driverRoute, setDriverRoute] = useState(null);
+  const [selectedDriver, setSelectedDriver] = useState(null);
+  const [loadingDrivers, setLoadingDrivers] = useState(false);
+
+  // Load nearby drivers once pickup is chosen
+  useEffect(() => {
+    if (!pickup?.lat) {
+      setDrivers([]);
+      return;
+    }
+    let cancelled = false;
+    setLoadingDrivers(true);
+    nearbyDrivers({ lat: pickup.lat, lng: pickup.lng, radius: 10000 })
+      .then(({ data }) => {
+        if (!cancelled) setDrivers(data.drivers || []);
+      })
+      .catch(() => {})
+      .finally(() => !cancelled && setLoadingDrivers(false));
+    return () => {
+      cancelled = true;
+    };
+  }, [pickup?.lat, pickup?.lng]);
+
+  // Fetch route + ETA from a selected driver to pickup
+  const selectDriver = async (d) => {
+    if (!pickup) return;
+    setSelectedDriver(d);
+    setDriverRoute(null);
+    try {
+      const { data } = await driverEta(d._id, { lat: pickup.lat, lng: pickup.lng });
+      setDriverRoute(data.route || []);
+    } catch {
+      setDriverRoute([]);
+    }
+  };
+
+  // Interactive map: first click sets pickup, second sets dropoff
+  const handlePick = (p) => {
+    if (!pickup) setPickup({ ...p, address: `Lat ${p.lat.toFixed(4)}, Lng ${p.lng.toFixed(4)}` });
+    else if (!dropoff) setDropoff({ ...p, address: `Lat ${p.lat.toFixed(4)}, Lng ${p.lng.toFixed(4)}` });
+  };
+
+  return (
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+      {/* Hero header */}
+      <section className="bg-brand-gradient-soft mb-6 overflow-hidden rounded-3xl px-6 py-8 sm:px-10 sm:py-12">
+        <h1 className="text-3xl font-bold tracking-tight text-brand-900 sm:text-4xl">
+          Reservations
+        </h1>
+        <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-brand-950/70 sm:text-base">
+          Book a taxi, see the fare upfront, and track your driver live from pickup to dropoff —
+          with clear arrival time and route, every step of the way.
+        </p>
+        <div className="mt-5 flex flex-wrap gap-2">
+          <span className="inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-1.5 text-xs font-medium text-brand-800 shadow-sm">
+            <span className="h-2 w-2 rounded-full bg-brand-500" />
+            Live driver tracking
+          </span>
+          <span className="inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-1.5 text-xs font-medium text-brand-800 shadow-sm">
+            <span className="h-2 w-2 rounded-full bg-brand-500" />
+            Upfront fare estimate
+          </span>
+          <span className="inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-1.5 text-xs font-medium text-brand-800 shadow-sm">
+            <span className="h-2 w-2 rounded-full bg-brand-500" />
+            Sedan · SUV · Van
+          </span>
+        </div>
+      </section>
+
+      {/* Booking card */}
+      <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+        <div className="grid lg:grid-cols-5">
+          {/* Form */}
+          <div className="border-slate-200 lg:col-span-2 lg:border-r">
+            <BookingForm
+              pickup={pickup}
+              dropoff={dropoff}
+              onPickupChange={setPickup}
+              onDropoffChange={setDropoff}
+            />
+          </div>
+
+          {/* Map */}
+          <div className="relative lg:col-span-3">
+            <div className="absolute left-4 top-4 z-[1000] rounded-full bg-white/95 px-4 py-2 text-xs font-medium text-brand-900 shadow-sm backdrop-blur">
+              {pickup && !dropoff
+                ? 'Tap the map to set dropoff'
+                : !pickup
+                  ? 'Tap the map to set pickup'
+                  : 'Pickup set'}
+            </div>
+            <div className="h-[380px] sm:h-[440px] lg:h-full lg:min-h-[560px]">
+              <BookingMap
+                center={position || DEFAULT_CENTER}
+                pickup={pickup}
+                dropoff={dropoff}
+                drivers={drivers}
+                route={driverRoute}
+                onPick={handlePick}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Nearby drivers strip */}
+        <div className="border-t border-slate-200 bg-slate-50/60 px-6 py-5">
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-ink">
+              {pickup ? 'Drivers near your pickup' : 'Drivers in the area'}
+              {loadingDrivers && <span className="ml-2 text-xs font-normal text-muted">Loading…</span>}
+            </h3>
+            <span className="flex items-center gap-1.5 text-xs font-medium text-brand-600">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-brand-500" />
+              {drivers.length} available
+            </span>
+          </div>
+
+          {drivers.length === 0 && !loadingDrivers ? (
+            <p className="text-sm text-muted">
+              {pickup
+                ? 'No drivers nearby yet. Set a pickup to search the area.'
+                : 'Choose a pickup location to find drivers near you.'}
+            </p>
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {drivers.map((d) => (
+                <button
+                  key={d._id}
+                  type="button"
+                  onClick={() => selectDriver(d)}
+                  className={`flex items-center gap-3 rounded-2xl border bg-white p-3 text-left transition-all ${
+                    selectedDriver?._id === d._id
+                      ? 'border-brand-500 ring-2 ring-brand-200'
+                      : 'border-slate-200 hover:border-brand-300'
+                  }`}
+                >
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-50 text-lg">
+                    {d.vehicleType === 'suv' ? '🚙' : d.vehicleType === 'van' ? '🚐' : '🚗'}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block truncate text-sm font-semibold text-ink">{d.name}</span>
+                    <span className="block text-xs capitalize text-muted">
+                      {d.vehicleType} · {d.plateNumber}
+                    </span>
+                  </span>
+                  <span className="ml-auto text-xs font-semibold text-brand-600">
+                    {selectedDriver?._id === d._id ? 'ETA…' : 'Select'}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+    </div>
+  );
+}

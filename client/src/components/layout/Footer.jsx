@@ -1,0 +1,96 @@
+import { Link } from 'react-router-dom';
+import { SERVICES } from '../../data/services.js';
+
+export default function Footer() {
+  return (
+    <footer className="mt-auto bg-brand-gradient text-white">
+      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-4">
+        <div>
+          <div className="text-lg font-bold text-white">
+            Ellicott City <span className="text-gold-300">Airport Taxi</span>
+          </div>
+          <p className="mt-3 text-sm leading-relaxed text-white/75">
+            Professional, full-service transportation across Howard County and the
+            Baltimore–Washington region. Available 24/7 — book online or call dispatch.
+          </p>
+          <div className="mt-4 flex gap-3">
+            <a
+              href="https://www.facebook.com/ridetaxi.ridetaxi"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Facebook"
+              className="grid h-9 w-9 place-items-center rounded-full bg-white/10 text-sm transition-colors hover:bg-white/20"
+            >
+              f
+            </a>
+            <a
+              href="tel:4435464116"
+              aria-label="Call us"
+              className="grid h-9 w-9 place-items-center rounded-full bg-white/10 text-sm transition-colors hover:bg-white/20"
+            >
+              📞
+            </a>
+            <a
+              href="mailto:ridetaxis@gmail.com"
+              aria-label="Email us"
+              className="grid h-9 w-9 place-items-center rounded-full bg-white/10 text-sm transition-colors hover:bg-white/20"
+            >
+              ✉️
+            </a>
+          </div>
+        </div>
+
+        <div>
+          <h4 className="text-sm font-semibold text-white">Company</h4>
+          <ul className="mt-3 space-y-2 text-sm text-white/75">
+            <li><Link to="/" className="transition-colors hover:text-white">Home</Link></li>
+            <li><Link to="/about" className="transition-colors hover:text-white">About</Link></li>
+            <li><Link to="/services" className="transition-colors hover:text-white">Services</Link></li>
+            <li><Link to="/fleet" className="transition-colors hover:text-white">Fleet</Link></li>
+            <li><Link to="/contact" className="transition-colors hover:text-white">Contact</Link></li>
+            <li><Link to="/careers" className="transition-colors hover:text-white">Careers</Link></li>
+            <li><Link to="/reservations" className="transition-colors hover:text-white">Client Portal</Link></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 className="text-sm font-semibold text-white">Services</h4>
+          <ul className="mt-3 space-y-2 text-sm text-white/75">
+            {SERVICES.slice(0, 7).map((s) => (
+              <li key={s.slug}>
+                <Link to={`/services/${s.slug}`} className="transition-colors hover:text-white">
+                  {s.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div>
+          <h4 className="text-sm font-semibold text-white">Contact</h4>
+          <ul className="mt-3 space-y-2.5 text-sm text-white/75">
+            <li className="flex items-start gap-2">
+              <span className="mt-0.5">📍</span>
+              <span>Columbia, Maryland</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="mt-0.5">📞</span>
+              <a href="tel:4435464116" className="transition-colors hover:text-white">(443) 546-4116</a>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="mt-0.5">✉️</span>
+              <a href="mailto:ridetaxis@gmail.com" className="transition-colors hover:text-white">ridetaxis@gmail.com</a>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="mt-0.5">🕑</span>
+              <span>24/7 dispatch &amp; support</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div className="border-t border-white/15 py-4 text-center text-xs text-white/60">
+        © {new Date().getFullYear()} Ride Taxi LLC. All rights reserved. · Columbia, Maryland
+      </div>
+    </footer>
+  );
+}
