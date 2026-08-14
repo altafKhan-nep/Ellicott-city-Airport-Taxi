@@ -12,11 +12,16 @@ import Careers from './pages/marketing/Careers.jsx';
 import Reservations from './pages/passenger/Reservations.jsx';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
+import ForgotPassword from './pages/ForgotPassword.jsx';
+import ResetPassword from './pages/ResetPassword.jsx';
+import VerifyEmail from './pages/VerifyEmail.jsx';
+import SocialCallback from './pages/SocialCallback.jsx';
 import RideHistory from './pages/passenger/RideHistory.jsx';
 import RideTracking from './pages/passenger/RideTracking.jsx';
 import DriverDashboard from './pages/driver/Dashboard.jsx';
 import AdminDashboard from './pages/admin/Dashboard.jsx';
 import { Spinner } from './components/ui/Spinner.jsx';
+import VerifyEmailBanner from './components/auth/VerifyEmailBanner.jsx';
 
 const RequireRole = ({ role, children }) => {
   const { user, loading } = useAuth();
@@ -36,6 +41,7 @@ export default function App() {
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
+      <VerifyEmailBanner />
       <main className="flex-1">
         <Routes>
           <Route path="/" element={<Home />} />
@@ -48,6 +54,10 @@ export default function App() {
           <Route path="/reservations" element={<Reservations />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/auth/social" element={<SocialCallback />} />
 
           <Route
             path="/rides/history"

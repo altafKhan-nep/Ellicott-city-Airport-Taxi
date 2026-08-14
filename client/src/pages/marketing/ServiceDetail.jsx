@@ -53,10 +53,10 @@ export default function ServiceDetail() {
               </Button>
             </Link>
             <a
-              href="tel:4435464116"
+              href="tel:4103655556"
               className="inline-flex items-center gap-2 rounded-full border border-white/30 px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-white/10"
             >
-              📞 (443) 546-4116
+              📞 (410) 365-5556
             </a>
           </div>
         </div>

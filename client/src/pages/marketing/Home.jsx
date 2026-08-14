@@ -35,7 +35,7 @@ const TESTIMONIALS = [
     quote:
       'Picked me up at BWI at 4:30am, drove the whole way professionally, and the fare was exactly what I saw on the app. Flawless.',
     name: 'Danielle R.',
-    detail: 'Columbia, MD · Airport transfer',
+    detail: 'Ellicott City, MD · Airport transfer',
   },
   {
     quote:
@@ -45,9 +45,9 @@ const TESTIMONIALS = [
   },
   {
     quote:
-      'I use RideTaxi every week for the commute to the office. Reliable, clean cars and the same great driver most mornings.',
+      'I use Ellicott City Airport Taxi every week for the commute to the office. Reliable, clean cars and the same great driver most mornings.',
     name: 'Jennifer W.',
-    detail: 'Howard County · Corporate account',
+    detail: 'Ellicott City, MD · Corporate account',
   },
 ];
 
@@ -84,17 +84,17 @@ export default function Home() {
             <div className="relative z-10">
               <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-medium uppercase tracking-wider text-white/85 backdrop-blur">
                 <span className="h-2 w-2 animate-pulse rounded-full bg-gold-400" />
-                Howard County · Available 24/7
+                Ellicott City, MD · Available 24/7
               </span>
 
               <h1 className="mt-6 text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-                Howard County’s premier{' '}
+                Ellicott City’s premier{' '}
                 <span className="text-gold-300">full-service</span> transportation provider
               </h1>
 
               <p className="mt-5 max-w-xl text-lg leading-relaxed text-white/80">
-                Professional taxi, sedan and SUV service across Howard County and the
-                Baltimore–Washington region — airport transfers, corporate travel, weddings,
+                Professional taxi, sedan and SUV service across Maryland, DC, and Virginia —
+                airport transfers, corporate travel, weddings,
                 events and more. Book online, pay upfront, track your driver live.
               </p>
 
@@ -105,11 +105,11 @@ export default function Home() {
                   </Button>
                 </Link>
                 <a
-                  href="tel:4435464116"
+                  href="tel:4103655556"
                   className="inline-flex items-center gap-2 rounded-full border border-white/30 px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-white/10"
                 >
                   <span className="text-lg">📞</span>
-                  (443) 546-4116
+                  (410) 365-5556
                 </a>
               </div>
 
@@ -197,20 +197,22 @@ export default function Home() {
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <div>
             <span className="text-xs font-semibold uppercase tracking-widest text-brand-600">
-              Welcome to RideTaxi
+              Welcome to Ellicott City Airport Taxi
             </span>
             <h2 className="mt-3 text-3xl font-bold tracking-tight text-ink sm:text-4xl">
               Peace of mind, <span className="text-brand-gradient">every mile</span>
             </h2>
             <p className="mt-5 text-base leading-relaxed text-muted">
-              RideTaxi delivers professional, reliable and comfortable transportation across
-              Howard County for private schools, corporate clients, events, airport transfers and
+              Ellicott City Airport Taxi delivers professional, reliable and comfortable
+              transportation across
+              Maryland, DC, and Virginia for private schools, corporate clients, events, airport
+              transfers and
               group travel. Our experienced drivers provide safe, seamless journeys — every time.
             </p>
             <p className="mt-4 text-base leading-relaxed text-muted">
               Every driver is professionally trained, licensed and background-checked. Our service
               manager monitors quality continuously and passengers rate every trip, so we can hold
-              the RideTaxi standard of excellence.
+              the Ellicott City Airport Taxi standard of excellence.
             </p>
             <ul className="mt-6 space-y-3">
               {['Prompt, efficient, comfortable and safe', 'Clean, modern, well-maintained vehicles', 'Transparent upfront pricing', 'Professional, courteous drivers'].map((item) => (
@@ -229,10 +231,10 @@ export default function Home() {
             <div className="p-8 sm:p-10">
               <h3 className="text-2xl font-bold">Book online or call</h3>
               <a
-                href="tel:4435464116"
+                href="tel:4103655556"
                 className="mt-2 block text-3xl font-extrabold tracking-tight text-gold-300"
               >
-                (443) 546-4116
+                (410) 365-5556
               </a>
               <p className="mt-4 text-[15px] leading-relaxed text-white/80">
                 Get a free, no-obligation quote for airport transfers, events, corporate accounts
@@ -307,7 +309,7 @@ export default function Home() {
       <section className="relative overflow-hidden">
         <img
           src="/images/ececutive-sedan.png"
-          alt="RideTaxi executive sedan"
+          alt="Ellicott City Airport Taxi executive sedan"
           className="h-72 w-full object-cover sm:h-96"
           loading="lazy"
         />
@@ -401,11 +403,12 @@ export default function Home() {
             Locally based
           </span>
           <h2 className="mt-3 text-3xl font-bold tracking-tight text-ink sm:text-4xl">
-            We are available across Howard County
+            We are available across Maryland, DC, and Virginia
           </h2>
           <p className="mt-4 text-muted">
-            Based in Columbia, RideTaxi operates actively in every community across the county and
-            the surrounding region — plus BWI, Dulles, Reagan National, Amtrak and MARC terminals.
+            Based in Ellicott City, Ellicott City Airport Taxi operates actively in every
+            community across the region — plus BWI, Dulles, Reagan National, Amtrak and MARC
+            terminals.
           </p>
         </div>
 
@@ -440,11 +443,11 @@ export default function Home() {
               </Button>
             </Link>
             <a
-              href="tel:4435464116"
+              href="tel:4103655556"
               className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-base font-semibold text-brand-800 shadow-sm transition-colors hover:bg-brand-50"
             >
               <span className="text-lg">📞</span>
-              (443) 546-4116
+              (410) 365-5556
             </a>
           </div>
         </div>

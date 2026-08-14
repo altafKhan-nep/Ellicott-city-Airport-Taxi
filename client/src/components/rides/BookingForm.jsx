@@ -5,18 +5,15 @@ import { Button } from '../ui/Button.jsx';
 import { Input } from '../ui/Input.jsx';
 import LocationSearch from './LocationSearch.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
-
-const VEHICLES = [
-  { id: 'sedan', label: 'Sedan', desc: 'Up to 4 riders', icon: '🚗' },
-  { id: 'suv', label: 'SUV', desc: 'Up to 6 riders', icon: '🚙' },
-  { id: 'van', label: 'Van', desc: 'Up to 8 riders', icon: '🚐' },
-];
+import { VEHICLES } from '../../data/vehicles.js';
+import { SERVICES } from '../../data/services.js';
 
 export default function BookingForm({ pickup, dropoff, onPickupChange, onDropoffChange }) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [when, setWhen] = useState('now');
-  const [vehicleType, setVehicleType] = useState('sedan');
+  const [vehicleType, setVehicleType] = useState('');
+  const [serviceType, setServiceType] = useState('');
   const [passengerCount, setPassengerCount] = useState(1);
   const [bags, setBags] = useState(0);
   const [extra, setExtra] = useState('');
@@ -40,6 +37,14 @@ export default function BookingForm({ pickup, dropoff, onPickupChange, onDropoff
       setError('Please select both pickup and dropoff locations on the map.');
       return;
     }
+    if (!vehicleType) {
+      setError('Please select your vehicle type.');
+      return;
+    }
+    if (!serviceType) {
+      setError('Please select your service type.');
+      return;
+    }
     if (!user) {
       navigate('/login', { state: { from: '/' } });
       return;
@@ -51,6 +56,7 @@ export default function BookingForm({ pickup, dropoff, onPickupChange, onDropoff
         pickup,
         dropoff,
         vehicleType,
+        serviceType,
         passengerCount,
         bags,
         when,
@@ -133,27 +139,38 @@ export default function BookingForm({ pickup, dropoff, onPickupChange, onDropoff
       )}
 
       {/* Vehicle type */}
-      <div>
-        <span className="mb-2 block text-sm font-medium text-ink">Vehicle type</span>
-        <div className="grid grid-cols-3 gap-2">
+      <label className="block">
+        <span className="mb-1.5 block text-sm font-medium text-ink">Vehicle type</span>
+        <select
+          value={vehicleType}
+          onChange={(e) => setVehicleType(e.target.value)}
+          className={field}
+        >
+          <option value="" disabled>Select your vehicle type</option>
           {VEHICLES.map((v) => (
-            <button
-              key={v.id}
-              type="button"
-              onClick={() => setVehicleType(v.id)}
-              className={`rounded-2xl border p-3 text-center transition-all ${
-                vehicleType === v.id
-                  ? 'border-brand-600 bg-brand-50 shadow-sm ring-2 ring-brand-200'
-                  : 'border-slate-200 hover:border-slate-300'
-              }`}
-            >
-              <div className="text-xl">{v.icon}</div>
-              <div className="mt-1 text-sm font-semibold">{v.label}</div>
-              <div className="text-xs text-muted">{v.desc}</div>
-            </button>
+            <option key={v.id} value={v.id}>
+              {v.icon} {v.label} — {v.desc}
+            </option>
           ))}
-        </div>
-      </div>
+        </select>
+      </label>
+
+      {/* Service type */}
+      <label className="block">
+        <span className="mb-1.5 block text-sm font-medium text-ink">Service type</span>
+        <select
+          value={serviceType}
+          onChange={(e) => setServiceType(e.target.value)}
+          className={field}
+        >
+          <option value="" disabled>Select your service type</option>
+          {SERVICES.map((s) => (
+            <option key={s.slug} value={s.slug}>
+              {s.name}
+            </option>
+          ))}
+        </select>
+      </label>
 
       {/* Counts */}
       <div className="grid grid-cols-2 gap-3">

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { Input } from '../components/ui/Input.jsx';
 import { Button } from '../components/ui/Button.jsx';
+import SocialLoginButtons from '../components/auth/SocialLoginButtons.jsx';
 
 export default function Register() {
   const { register } = useAuth();
@@ -17,6 +18,7 @@ export default function Register() {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [done, setDone] = useState(null); // { email, verificationLink }
 
   const submit = async (e) => {
     e.preventDefault();
@@ -27,8 +29,8 @@ export default function Register() {
     }
     setLoading(true);
     try {
-      await register(form);
-      navigate(form.role === 'driver' ? '/driver' : '/');
+      const data = await register(form);
+      setDone({ email: form.email, verificationLink: data.verificationLink || '' });
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed');
     } finally {
@@ -38,11 +40,46 @@ export default function Register() {
 
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
 
+  const goHome = () => navigate(form.role === 'driver' ? '/driver' : '/', { replace: true });
+
+  if (done) {
+    return (
+      <div className="mx-auto flex max-w-md flex-col px-4 py-12">
+        <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-100 text-2xl text-green-700">
+            ✓
+          </div>
+          <h1 className="text-2xl font-bold">Account created</h1>
+          <p className="mt-2 text-sm text-muted">
+            We sent a verification link to <strong>{done.email}</strong>. Verify your email to
+            activate your account.
+          </p>
+          {done.verificationLink && (
+            <div className="mt-4 rounded-xl bg-slate-50 px-4 py-3 text-left text-sm">
+              <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted">
+                Development verification link
+              </p>
+              <a
+                href={done.verificationLink}
+                className="break-all font-medium text-brand-700 underline"
+              >
+                {done.verificationLink}
+              </a>
+            </div>
+          )}
+          <Button onClick={goHome} size="lg" className="mt-6 w-full">
+            Continue to home
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto flex max-w-md flex-col px-4 py-12">
       <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
         <h1 className="text-2xl font-bold">Create your account</h1>
-        <p className="mt-1 text-sm text-muted">Join RideTaxi in under a minute.</p>
+        <p className="mt-1 text-sm text-muted">Join Ellicott City Airport Taxi in under a minute.</p>
 
         <form onSubmit={submit} className="mt-6 space-y-4">
           <Input label="Full name" required value={form.name} onChange={set('name')} />
@@ -84,6 +121,12 @@ export default function Register() {
             Create account
           </Button>
         </form>
+
+        <p className="mt-4 rounded-xl bg-brand-50 px-4 py-2.5 text-center text-xs text-brand-700">
+          A verification email will be sent to your inbox after sign-up.
+        </p>
+
+        <SocialLoginButtons />
 
         <p className="mt-6 text-center text-sm text-muted">
           Already have an account?{' '}

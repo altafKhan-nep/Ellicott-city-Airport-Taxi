@@ -126,7 +126,7 @@ export const SERVICES = [
     icon: '🏫',
     tagline: 'Safe daily routes & field trips',
     summary:
-      'RideTaxi provides safe, dependable transportation tailored for private schools. From daily AM and PM routes to field trips and special events, our professional drivers ensure students travel comfortably, securely and on schedule.',
+      'Ellicott City Airport Taxi provides safe, dependable transportation tailored for private schools. From daily AM and PM routes to field trips and special events, our professional drivers ensure students travel comfortably, securely and on schedule.',
     features: [
       'Daily routes and activity buses',
       'Background-checked, trained drivers',

@@ -4,7 +4,7 @@ import BookingForm from '../../components/rides/BookingForm.jsx';
 import useGeolocation from '../../hooks/useGeolocation.js';
 import { nearbyDrivers, driverEta } from '../../services/rideService.js';
 
-const DEFAULT_CENTER = [39.203, -76.857]; // Howard County, MD
+const DEFAULT_CENTER = [39.267, -76.799]; // Ellicott City, MD
 
 export default function Reservations() {
   const { position } = useGeolocation();

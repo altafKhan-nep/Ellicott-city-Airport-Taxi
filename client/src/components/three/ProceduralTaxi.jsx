@@ -91,11 +91,11 @@ function makeDecalTexture(flip = false) {
   ctx.shadowBlur = 10;
   ctx.fillStyle = '#ffffff';
   ctx.font = '700 58px Inter, system-ui, sans-serif';
-  ctx.fillText('RideTaxi', 256, 62);
+  ctx.fillText('Ellicott City', 256, 62);
   ctx.shadowBlur = 5;
   ctx.font = '600 30px Inter, system-ui, sans-serif';
   ctx.fillStyle = '#e6e6e8';
-  ctx.fillText('Howard County', 256, 112);
+  ctx.fillText('Airport Taxi', 256, 112);
   const tex = new THREE.CanvasTexture(c);
   tex.anisotropy = 4;
   tex.colorSpace = THREE.SRGBColorSpace;
@@ -114,7 +114,7 @@ function makeSignTexture() {
   ctx.shadowBlur = 14;
   ctx.fillStyle = '#ffffff';
   ctx.font = '800 36px Inter, system-ui, sans-serif';
-  ctx.fillText('RideTaxi', 128, 34);
+  ctx.fillText('TAXI', 128, 34);
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   return tex;

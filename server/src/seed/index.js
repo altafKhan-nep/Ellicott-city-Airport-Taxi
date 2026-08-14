@@ -13,6 +13,7 @@ const users = [
     phone: '+1 555 010 0000',
     password: 'admin123',
     role: 'admin',
+    emailVerified: true,
   },
   {
     name: 'John Passenger',
@@ -20,6 +21,7 @@ const users = [
     phone: '+1 555 010 1000',
     password: 'pass123',
     role: 'passenger',
+    emailVerified: true,
   },
   {
     name: 'Driver Alex',
@@ -27,8 +29,9 @@ const users = [
     phone: '+1 555 010 2001',
     password: 'driver123',
     role: 'driver',
+    emailVerified: true,
     driverDetails: {
-      vehicleType: 'sedan',
+      vehicleType: 'executive-sedan',
       plateNumber: 'ABC-123',
       licenseNo: 'DL-88213',
       isAvailable: true,
@@ -40,8 +43,9 @@ const users = [
     phone: '+1 555 010 2002',
     password: 'driver123',
     role: 'driver',
+    emailVerified: true,
     driverDetails: {
-      vehicleType: 'suv',
+      vehicleType: 'premium-suv',
       plateNumber: 'XYZ-789',
       licenseNo: 'DL-99102',
       isAvailable: true,

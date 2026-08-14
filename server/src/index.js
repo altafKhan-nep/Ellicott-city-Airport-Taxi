@@ -1,5 +1,7 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
@@ -17,13 +19,45 @@ dotenv.config();
 
 const app = express();
 
+// Behind a reverse proxy (nginx, Render, Vercel) set TRUST_PROXY=true so
+// req.ip / rate-limit see the real client address.
+app.set('trust proxy', process.env.TRUST_PROXY === 'true' ? 1 : false);
+
+app.use(helmet());
 app.use(
   cors({
     origin: process.env.CLIENT_ORIGIN || 'http://localhost:5173',
     credentials: true,
   })
 );
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
+
+// Rate limiting — production hardening.
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: Number(process.env.RATE_LIMIT_API || 600),
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Too many requests. Please try again later.' },
+});
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: Number(process.env.RATE_LIMIT_AUTH || 60),
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Too many attempts. Please try again later.' },
+});
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: Number(process.env.RATE_LIMIT_LOGIN || 10),
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Too many login attempts. Please wait a few minutes.' },
+});
+
+app.use('/api', apiLimiter);
+app.use('/api/auth', authLimiter);
+app.use('/api/auth/login', loginLimiter);
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 

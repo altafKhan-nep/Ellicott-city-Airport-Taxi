@@ -1,6 +1,14 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
+const tokenSubSchema = new mongoose.Schema(
+  {
+    token: { type: String },
+    expiresAt: { type: Date },
+  },
+  { _id: false }
+);
+
 const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
@@ -9,8 +17,32 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true, select: false },
     role: { type: String, enum: ['passenger', 'driver', 'admin'], default: 'passenger' },
     avatar: { type: String, default: '' },
+    emailVerified: { type: Boolean, default: false },
+    // Incremented on logout / password reset to invalidate outstanding JWTs
+    tokenVersion: { type: Number, default: 1 },
+    verificationToken: { type: tokenSubSchema, default: null },
+    resetToken: { type: tokenSubSchema, default: null },
+    authProvider: {
+      type: String,
+      enum: ['local', 'google', 'facebook'],
+      default: 'local',
+    },
     driverDetails: {
-      vehicleType: { type: String, enum: ['sedan', 'suv', 'van'], default: 'sedan' },
+      vehicleType: {
+        type: String,
+        enum: [
+          'executive-sedan',
+          'economy-sedan',
+          'economy-suv',
+          'premium-suv',
+          'luxury-suv',
+          'van',
+          'mini-coach',
+          'school-bus',
+          'motorcoach',
+        ],
+        default: 'economy-sedan',
+      },
       plateNumber: { type: String, default: '' },
       licenseNo: { type: String, default: '' },
       isAvailable: { type: Boolean, default: false },
@@ -31,6 +63,15 @@ userSchema.methods.matchPassword = function (entered) {
 
 userSchema.statics.findByEmail = function (email) {
   return this.findOne({ email }).select('+password');
+};
+
+userSchema.statics.findByPhone = function (phone) {
+  return this.findOne({ phone }).select('+password');
+};
+
+userSchema.statics.findByLogin = function (identifier) {
+  const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
+  return isEmail ? this.findByEmail(identifier) : this.findByPhone(identifier);
 };
 
 const User = mongoose.model('User', userSchema);

@@ -48,7 +48,10 @@ Usage rules:
 | Maps | Leaflet + OpenStreetMap | Free, no API key |
 | Backend | Express.js + Socket.io | Real-time events |
 | Database | MongoDB + Mongoose | Flexible schema, geospatial queries |
-| Auth | JWT (access + refresh tokens) | Stateless, scalable |
+| Auth | Passport.js (local + OAuth2 + JWT strategies) | Stateless JWT, horizontally scalable |
+| Email | Nodemailer (SMTP) | Optional — verification + password reset; console fallback in dev |
+| Social | Passport Google/Facebook OAuth2 (redirect flow) | Server-side verification, no app secret needed for token flows |
+| Hardening | Helmet + express-rate-limit | Security headers + per-IP auth throttling |
 
 ## Project Structure
 
@@ -56,7 +59,7 @@ Usage rules:
 ride-booking/
 ├── client/                  # React frontend (Vite)
 │   ├── src/
-│   │   ├── components/      # Reusable UI (maps/, rides/, ui/, layout/, three/)
+│   │   ├── components/      # Reusable UI (auth/, maps/, rides/, ui/, layout/, three/)
 │   │   ├── pages/           # Route pages
 │   │   │   ├── marketing/   # Public site: Home, About, Services, ServiceDetail, Fleet, Contact, Careers
 │   │   │   ├── passenger/   # Reservations.jsx (booking), RideTracking, RideHistory
@@ -70,11 +73,12 @@ ride-booking/
 ├── server/                  # Express backend
 │   ├── src/
 │   │   ├── controllers/     # Route handlers
-│   │   ├── models/          # Mongoose schemas (User, Ride, Location)
+│   │   ├── models/          # Mongoose schemas (User, Ride, Location, RefreshToken)
 │   │   ├── routes/          # API routes
-│   │   ├── middleware/       # auth.js, validate.js
-│   │   ├── services/        # Business logic (rideService.js, driverService.js)
-│   │   └── config/          # db.js, socket.js
+│   │   ├── middleware/       # auth.js (Passport JWT protect + roles), error.js
+│   │   ├── services/        # Business logic (rideService.js, driverService.js, authService.js, mailService.js)
+│   │   ├── utils/           # tokens.js (opaque token + SHA-256 hash)
+│   │   └── config/          # db.js, socket.js, passport.js (Local/Google/Facebook/JWT strategies)
 │   └── .env.example
 └── AGENTS.md
 ```
@@ -88,10 +92,14 @@ ride-booking/
 | `/services` | marketing/Services.jsx | Public | Full grid of 10 services (data/services.js) |
 | `/services/:slug` | marketing/ServiceDetail.jsx | Public | Data-driven per-service page |
 | `/fleet` | marketing/Fleet.jsx | Public | Vehicle cards (Sedan/SUV/Van) + charter CTA |
-| `/contact` | marketing/Contact.jsx | Public | Quote form (mailto to ridetaxis@gmail.com) + info |
+| `/contact` | marketing/Contact.jsx | Public | Quote form (mailto to chriskbonsu@gmail.com) + info |
 | `/careers` | marketing/Careers.jsx | Public | Driver application form + PDF links |
 | `/reservations` | passenger/Reservations.jsx | Public* | Booking flow: autocomplete + map + drivers strip |
-| `/login`, `/register` | pages/Login.jsx, Register.jsx | Public | Auth |
+| `/login`, `/register` | pages/Login.jsx, Register.jsx | Public | Auth (email-or-phone, remember me, social buttons) |
+| `/forgot-password` | pages/ForgotPassword.jsx | Public | Email reset link |
+| `/reset-password` | pages/ResetPassword.jsx | Public | New password (token from email) |
+| `/verify-email` | pages/VerifyEmail.jsx | Public | Confirm email via emailed link |
+| `/auth/social` | pages/SocialCallback.jsx | Public | OAuth redirect landing — stores tokens from query, hard-redirects to `/` |
 | `/rides/history` | passenger/RideHistory.jsx | passenger | |
 | `/rides/track/:id` | passenger/RideTracking.jsx | passenger | Live tracking + ETA |
 | `/driver` | driver/Dashboard.jsx | driver | Accept rides, location broadcast |
@@ -105,15 +113,15 @@ ride-booking/
 3. Selecting a driver calls `GET /api/drivers/:id/eta` → draws dashed route to pickup + shows ETA strip.
 4. Submit → `POST /api/rides` → navigate to `/rides/track/:id`.
 
-## Real Business Info (from ridetaxis.com)
+## Real Business Info (from ellicottcityairporttaxi.com)
 
 | Field | Value |
 |-------|-------|
-| Phone | (443) 546-4116 → `tel:4435464116` |
-| Email | ridetaxis@gmail.com |
-| Location | Columbia, Maryland |
-| Social | facebook.com/ridetaxi.ridetaxi |
-| Legal name | Ride Taxi LLC |
+| Phone | (410) 365-5556 → `tel:4103655556` |
+| Email | chriskbonsu@gmail.com |
+| Address | 9019 Early April Way, Ellicott City, MD |
+| Service area | Maryland, DC, Virginia (local & long distance, door-to-door) |
+| Legal name | Ellicott City Airport Taxi |
 
 Used in `Footer.jsx` (contact column) and the `tel:`/`mailto:` CTAs on marketing pages.
 
@@ -171,12 +179,21 @@ cd server && npm run seed       # Seed test data
   _id, name, email, phone, password: (hashed),
   role: "passenger" | "driver" | "admin",
   avatar, createdAt, updatedAt,
+  emailVerified: Boolean,          // default false
+  authProvider: "local" | "google" | "facebook",
+  tokenVersion: Number,            // bumped on logout / password reset to revoke JWTs
+  verificationToken: { token, expiresAt } | null,  // hashed, 24h
+  resetToken: { token, expiresAt } | null,          // hashed, 1h
   driverDetails: {
-    vehicleType: "sedan" | "suv" | "van",
+    vehicleType: "executive-sedan" | "economy-sedan" | "economy-suv" | "premium-suv" | "luxury-suv" | "van" | "mini-coach" | "school-bus" | "motorcoach",
     plateNumber, licenseNo, isAvailable: Boolean
   }
 }
 ```
+Statics: `findByEmail` / `findByPhone` / `findByLogin` (email-or-phone regex autodetect, all `.select('+password')`).
+
+Fleet ids are shared via `client/src/data/vehicles.js` (`VEHICLES` + `vehicleLabel` helper) and must
+match the enum above — same ids are used for driver matching and fares.
 
 ### Ride
 ```js
@@ -186,7 +203,9 @@ cd server && npm run seed       # Seed test data
   driver: ref(User) | null,
   pickup: { address, lat, lng },
   dropoff: { address, lat, lng },
-  vehicleType, passengerCount, bags,
+  vehicleType,                    // one of the 9 fleet ids above
+  serviceType,                    // one of the 10 service slugs (data/services.js): airport, corporate, wedding, prom, shuttle, charter, night-out, funeral, school, valet
+  passengerCount, bags,
   status: "pending" | "accepted" | "arriving" | "in_progress" | "completed" | "cancelled",
   fare: { estimated, final },
   route: [{ lat, lng }],           // Polyline from OSRM
@@ -205,13 +224,32 @@ cd server && npm run seed       # Seed test data
 }
 ```
 
+### RefreshToken (server-side sessions)
+```js
+{
+  user: ref(User),
+  tokenHash,                       // SHA-256 of the opaque refresh token
+  expiresAt,                       // TTL index -> MongoDB auto-deletes expired
+  revokedAt: Date | null,
+  rememberMe, userAgent, ip,
+  createdAt, updatedAt
+}
+```
+
 ## API Endpoints
 
 ### Auth
-- `POST /api/auth/register` - Register passenger
-- `POST /api/auth/login` - Returns access + refresh tokens
-- `POST /api/auth/refresh` - Get new access token
-- `GET /api/auth/me` - Current user profile
+- `POST /api/auth/register` - Register (validates name/email/password >= 6/phone format; 409 on duplicate email). Creates unverified user + sends verification email; returns `verificationLink` in non-production.
+- `POST /api/auth/login` - Login with **email OR phone** + password (Passport LocalStrategy). Body: `{ identifier, rememberMe }` (or `{ email }`/`{ phone }`). `rememberMe` = true → 30d refresh, else 7d.
+- `POST /api/auth/refresh` - **Rotates** the opaque refresh token (old one is revoked atomically). Rejects replays/concurrent reuse (exactly one success). Rejects if `tokenVersion` changed.
+- `POST /api/auth/logout` - **Auth required.** Body `{ refreshToken }` — revokes that device's session.
+- `GET /api/auth/google` / `GET /api/auth/facebook` - Passport OAuth2 **redirect** start. 503 if provider not configured. On success the provider bounces back to the callback which issues tokens and redirects to `{CLIENT_ORIGIN}/auth/social?accessToken=&refreshToken=`.
+- `GET /api/auth/google/callback` / `GET /api/auth/facebook/callback` - OAuth2 callback → find-or-create/link user → tokens → SPA.
+- `POST /api/auth/verify-email` - Body `{ token }`. Marks `emailVerified`, clears `verificationToken` (24h expiry).
+- `POST /api/auth/resend-verification` - Body `{ email }`.
+- `POST /api/auth/forgot-password` - Body `{ email }`. Sends reset link (1h expiry); returns `resetLink` in non-production.
+- `POST /api/auth/reset-password` - Body `{ token, password }`. Also bumps `tokenVersion` (signs out all sessions).
+- `GET /api/auth/me` - Current user profile (auth required)
 
 ### Rides
 - `POST /api/rides` - Request ride (passenger)
@@ -249,14 +287,6 @@ cd server && npm run seed       # Seed test data
 - `ride:completed` `{ ride, fare }` - Fare final
 - `driver:location` `{ driverId, lat, lng, heading, speed }` - Live driver position (ride room)
 
-## Auth Flow
-
-1. Login → server returns `accessToken` (15min) + `refreshToken` (7d)
-2. Client stores both in `localStorage` (`rt_access`, `rt_refresh`) via `services/api.js`
-3. Axios request interceptor auto-attaches `Authorization: Bearer <token>`
-4. On 401, queued-refresh pattern calls `/api/auth/refresh`, retries original request
-5. On refresh failure, clears storage + redirects to `/login`
-
 ## Seed Credentials
 
 ```bash
@@ -271,6 +301,25 @@ cd server && npm run seed   # resets users + driver positions
 | driver (suv) | `sam@ridetaxi.com` | `driver123` |
 
 Driver positions are seeded near Howard County, MD (~39.20, -76.85). "Nearby drivers" queries use these seeded `Location` docs — no drivers online until you run the seed.
+
+## Auth Flow
+
+1. Register → user created `emailVerified:false` + `verificationToken` (hashed, 24h) → verification email sent (SMTP, or console + `verificationLink` in dev response). Account is auto-logged-in.
+2. `POST /verify-email?token=` (`/verify-email` page) verifies the account; `VerifyEmailBanner` (App.jsx) shows "verify your email" with a resend button for any logged-in unverified user.
+3. Login (`POST /api/auth/login`) is handled by **Passport LocalStrategy** (`usernameField: 'identifier'` → email-or-phone). On success the controller issues a 15m access JWT + an opaque refresh token.
+4. Access token embeds `{ id, role, v: tokenVersion }`; `protect` uses the **Passport JWT strategy** and rejects when `v` changes (password reset / logout-all). `TOKEN_EXPIRED` code triggers the client refresh.
+5. Refresh tokens are **opaque, stored hashed** in the `RefreshToken` collection with a TTL index (auto-cleanup). `POST /refresh` **atomically rotates** (`findOneAndUpdate` on `revokedAt: null`) → replaying or racing the same token yields exactly one success. `POST /logout` revokes that device's token. Password reset revokes all + bumps `tokenVersion`.
+6. Social login is the **Passport OAuth2 redirect flow**: `/auth/google` → Google → `/auth/google/callback` → find-or-create/link user → redirect to `/auth/social?accessToken=&refreshToken=` (SPA stores tokens, hard-redirects to `/`). Strategies register only when `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` or `FACEBOOK_APP_ID`/`FACEBOOK_APP_SECRET` are set; buttons render only when `VITE_GOOGLE_CLIENT_ID`/`VITE_FACEBOOK_APP_ID` are set in `client/.env`.
+7. On 401, `api.js` queued-refresh pattern calls `/refresh`, stores the rotated token, retries; on failure clears storage + redirects to `/login`.
+
+> **Stateless & scalable**: every Passport strategy runs `session:false` — no session store, no sticky sessions, any instance serves any request. Rate limits are per-IP and in-memory per instance (use Redis or a shared store for multi-instance).
+
+## Production Hardening (index.js)
+
+- `helmet()` security headers; `express.json({ limit: '1mb' })`.
+- `express-rate-limit`: global API limiter (default 600/15min), auth limiter (60/15min), login limiter (10/15min) — all configurable via `RATE_LIMIT_*` env vars. 429 when exceeded.
+- `TRUST_PROXY=true` when behind nginx/Render/Vercel so `req.ip` and rate limits see the real client IP.
+- Strict CORS to `CLIENT_ORIGIN` only.
 
 ## External API Dependencies (no keys, but need network)
 

@@ -10,28 +10,19 @@ export default function Footer() {
             Ellicott City <span className="text-gold-300">Airport Taxi</span>
           </div>
           <p className="mt-3 text-sm leading-relaxed text-white/75">
-            Professional, full-service transportation across Howard County and the
-            Baltimore–Washington region. Available 24/7 — book online or call dispatch.
+            Reliable, professional airport transfers and luxury black-car service across
+            Maryland, DC, and Virginia. Available 24/7 — book online or call dispatch.
           </p>
           <div className="mt-4 flex gap-3">
             <a
-              href="https://www.facebook.com/ridetaxi.ridetaxi"
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Facebook"
-              className="grid h-9 w-9 place-items-center rounded-full bg-white/10 text-sm transition-colors hover:bg-white/20"
-            >
-              f
-            </a>
-            <a
-              href="tel:4435464116"
+              href="tel:4103655556"
               aria-label="Call us"
               className="grid h-9 w-9 place-items-center rounded-full bg-white/10 text-sm transition-colors hover:bg-white/20"
             >
               📞
             </a>
             <a
-              href="mailto:ridetaxis@gmail.com"
+              href="mailto:chriskbonsu@gmail.com"
               aria-label="Email us"
               className="grid h-9 w-9 place-items-center rounded-full bg-white/10 text-sm transition-colors hover:bg-white/20"
             >
@@ -71,15 +62,15 @@ export default function Footer() {
           <ul className="mt-3 space-y-2.5 text-sm text-white/75">
             <li className="flex items-start gap-2">
               <span className="mt-0.5">📍</span>
-              <span>Columbia, Maryland</span>
+              <span>9019 Early April Way, Ellicott City, MD</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="mt-0.5">📞</span>
-              <a href="tel:4435464116" className="transition-colors hover:text-white">(443) 546-4116</a>
+              <a href="tel:4103655556" className="transition-colors hover:text-white">(410) 365-5556</a>
             </li>
             <li className="flex items-start gap-2">
               <span className="mt-0.5">✉️</span>
-              <a href="mailto:ridetaxis@gmail.com" className="transition-colors hover:text-white">ridetaxis@gmail.com</a>
+              <a href="mailto:chriskbonsu@gmail.com" className="transition-colors hover:text-white">chriskbonsu@gmail.com</a>
             </li>
             <li className="flex items-start gap-2">
               <span className="mt-0.5">🕑</span>
@@ -89,7 +80,7 @@ export default function Footer() {
         </div>
       </div>
       <div className="border-t border-white/15 py-4 text-center text-xs text-white/60">
-        © {new Date().getFullYear()} Ride Taxi LLC. All rights reserved. · Columbia, Maryland
+        © {new Date().getFullYear()} Ellicott City Airport Taxi. All rights reserved. · Ellicott City, Maryland
       </div>
     </footer>
   );

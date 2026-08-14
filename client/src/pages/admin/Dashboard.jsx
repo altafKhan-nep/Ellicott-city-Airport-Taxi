@@ -5,6 +5,7 @@ import {
   adminDrivers,
 } from '../../services/rideService.js';
 import { Spinner } from '../../components/ui/Spinner.jsx';
+import { vehicleLabel } from '../../data/vehicles.js';
 
 const STATUS_STYLE = {
   pending: 'bg-accent-50 text-accent-700',
@@ -170,7 +171,7 @@ export default function Dashboard() {
                 </span>
               </div>
               <p className="mt-3 text-xs text-muted">
-                {d.driverDetails?.vehicleType} · {d.driverDetails?.plateNumber || 'No plate'}
+                {vehicleLabel(d.driverDetails?.vehicleType)} · {d.driverDetails?.plateNumber || 'No plate'}
               </p>
             </div>
           ))}

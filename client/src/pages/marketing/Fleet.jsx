@@ -101,10 +101,10 @@ export default function Fleet() {
               </Button>
             </Link>
             <a
-              href="tel:4435464116"
+              href="tel:4103655556"
               className="inline-flex items-center gap-2 rounded-full border border-white/30 px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-white/10"
             >
-              📞 (443) 546-4116
+              📞 (410) 365-5556
             </a>
           </div>
         </div>
@@ -119,7 +119,7 @@ export default function Fleet() {
                 <div className="img-zoom relative bg-gradient-to-b from-brand-50 to-white">
                   <img
                     src={v.img}
-                    alt={`${v.name} — RideTaxi`}
+                    alt={`${v.name} — Ellicott City Airport Taxi`}
                     className="h-52 w-full object-contain p-4"
                     loading="lazy"
                   />
@@ -146,7 +146,7 @@ export default function Fleet() {
                       <Button className="w-full">Book now</Button>
                     </Link>
                     <a
-                      href="tel:4435464116"
+                      href="tel:4103655556"
                       className="grid h-11 w-11 place-items-center rounded-full border border-slate-200 text-base text-brand-700 transition-colors hover:border-brand-300 hover:bg-brand-50"
                       aria-label={`Call about ${v.name}`}
                     >
@@ -169,9 +169,9 @@ export default function Fleet() {
                 motorcoaches.
               </p>
             </div>
-            <a href="tel:4435464116">
+            <a href="tel:4103655556">
               <Button size="lg" className="bg-white !text-brand-900 shadow-lg hover:bg-brand-50">
-                Call (443) 546-4116
+                Call (410) 365-5556
               </Button>
             </a>
           </div>

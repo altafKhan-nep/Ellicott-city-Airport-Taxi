@@ -43,7 +43,7 @@ export default function Careers() {
     const body = encodeURIComponent(
       `Name: ${form.name}\nPhone: ${form.phone}\nEmail: ${form.email}\nSubject: ${form.subject}\n\nMessage:\n${form.message || ''}`
     );
-    window.location.href = `mailto:ridetaxis@gmail.com?subject=${encodeURIComponent(
+    window.location.href = `mailto:chriskbonsu@gmail.com?subject=${encodeURIComponent(
       `${subject} — ${name}`
     )}&body=${body}`;
     setSent(true);
@@ -67,11 +67,11 @@ export default function Careers() {
             Careers
           </span>
           <h1 className="mt-6 max-w-3xl text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl">
-            Explore employment at <span className="text-gold-300">RideTaxi</span>
+            Explore employment at <span className="text-gold-300">Ellicott City Airport Taxi</span>
           </h1>
           <p className="mt-5 max-w-2xl text-lg leading-relaxed text-white/80">
             Join a growing team of professional drivers who take pride in prompt, courteous and
-            safe service across Howard County and the greater Baltimore–Washington region.
+            safe service across Maryland, DC, and Virginia.
           </p>
         </div>
       </section>
@@ -86,7 +86,7 @@ export default function Careers() {
             Build your career on the road
           </h2>
           <p className="mt-4 text-muted">
-            We invest in our drivers because they are the face of RideTaxi.
+            We invest in our drivers because they are the face of Ellicott City Airport Taxi.
           </p>
         </div>
 
@@ -133,11 +133,11 @@ export default function Careers() {
               <h3 className="text-base font-bold text-ink">Prefer a paper application?</h3>
               <p className="mt-1.5 text-sm text-muted">
                 Download the application, fill it in, and return it to our dispatch office in
-                Columbia, MD.
+                Ellicott City, MD.
               </p>
               <div className="mt-5 flex flex-wrap gap-3">
                 <a
-                  href="https://ridetaxis.com/wp-content/uploads/2019/03/APPLICATION.pdf"
+                  href="https://chriskbonsu@gmail.com/wp-content/uploads/2019/03/APPLICATION.pdf"
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center gap-2 rounded-full bg-brand-gradient px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
@@ -145,7 +145,7 @@ export default function Careers() {
                   📄 Driver application
                 </a>
                 <a
-                  href="https://ridetaxis.com/wp-content/uploads/2020/05/New-Drivers-Application-1.pdf"
+                  href="https://chriskbonsu@gmail.com/wp-content/uploads/2020/05/New-Drivers-Application-1.pdf"
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center gap-2 rounded-full border border-brand-600 px-5 py-2.5 text-sm font-semibold text-brand-700 transition-colors hover:bg-brand-50"
@@ -169,7 +169,7 @@ export default function Careers() {
                 <h3 className="mt-2 text-lg font-bold text-brand-900">Thank you!</h3>
                 <p className="mt-1 text-sm text-brand-700">
                   Your email draft has been opened in your mail app. Send it to{' '}
-                  <span className="font-semibold">ridetaxis@gmail.com</span> and we will be in
+                  <span className="font-semibold">chriskbonsu@gmail.com</span> and we will be in
                   touch shortly.
                 </p>
               </div>
@@ -203,7 +203,7 @@ export default function Careers() {
                   Send application
                 </button>
                 <p className="text-center text-xs text-muted">
-                  Opens your email app addressed to ridetaxis@gmail.com.
+                  Opens your email app addressed to chriskbonsu@gmail.com.
                 </p>
               </form>
             )}

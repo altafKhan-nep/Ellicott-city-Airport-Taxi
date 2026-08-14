@@ -16,7 +16,22 @@ const rideSchema = new mongoose.Schema(
       lng: { type: Number, required: true },
     },
 
-    vehicleType: { type: String, enum: ['sedan', 'suv', 'van'], default: 'sedan' },
+    vehicleType: {
+      type: String,
+      enum: [
+        'executive-sedan',
+        'economy-sedan',
+        'economy-suv',
+        'premium-suv',
+        'luxury-suv',
+        'van',
+        'mini-coach',
+        'school-bus',
+        'motorcoach',
+      ],
+      default: 'economy-sedan',
+    },
+    serviceType: { type: String, default: '' },
     passengerCount: { type: Number, default: 1, min: 1 },
     bags: { type: Number, default: 0 },
 

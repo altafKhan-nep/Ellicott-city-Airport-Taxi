@@ -115,11 +115,11 @@ export default function Navbar() {
         <div className="flex items-center gap-2">
           {/* Phone + portal (desktop) */}
           <a
-            href="tel:4435464116"
+            href="tel:4103655556"
             className="hidden items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold text-white/90 transition-colors hover:bg-white/10 xl:flex"
           >
             <span className="text-base">📞</span>
-            (443) 546-4116
+            (410) 365-5556
           </a>
 
           <div className="hidden items-center gap-2 lg:flex">
@@ -228,10 +228,10 @@ export default function Navbar() {
               Client Portal
             </button>
             <a
-              href="tel:4435464116"
+              href="tel:4103655556"
               className="block w-full rounded-2xl px-4 py-3 text-left text-sm font-semibold text-gold-300"
             >
-              📞 (443) 546-4116
+              📞 (410) 365-5556
             </a>
 
             {user && user.role === 'driver' && (

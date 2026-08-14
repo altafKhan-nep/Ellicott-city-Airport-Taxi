@@ -1,5 +1,10 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { login as apiLogin, register as apiRegister, getMe } from '../services/authService.js';
+import {
+  login as apiLogin,
+  register as apiRegister,
+  logout as apiLogout,
+  getMe,
+} from '../services/authService.js';
 import { tokenStore } from '../services/api.js';
 import { connectSocket, disconnectSocket } from '../services/socketService.js';
 
@@ -44,11 +49,11 @@ export const AuthProvider = ({ children }) => {
     const { data } = await apiRegister(payload);
     tokenStore.setTokens(data.tokens.accessToken, data.tokens.refreshToken);
     setUser(data.user);
-    return data.user;
+    return data; // includes user + verificationLink (dev)
   };
 
-  const logout = () => {
-    tokenStore.clear();
+  const logout = async () => {
+    await apiLogout();
     setUser(null);
   };
 

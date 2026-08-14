@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { listRides } from '../../services/rideService.js';
+import { vehicleLabel } from '../../data/vehicles.js';
 import { Spinner } from '../../components/ui/Spinner.jsx';
 
 const STATUS_STYLE = {
@@ -69,7 +70,7 @@ export default function RideHistory() {
                   <p className="font-bold text-brand-700">
                     ${(r.status === 'completed' ? r.fare.final : r.fare.estimated || 0).toFixed(2)}
                   </p>
-                  <p className="text-xs text-muted capitalize">{r.vehicleType}</p>
+                  <p className="text-xs text-muted">{vehicleLabel(r.vehicleType)}</p>
                   {['pending', 'accepted', 'arriving', 'in_progress'].includes(r.status) && (
                     <Link
                       to={`/rides/track/${r._id}`}

@@ -4,6 +4,7 @@ import { MapContainer, TileLayer, Marker, Polyline, AttributionControl } from 'r
 import L from 'leaflet';
 import { getRide, cancelRide, driverEta } from '../../services/rideService.js';
 import { MapViewSelector, MAP_VIEWS } from '../../components/maps/MapViewSelector.jsx';
+import { vehicleLabel } from '../../data/vehicles.js';
 import {
   joinRideRoom,
   onDriverFound,
@@ -242,7 +243,7 @@ export default function RideTracking() {
             <dl className="mt-6 space-y-2 border-t border-slate-100 pt-4 text-sm">
               <div className="flex justify-between">
                 <dt className="text-muted">Vehicle</dt>
-                <dd className="font-medium capitalize">{ride.vehicleType}</dd>
+                <dd className="font-medium">{vehicleLabel(ride.vehicleType)}</dd>
               </div>
               <div className="flex justify-between">
                 <dt className="text-muted">Distance</dt>

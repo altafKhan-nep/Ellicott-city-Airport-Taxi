@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // In dev, API is same-origin via the Vite proxy. In production, point to the
 // deployed backend with VITE_API_URL (e.g. https://your-api.onrender.com).
-const API_ROOT = import.meta.env.VITE_API_URL || '';
+export const API_ROOT = import.meta.env.VITE_API_URL || '';
 
 const api = axios.create({ baseURL: `${API_ROOT}/api` });
 

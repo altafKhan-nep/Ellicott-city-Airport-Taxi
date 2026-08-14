@@ -38,10 +38,19 @@ export const getRoute = async (from, to) => {
 
 // Simple fare: base + per-km (could move to config/DB later)
 const estimateFare = (distanceKm, durationMin, vehicleType) => {
-  const base = { sedan: 3, suv: 5, van: 6 };
-  const perKm = { sedan: 1.5, suv: 2.1, van: 2.4 };
-  const perMin = { sedan: 0.3, suv: 0.4, van: 0.45 };
-  const total = base[vehicleType] + distanceKm * perKm[vehicleType] + durationMin * perMin[vehicleType];
+  const rates = {
+    'executive-sedan': { base: 6, perKm: 1.9, perMin: 0.4 },
+    'economy-sedan': { base: 3, perKm: 1.4, perMin: 0.3 },
+    'economy-suv': { base: 5, perKm: 1.8, perMin: 0.4 },
+    'premium-suv': { base: 7, perKm: 2.2, perMin: 0.45 },
+    'luxury-suv': { base: 10, perKm: 2.6, perMin: 0.5 },
+    van: { base: 8, perKm: 2.0, perMin: 0.42 },
+    'mini-coach': { base: 35, perKm: 3.5, perMin: 0.8 },
+    'school-bus': { base: 45, perKm: 4.0, perMin: 0.9 },
+    motorcoach: { base: 70, perKm: 5.0, perMin: 1.2 },
+  };
+  const rate = rates[vehicleType] || rates['economy-sedan'];
+  const total = rate.base + distanceKm * rate.perKm + durationMin * rate.perMin;
   return Math.round(total * 100) / 100;
 };
 
@@ -56,7 +65,8 @@ export const createRide = async (passengerId, input) => {
     passenger: passengerId,
     pickup,
     dropoff,
-    vehicleType: input.vehicleType || 'sedan',
+    vehicleType: input.vehicleType || 'economy-sedan',
+    serviceType: input.serviceType || '',
     passengerCount: input.passengerCount || 1,
     bags: input.bags || 0,
     fare: {
