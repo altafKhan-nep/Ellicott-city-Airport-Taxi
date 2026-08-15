@@ -12,6 +12,10 @@ export const protect = (req, res, next) =>
         ...(expired ? { code: 'TOKEN_EXPIRED' } : {}),
       });
     }
+    // Suspended accounts are rejected even with a valid token.
+    if (user.isSuspended) {
+      return res.status(403).json({ message: 'Account suspended', code: 'ACCOUNT_SUSPENDED' });
+    }
     req.user = user;
     next();
   })(req, res, next);

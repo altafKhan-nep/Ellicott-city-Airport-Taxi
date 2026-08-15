@@ -20,6 +20,7 @@ import RideHistory from './pages/passenger/RideHistory.jsx';
 import RideTracking from './pages/passenger/RideTracking.jsx';
 import DriverDashboard from './pages/driver/Dashboard.jsx';
 import AdminDashboard from './pages/admin/Dashboard.jsx';
+import Profile from './pages/Profile.jsx';
 import { Spinner } from './components/ui/Spinner.jsx';
 import VerifyEmailBanner from './components/auth/VerifyEmailBanner.jsx';
 
@@ -33,7 +34,7 @@ const RequireRole = ({ role, children }) => {
     );
   }
   if (!user) return <Navigate to="/login" replace />;
-  if (user.role !== role) return <Navigate to="/" replace />;
+  if (role && user.role !== role) return <Navigate to="/" replace />;
   return children;
 };
 
@@ -72,6 +73,15 @@ export default function App() {
             element={
               <RequireRole role="passenger">
                 <RideTracking />
+              </RequireRole>
+            }
+          />
+
+          <Route
+            path="/profile"
+            element={
+              <RequireRole>
+                <Profile />
               </RequireRole>
             }
           />

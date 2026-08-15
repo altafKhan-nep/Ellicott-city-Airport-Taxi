@@ -18,13 +18,24 @@ const userSchema = new mongoose.Schema(
     role: { type: String, enum: ['passenger', 'driver', 'admin'], default: 'passenger' },
     avatar: { type: String, default: '' },
     emailVerified: { type: Boolean, default: false },
+    isSuspended: { type: Boolean, default: false },
+    // Web-push subscriptions (endpoint + VAPID keys) for browser notifications
+    pushSubscriptions: [
+      {
+        endpoint: { type: String, required: true },
+        keys: {
+          p256dh: String,
+          auth: String,
+        },
+      },
+    ],
     // Incremented on logout / password reset to invalidate outstanding JWTs
     tokenVersion: { type: Number, default: 1 },
     verificationToken: { type: tokenSubSchema, default: null },
     resetToken: { type: tokenSubSchema, default: null },
     authProvider: {
       type: String,
-      enum: ['local', 'google', 'facebook'],
+      enum: ['local', 'google', 'facebook', 'phone'],
       default: 'local',
     },
     driverDetails: {

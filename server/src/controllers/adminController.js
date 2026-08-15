@@ -1,6 +1,10 @@
 import { asyncHandler } from '../middleware/error.js';
 import Ride from '../models/Ride.js';
 import User from '../models/User.js';
+import Payment from '../models/Payment.js';
+import Location from '../models/Location.js';
+import RefreshToken from '../models/RefreshToken.js';
+import { getSettings, updateSettings } from '../services/settingsService.js';
 
 // GET /api/admin/analytics
 export const analytics = asyncHandler(async (req, res) => {
@@ -59,8 +63,103 @@ export const toggleDriver = asyncHandler(async (req, res) => {
   res.json({ driver });
 });
 
-// GET /api/admin/users
+// GET /api/admin/users?search=&role=&page=&limit=
 export const users = asyncHandler(async (req, res) => {
-  const users = await User.find().select('-password');
-  res.json({ users });
+  const { search = '', role = '', page = 1, limit = 20 } = req.query;
+  const query = {};
+  if (role) query.role = role;
+  if (search) {
+    const rx = new RegExp(search, 'i');
+    query.$or = [{ name: rx }, { email: rx }, { phone: rx }];
+  }
+  const [users, total] = await Promise.all([
+    User.find(query)
+      .select('-password')
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(+limit),
+    User.countDocuments(query),
+  ]);
+  res.json({ users, total, page: +page, limit: +limit });
+});
+
+// PATCH /api/admin/users/:id/suspend
+export const suspendUser = asyncHandler(async (req, res) => {
+  const user = await User.findByIdAndUpdate(
+    req.params.id,
+    { isSuspended: true },
+    { new: true }
+  ).select('-password');
+  if (!user) return res.status(404).json({ message: 'User not found' });
+  // Kick their active refresh sessions so they can't keep using the app.
+  await RefreshToken.updateMany({ user: user._id, revokedAt: null }, { revokedAt: new Date() });
+  res.json({ user });
+});
+
+// PATCH /api/admin/users/:id/unsuspend
+export const unsuspendUser = asyncHandler(async (req, res) => {
+  const user = await User.findByIdAndUpdate(
+    req.params.id,
+    { isSuspended: false },
+    { new: true }
+  ).select('-password');
+  if (!user) return res.status(404).json({ message: 'User not found' });
+  res.json({ user });
+});
+
+// DELETE /api/admin/users/:id - permanently deletes a user + their data.
+export const deleteUser = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.id);
+  if (!user) return res.status(404).json({ message: 'User not found' });
+  if (user.role === 'admin') return res.status(400).json({ message: 'Cannot delete an admin account' });
+
+  await Promise.all([
+    User.deleteOne({ _id: user._id }),
+    Location.deleteMany({ driver: user._id }),
+    RefreshToken.deleteMany({ user: user._id }),
+    Ride.deleteMany({ $or: [{ passenger: user._id }, { driver: user._id }] }),
+    Payment.deleteMany({ user: user._id }),
+  ]);
+  res.json({ success: true });
+});
+
+// GET /api/admin/payments?status=&page=&limit=
+export const payments = asyncHandler(async (req, res) => {
+  const { status = '', page = 1, limit = 20 } = req.query;
+  const query = status ? { status } : {};
+  const [payments, total, summary] = await Promise.all([
+    Payment.find(query)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(+limit)
+      .populate('user', 'name email')
+      .populate('ride', 'pickup dropoff'),
+    Payment.countDocuments(query),
+    Payment.aggregate([
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 },
+          total: { $sum: '$amount' },
+        },
+      },
+    ]),
+  ]);
+  res.json({
+    payments,
+    total,
+    page: +page,
+    limit: +limit,
+    summary: Object.fromEntries(summary.map((s) => [s._id, s])),
+  });
+});
+
+// GET /api/admin/settings
+export const settings = asyncHandler(async (req, res) => {
+  res.json({ settings: await getSettings() });
+});
+
+// PATCH /api/admin/settings
+export const updateAppSettings = asyncHandler(async (req, res) => {
+  res.json({ settings: await updateSettings(req.body) });
 });

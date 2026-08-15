@@ -17,6 +17,12 @@ export default [
         console: 'readonly',
         setInterval: 'readonly',
         clearInterval: 'readonly',
+        atob: 'readonly',
+        FileReader: 'readonly',
+        Notification: 'readonly',
+        fetch: 'readonly',
+        history: 'readonly',
+        location: 'readonly',
       },
     },
     rules: {

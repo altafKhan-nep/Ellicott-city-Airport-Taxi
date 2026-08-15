@@ -6,6 +6,8 @@ export const listRides = (params) => api.get('/rides', { params });
 
 export const getRide = (id) => api.get(`/rides/${id}`);
 
+export const editRide = (id, payload) => api.patch(`/rides/${id}`, payload);
+
 export const acceptRide = (id) => api.patch(`/rides/${id}/accept`);
 
 export const updateRideStatus = (id, payload) => api.patch(`/rides/${id}/status`, payload);
@@ -40,6 +42,7 @@ export default {
   createRide,
   listRides,
   getRide,
+  editRide,
   acceptRide,
   updateRideStatus,
   cancelRide,

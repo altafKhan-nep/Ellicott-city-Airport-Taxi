@@ -23,6 +23,9 @@ passport.use(
         if (!user || !(await user.matchPassword(password))) {
           return done(null, false, { message: 'Invalid email/phone or password' });
         }
+        if (user.isSuspended) {
+          return done(null, false, { message: 'Account suspended' });
+        }
         return done(null, user);
       } catch (err) {
         return done(err);
@@ -90,7 +93,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
         callbackURL:
           process.env.GOOGLE_CALLBACK_URL ||
-          `${process.env.CLIENT_ORIGIN || 'http://localhost:5173'}/api/auth/google/callback`,
+          `${process.env.APP_URL || `http://localhost:${process.env.PORT || 5001}`}/api/auth/google/callback`,
       },
       (_accessToken, _refreshToken, profile, done) =>
         upsertSocialUser(
@@ -114,7 +117,7 @@ if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
         clientSecret: process.env.FACEBOOK_APP_SECRET,
         callbackURL:
           process.env.FACEBOOK_CALLBACK_URL ||
-          `${process.env.CLIENT_ORIGIN || 'http://localhost:5173'}/api/auth/facebook/callback`,
+          `${process.env.APP_URL || `http://localhost:${process.env.PORT || 5001}`}/api/auth/facebook/callback`,
         profileFields: ['id', 'displayName', 'emails'],
       },
       (_accessToken, _refreshToken, profile, done) =>

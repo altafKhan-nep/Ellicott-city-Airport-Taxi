@@ -182,6 +182,15 @@ h6 {
 
 .map-pin-vehicle span {
   font-size: 15px;
+  color: var(--color-brand-600);
+}
+
+/* Lucide SVG icons inside map pins */
+.map-pin span svg,
+.map-pin-vehicle span svg {
+  display: block;
+  width: auto;
+  height: 1em;
 }
 
 @keyframes pin-pulse {

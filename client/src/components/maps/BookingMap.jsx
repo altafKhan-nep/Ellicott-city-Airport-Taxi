@@ -2,6 +2,7 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline, useMapEvents, Attribu
 import L from 'leaflet';
 import { useMemo, useState } from 'react';
 import { MapViewSelector, MAP_VIEWS } from './MapViewSelector.jsx';
+import { PIN_CAR, PIN_SUV, PIN_BUS, PIN_FLAG } from './pinIcons.js';
 
 const pickupIcon = L.divIcon({
   className: '',
@@ -13,38 +14,45 @@ const pickupIcon = L.divIcon({
 
 const dropoffIcon = L.divIcon({
   className: '',
-  html: `<div class="map-pin map-pin-dropoff"><span>🏁</span></div>`,
+  html: `<div class="map-pin map-pin-dropoff"><span>${PIN_FLAG}</span></div>`,
   iconSize: [30, 30],
   iconAnchor: [15, 30],
   popupAnchor: [0, -30],
 });
 
-const driverIcon = L.divIcon({
-  className: '',
-  html: `<div class="map-pin map-pin-driver"><span>🚕</span></div>`,
-  iconSize: [30, 30],
-  iconAnchor: [15, 30],
-});
-
 const vehicleIcons = {
   sedan: L.divIcon({
     className: '',
-    html: `<div class="map-pin map-pin-vehicle"><span>🚗</span></div>`,
+    html: `<div class="map-pin map-pin-vehicle"><span>${PIN_CAR}</span></div>`,
     iconSize: [30, 30],
     iconAnchor: [15, 30],
   }),
   suv: L.divIcon({
     className: '',
-    html: `<div class="map-pin map-pin-vehicle"><span>🚙</span></div>`,
+    html: `<div class="map-pin map-pin-vehicle"><span>${PIN_SUV}</span></div>`,
     iconSize: [30, 30],
     iconAnchor: [15, 30],
   }),
   van: L.divIcon({
     className: '',
-    html: `<div class="map-pin map-pin-vehicle"><span>🚐</span></div>`,
+    html: `<div class="map-pin map-pin-vehicle"><span>${PIN_BUS}</span></div>`,
     iconSize: [30, 30],
     iconAnchor: [15, 30],
   }),
+};
+
+// Pick the right vehicle glyph from a full fleet id (e.g. "executive-sedan").
+const divIconFor = (type) => {
+  const t = String(type || '');
+  let glyph = PIN_CAR;
+  if (t.includes('van') || t.includes('coach') || t.includes('bus')) glyph = PIN_BUS;
+  else if (t.includes('suv')) glyph = PIN_SUV;
+  return L.divIcon({
+    className: '',
+    html: `<div class="map-pin map-pin-vehicle"><span>${glyph}</span></div>`,
+    iconSize: [30, 30],
+    iconAnchor: [15, 30],
+  });
 };
 
 // Captures map clicks and reports lat/lng
@@ -99,7 +107,7 @@ export function BookingMap({ center, pickup, dropoff, route, drivers = [], onPic
           <Marker
             key={d._id}
             position={[d.lat, d.lng]}
-            icon={vehicleIcons[d.vehicleType] || driverIcon}
+            icon={vehicleIcons[d.vehicleType] || divIconFor(d.vehicleType)}
           >
             <Popup>
               <div className="text-sm">

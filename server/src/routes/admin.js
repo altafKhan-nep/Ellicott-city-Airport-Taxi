@@ -11,5 +11,11 @@ router.get('/rides', admin.rides);
 router.get('/drivers', admin.drivers);
 router.patch('/drivers/:id', admin.toggleDriver);
 router.get('/users', admin.users);
+router.patch('/users/:id/suspend', admin.suspendUser);
+router.patch('/users/:id/unsuspend', admin.unsuspendUser);
+router.delete('/users/:id', admin.deleteUser);
+router.get('/payments', admin.payments);
+router.get('/settings', admin.settings);
+router.patch('/settings', admin.updateAppSettings);
 
 export default router;

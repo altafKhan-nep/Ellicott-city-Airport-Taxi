@@ -2,13 +2,14 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { Button } from '../../components/ui/Button.jsx';
 import { Reveal } from '../../components/ui/Reveal.jsx';
+import { Timer, Handshake, Sparkles, ShieldCheck, Phone, ArrowRight } from 'lucide-react';
 import { SERVICES } from '../../data/services.js';
 
 const PROMISES = [
-  { icon: '⏱️', title: 'Prompt', desc: 'We value your time. On-time pickup, efficient routing.' },
-  { icon: '🤝', title: 'Courteous', desc: 'Professional drivers who treat you with respect.' },
-  { icon: '🧼', title: 'Clean & comfortable', desc: 'Modern, well-maintained vehicles you enjoy riding in.' },
-  { icon: '🛡️', title: 'Safe', desc: 'Licensed, insured and continuously quality-monitored.' },
+  { icon: Timer, title: 'Prompt', desc: 'We value your time. On-time pickup, efficient routing.' },
+  { icon: Handshake, title: 'Courteous', desc: 'Professional drivers who treat you with respect.' },
+  { icon: Sparkles, title: 'Clean & comfortable', desc: 'Modern, well-maintained vehicles you enjoy riding in.' },
+  { icon: ShieldCheck, title: 'Safe', desc: 'Licensed, insured and continuously quality-monitored.' },
 ];
 
 export default function Services() {
@@ -46,7 +47,8 @@ export default function Services() {
               href="tel:4103655556"
               className="inline-flex items-center gap-2 rounded-full border border-white/30 px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-white/10"
             >
-              📞 (410) 365-5556
+              <Phone className="h-4 w-4" />
+              (410) 365-5556
             </a>
           </div>
         </div>
@@ -76,8 +78,8 @@ export default function Services() {
               >
                 <div className="absolute inset-x-0 top-0 h-1.5 bg-brand-gradient opacity-0 transition-opacity group-hover:opacity-100" />
                 <div className="flex items-start justify-between">
-                  <span className="grid h-14 w-14 place-items-center rounded-2xl bg-brand-gradient-soft text-2xl">
-                    {s.icon}
+                  <span className="grid h-14 w-14 place-items-center rounded-2xl bg-brand-gradient-soft">
+                    <s.icon className="h-7 w-7 text-brand-700" />
                   </span>
                   <span className="rounded-full bg-accent-50 px-3 py-1 text-xs font-semibold text-accent-700">
                     {s.tagline}
@@ -88,7 +90,7 @@ export default function Services() {
                 <div className="mt-5 flex-1" />
                 <span className="inline-flex items-center gap-1.5 border-t border-slate-100 pt-5 text-sm font-semibold text-brand-700">
                   Learn more
-                  <span className="transition-transform group-hover:translate-x-1" aria-hidden>→</span>
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden />
                 </span>
               </Link>
             </Reveal>
@@ -116,8 +118,8 @@ export default function Services() {
             {PROMISES.map((p, i) => (
               <Reveal key={p.title} delay={i * 80} className="h-full">
                 <div className="card-lift h-full rounded-3xl border border-slate-200 bg-white p-7 text-center shadow-sm">
-                  <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-brand-gradient-soft text-2xl">
-                    {p.icon}
+                  <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-brand-gradient-soft">
+                    <p.icon className="h-7 w-7 text-brand-700" />
                   </span>
                   <h3 className="mt-4 text-base font-bold text-ink">{p.title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-muted">{p.desc}</p>
@@ -148,7 +150,8 @@ export default function Services() {
               href="tel:4103655556"
               className="inline-flex items-center gap-2 rounded-full border border-white/30 px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-white/10"
             >
-              📞 (410) 365-5556
+              <Phone className="h-4 w-4" />
+              (410) 365-5556
             </a>
           </div>
         </div>

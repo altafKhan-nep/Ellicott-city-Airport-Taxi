@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router-dom';
+import { Phone, Check, Star, ArrowRight } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { Button } from '../../components/ui/Button.jsx';
 import { Reveal } from '../../components/ui/Reveal.jsx';
@@ -33,8 +34,8 @@ export default function ServiceDetail() {
         </div>
         <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-24">
           <div className="flex items-center gap-3">
-            <span className="grid h-14 w-14 place-items-center rounded-2xl bg-white/10 text-2xl backdrop-blur">
-              {service.icon}
+            <span className="grid h-14 w-14 place-items-center rounded-2xl bg-white/10 backdrop-blur">
+              <service.icon className="h-7 w-7 text-white" />
             </span>
             <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-medium uppercase tracking-wider text-white/85 backdrop-blur">
               <span className="h-2 w-2 rounded-full bg-gold-400" />
@@ -56,7 +57,8 @@ export default function ServiceDetail() {
               href="tel:4103655556"
               className="inline-flex items-center gap-2 rounded-full border border-white/30 px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-white/10"
             >
-              📞 (410) 365-5556
+              <Phone className="h-4 w-4" />
+              (410) 365-5556
             </a>
           </div>
         </div>
@@ -99,8 +101,8 @@ export default function ServiceDetail() {
               <ul className="mt-5 space-y-4">
                 {service.features.map((f) => (
                   <li key={f} className="flex items-start gap-3 text-sm font-medium text-ink">
-                    <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-accent-100 text-xs font-bold text-accent-700">
-                      ✓
+                    <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-accent-100 text-accent-700">
+                      <Check className="h-3 w-3" />
                     </span>
                     {f}
                   </li>
@@ -109,7 +111,11 @@ export default function ServiceDetail() {
               <div className="mt-8 border-t border-slate-100 pt-6">
                 <div className="flex items-center justify-between text-sm">
                   <span className="font-semibold text-ink">5-star rated</span>
-                  <span className="text-gold-400" aria-label="Five stars">★★★★★</span>
+                  <span className="flex gap-0.5 text-gold-400" aria-label="Five stars">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star key={i} className="h-4 w-4 fill-current" />
+                    ))}
+                  </span>
                 </div>
                 <div className="mt-3 flex items-center justify-between text-sm">
                   <span className="font-semibold text-ink">Available</span>
@@ -137,7 +143,7 @@ export default function ServiceDetail() {
               to="/services"
               className="inline-flex items-center gap-2 rounded-full border border-brand-600 px-5 py-2.5 text-sm font-semibold text-brand-700 transition-colors hover:bg-brand-50"
             >
-              All services <span aria-hidden>→</span>
+              All services <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
 
@@ -148,14 +154,14 @@ export default function ServiceDetail() {
                   to={`/services/${s.slug}`}
                   className="card-lift group flex h-full items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
                 >
-                  <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-brand-gradient-soft text-xl">
-                    {s.icon}
+                  <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-brand-gradient-soft">
+                    <s.icon className="h-6 w-6 text-brand-700" />
                   </span>
                   <span>
                     <span className="block font-bold text-ink">{s.name}</span>
                     <span className="block text-xs text-muted">{s.tagline}</span>
                   </span>
-                  <span className="ml-auto text-brand-700" aria-hidden>→</span>
+                  <ArrowRight className="ml-auto h-4 w-4 text-brand-700" aria-hidden />
                 </Link>
               </Reveal>
             ))}

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { CheckCircle2, Phone } from 'lucide-react';
 import { SERVICES } from '../../data/services.js';
 
 const inputCls =
@@ -64,7 +65,9 @@ export default function Contact() {
 
               {sent ? (
                 <div className="mt-8 rounded-2xl bg-brand-gradient-soft p-6 text-center">
-                  <div className="text-3xl">✅</div>
+                  <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-white">
+                    <CheckCircle2 className="h-8 w-8 text-brand-600" />
+                  </div>
                   <h3 className="mt-2 text-lg font-bold text-brand-900">Almost there!</h3>
                   <p className="mt-2 text-sm text-brand-950/70">
                     Your email app should have opened with your request. Send it and we will be in
@@ -72,9 +75,10 @@ export default function Contact() {
                   </p>
                   <a
                     href="tel:4103655556"
-                    className="mt-4 inline-block rounded-full bg-white px-6 py-3 text-sm font-semibold text-brand-800 shadow-sm hover:bg-brand-50"
+                    className="mt-4 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-brand-800 shadow-sm hover:bg-brand-50"
                   >
-                    📞 (410) 365-5556
+                    <Phone className="h-4 w-4" />
+                    (410) 365-5556
                   </a>
                 </div>
               ) : (

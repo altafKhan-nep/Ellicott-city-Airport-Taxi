@@ -1,5 +1,6 @@
 import { Suspense, lazy } from 'react';
 import { Link } from 'react-router-dom';
+import { ShieldCheck, Receipt, Search, Star, Phone, MapPin, Flag, Check, ArrowRight } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { Button } from '../../components/ui/Button.jsx';
 import { Reveal } from '../../components/ui/Reveal.jsx';
@@ -14,14 +15,14 @@ const STATS = [
   { value: '24/7', label: 'Service, every day' },
   { value: '18+', label: 'Communities served' },
   { value: '10,000+', label: 'Rides completed' },
-  { value: '5★', label: 'Passenger ratings' },
+  { value: '5.0', label: 'Passenger rating' },
 ];
 
 const TRUST = [
-  { icon: '🛡️', label: 'Licensed & insured' },
-  { icon: '🧾', label: 'Upfront, transparent pricing' },
-  { icon: '🔍', label: 'Background-checked drivers' },
-  { icon: '⭐', label: 'Rated after every ride' },
+  { icon: ShieldCheck, label: 'Licensed & insured' },
+  { icon: Receipt, label: 'Upfront, transparent pricing' },
+  { icon: Search, label: 'Background-checked drivers' },
+  { icon: Star, label: 'Rated after every ride' },
 ];
 
 const STEPS = [
@@ -108,7 +109,7 @@ export default function Home() {
                   href="tel:4103655556"
                   className="inline-flex items-center gap-2 rounded-full border border-white/30 px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-white/10"
                 >
-                  <span className="text-lg">📞</span>
+                  <Phone className="h-4 w-4" />
                   (410) 365-5556
                 </a>
               </div>
@@ -117,7 +118,7 @@ export default function Home() {
                 {TRUST.map((t) => (
                   <div key={t.label} className="flex items-center gap-2 text-sm text-white/75">
                     <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white/10">
-                      {t.icon}
+                      <t.icon className="h-4 w-4" />
                     </span>
                     {t.label}
                   </div>
@@ -135,11 +136,11 @@ export default function Home() {
 
                 <div className="mt-6 space-y-4">
                   <div className="flex items-center gap-3 rounded-full border border-slate-200 bg-slate-50 px-4 py-3">
-                    <span className="text-lg">📍</span>
+                    <MapPin className="h-4 w-4 text-brand-600" />
                     <span className="text-sm text-slate-500">Pickup — where are you?</span>
                   </div>
                   <div className="flex items-center gap-3 rounded-full border border-slate-200 bg-slate-50 px-4 py-3">
-                    <span className="text-lg">🏁</span>
+                    <Flag className="h-4 w-4 text-brand-600" />
                     <span className="text-sm text-slate-500">Dropoff — where to?</span>
                   </div>
                 </div>
@@ -217,8 +218,8 @@ export default function Home() {
             <ul className="mt-6 space-y-3">
               {['Prompt, efficient, comfortable and safe', 'Clean, modern, well-maintained vehicles', 'Transparent upfront pricing', 'Professional, courteous drivers'].map((item) => (
                 <li key={item} className="flex items-start gap-3 text-sm font-medium text-ink">
-                  <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-accent-100 text-xs font-bold text-accent-700">
-                    ✓
+                  <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-accent-100 text-accent-700">
+                    <Check className="h-3 w-3" />
                   </span>
                   {item}
                 </li>
@@ -274,7 +275,7 @@ export default function Home() {
               to="/services"
               className="inline-flex items-center gap-2 rounded-full border border-brand-600 px-5 py-2.5 text-sm font-semibold text-brand-700 transition-colors hover:bg-brand-50"
             >
-              View all services <span aria-hidden>→</span>
+              View all services <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
 
@@ -286,8 +287,8 @@ export default function Home() {
                   className="card-lift group relative flex h-full flex-col rounded-3xl border border-slate-200 bg-white p-7 shadow-sm"
                 >
                   <div className="absolute inset-x-0 top-0 h-1.5 rounded-t-3xl bg-brand-gradient opacity-0 transition-opacity group-hover:opacity-100" />
-                  <span className="grid h-14 w-14 place-items-center rounded-2xl bg-brand-gradient-soft text-2xl">
-                    {s.icon}
+                  <span className="grid h-14 w-14 place-items-center rounded-2xl bg-brand-gradient-soft">
+                    <s.icon className="h-7 w-7 text-brand-700" />
                   </span>
                   <h3 className="mt-5 text-lg font-bold text-ink">{s.name}</h3>
                   <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-brand-600">
@@ -296,7 +297,9 @@ export default function Home() {
                   <p className="mt-3 text-sm leading-relaxed text-muted">{s.summary}</p>
                   <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700">
                     Learn more
-                    <span className="transition-transform group-hover:translate-x-1" aria-hidden>→</span>
+                    <span className="transition-transform group-hover:translate-x-1">
+                      <ArrowRight className="h-4 w-4" />
+                    </span>
                   </span>
                 </Link>
               </Reveal>
@@ -328,7 +331,7 @@ export default function Home() {
                 to="/fleet"
                 className="mt-6 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-brand-900 shadow-lg transition-colors hover:bg-brand-50"
               >
-                Explore the fleet <span aria-hidden>→</span>
+                Explore the fleet <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
           </div>
@@ -372,8 +375,10 @@ export default function Home() {
             <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
               Our clients share the love
             </h2>
-            <div className="mt-4 text-gold-400" aria-label="Five star reviews">
-              ★★★★★
+                        <div className="mt-4 flex justify-center gap-0.5 text-gold-400" aria-label="Five star reviews">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Star key={i} className="h-4 w-4 fill-current" />
+              ))}
             </div>
           </div>
 
@@ -381,7 +386,11 @@ export default function Home() {
             {TESTIMONIALS.map((t, i) => (
               <Reveal key={t.name} delay={(i % 3) * 110} className="h-full">
                 <figure className="card-lift h-full rounded-3xl border border-white/15 bg-white/10 p-7 backdrop-blur">
-                  <div className="text-gold-400" aria-hidden>★★★★★</div>
+                  <div className="flex gap-0.5 text-gold-400" aria-hidden>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star key={i} className="h-4 w-4 fill-current" />
+                  ))}
+                </div>
                   <blockquote className="mt-4 text-[15px] leading-relaxed text-white/90">
                     “{t.quote}”
                   </blockquote>
@@ -446,7 +455,7 @@ export default function Home() {
               href="tel:4103655556"
               className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-base font-semibold text-brand-800 shadow-sm transition-colors hover:bg-brand-50"
             >
-              <span className="text-lg">📞</span>
+              <Phone className="h-4 w-4" />
               (410) 365-5556
             </a>
           </div>

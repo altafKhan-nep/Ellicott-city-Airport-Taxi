@@ -1,6 +1,7 @@
 import Ride from '../models/Ride.js';
 import Location from '../models/Location.js';
 import User from '../models/User.js';
+import { getSettings } from './settingsService.js';
 
 const RADIUS_M = 5000;
 
@@ -36,8 +37,8 @@ export const getRoute = async (from, to) => {
   return { distanceKm, durationMin, polyline };
 };
 
-// Simple fare: base + per-km (could move to config/DB later)
-const estimateFare = (distanceKm, durationMin, vehicleType) => {
+// Simple fare: base + per-km (vehicle-specific, overridable from Admin Settings).
+const estimateFare = (distanceKm, durationMin, vehicleType, overrides = {}) => {
   const rates = {
     'executive-sedan': { base: 6, perKm: 1.9, perMin: 0.4 },
     'economy-sedan': { base: 3, perKm: 1.4, perMin: 0.3 },
@@ -50,7 +51,11 @@ const estimateFare = (distanceKm, durationMin, vehicleType) => {
     motorcoach: { base: 70, perKm: 5.0, perMin: 1.2 },
   };
   const rate = rates[vehicleType] || rates['economy-sedan'];
-  const total = rate.base + distanceKm * rate.perKm + durationMin * rate.perMin;
+  // Global overrides (Admin Settings) take precedence when set.
+  const base = overrides.baseFare ?? rate.base;
+  const perKm = overrides.perKm ?? rate.perKm;
+  const perMin = overrides.perMin ?? rate.perMin;
+  const total = base + distanceKm * perKm + durationMin * perMin;
   return Math.round(total * 100) / 100;
 };
 
@@ -59,7 +64,8 @@ export const createRide = async (passengerId, input) => {
   const dropoff = input.dropoff.lat ? input.dropoff : await geocode(input.dropoff);
 
   const route = await getRoute(pickup, dropoff);
-  const estimated = estimateFare(route.distanceKm, route.durationMin, input.vehicleType);
+  const settings = await getSettings();
+  const estimated = estimateFare(route.distanceKm, route.durationMin, input.vehicleType, settings);
 
   const ride = await Ride.create({
     passenger: passengerId,
@@ -136,10 +142,67 @@ export const updateStatus = async (rideId, status, driverId) => {
 
   ride.status = status;
   ride.timestamps[status] = new Date();
-  if (status === 'completed') ride.timestamps.completed = new Date();
+  if (status === 'completed') {
+    ride.timestamps.completed = new Date();
+    // Final fare: use the estimate at completion (no metering in sandbox).
+    ride.fare.final = ride.fare.estimated;
+  }
 
   await ride.save();
   return Ride.findById(rideId).populate('passenger driver', 'name phone avatar');
+};
+
+// Edit a ride while it's still pending (passenger only). Re-geocodes changed
+// locations and recomputes route + fare. If a driver already accepted, editing
+// is blocked (they'd be expecting the original job).
+export const editRide = async (rideId, passengerId, input) => {
+  const ride = await Ride.findOne({ _id: rideId, passenger: passengerId, status: 'pending' });
+  if (!ride) {
+    throw Object.assign(new Error('Ride can only be edited while pending'), { statusCode: 409 });
+  }
+
+  let pickup = ride.pickup;
+  let dropoff = ride.dropoff;
+
+  if (input.pickup !== undefined) {
+    pickup = input.pickup.lat ? input.pickup : await geocode(input.pickup);
+  }
+  if (input.dropoff !== undefined) {
+    dropoff = input.dropoff.lat ? input.dropoff : await geocode(input.dropoff);
+  }
+
+  const changedRoute =
+    pickup.lat !== ride.pickup.lat ||
+    pickup.lng !== ride.pickup.lng ||
+    dropoff.lat !== ride.dropoff.lat ||
+    dropoff.lng !== ride.dropoff.lng;
+
+  let route = ride.route;
+  let distanceKm = ride.fare.distanceKm;
+  let durationMin = ride.fare.durationMin;
+
+  if (changedRoute) {
+    const fresh = await getRoute(pickup, dropoff);
+    route = fresh.polyline;
+    distanceKm = fresh.distanceKm;
+    durationMin = fresh.durationMin;
+  }
+
+  const settings = await getSettings();
+  const vehicleType = input.vehicleType || ride.vehicleType;
+  const estimated = estimateFare(distanceKm, durationMin, vehicleType, settings);
+
+  ride.pickup = pickup;
+  ride.dropoff = dropoff;
+  ride.vehicleType = vehicleType;
+  ride.serviceType = input.serviceType ?? ride.serviceType;
+  ride.passengerCount = input.passengerCount ?? ride.passengerCount;
+  ride.bags = input.bags ?? ride.bags;
+  ride.route = route;
+  ride.fare = { estimated, distanceKm, durationMin };
+
+  await ride.save();
+  return Ride.findById(rideId).populate('passenger', 'name phone avatar');
 };
 
 export const cancelRide = async (rideId, userId, reason = '') => {

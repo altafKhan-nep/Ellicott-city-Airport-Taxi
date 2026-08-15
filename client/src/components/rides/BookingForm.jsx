@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { MapPin, Flag } from 'lucide-react';
 import { createRide, nearbyDrivers } from '../../services/rideService.js';
 import { Button } from '../ui/Button.jsx';
 import { Input } from '../ui/Input.jsx';
@@ -104,14 +105,14 @@ export default function BookingForm({ pickup, dropoff, onPickupChange, onDropoff
       <div className="space-y-3">
         <LocationSearch
           label="Pick up location"
-          icon="📍"
+          icon={MapPin}
           placeholder="Search pickup address"
           value={pickup}
           onSelect={onPickupChange}
         />
         <LocationSearch
           label="Drop off location"
-          icon="🏁"
+          icon={Flag}
           placeholder="Search dropoff address"
           value={dropoff}
           onSelect={onDropoffChange}
@@ -149,7 +150,7 @@ export default function BookingForm({ pickup, dropoff, onPickupChange, onDropoff
           <option value="" disabled>Select your vehicle type</option>
           {VEHICLES.map((v) => (
             <option key={v.id} value={v.id}>
-              {v.icon} {v.label} — {v.desc}
+              {v.label} — {v.desc}
             </option>
           ))}
         </select>

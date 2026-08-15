@@ -1,7 +1,9 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
+import { Phone, ArrowRight } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { SERVICES } from '../../data/services.js';
+import NotificationsBell from './NotificationsBell.jsx';
 
 const MAIN_LINKS = [
   { to: '/about', label: 'About' },
@@ -87,8 +89,8 @@ export default function Navbar() {
                         onClick={() => go(`/services/${s.slug}`)}
                         className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-brand-50"
                       >
-                        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-brand-gradient-soft text-base">
-                          {s.icon}
+                        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-brand-gradient-soft">
+                          <s.icon className="h-5 w-5 text-brand-700" />
                         </span>
                         <span>
                           <span className="block text-sm font-semibold text-ink">{s.name}</span>
@@ -103,7 +105,7 @@ export default function Navbar() {
                       className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold text-brand-700 transition-colors hover:bg-brand-50"
                     >
                       View all services
-                      <span aria-hidden>→</span>
+                      <ArrowRight className="h-4 w-4" aria-hidden />
                     </button>
                   </div>
                 </div>
@@ -118,7 +120,7 @@ export default function Navbar() {
             href="tel:4103655556"
             className="hidden items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold text-white/90 transition-colors hover:bg-white/10 xl:flex"
           >
-            <span className="text-base">📞</span>
+            <Phone className="h-4 w-4" />
             (410) 365-5556
           </a>
 
@@ -131,12 +133,14 @@ export default function Navbar() {
             </Link>
             {user ? (
               <div className="flex items-center gap-2">
+                <NotificationsBell />
                 {user.role === 'driver' && (
                   <NavLink to="/driver" className={navItem}>Driver</NavLink>
                 )}
                 {user.role === 'admin' && (
                   <NavLink to="/admin" className={navItem}>Admin</NavLink>
                 )}
+                <NavLink to="/profile" className={navItem}>Profile</NavLink>
                 <button
                   onClick={handleLogout}
                   className="rounded-full bg-white/10 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-white/20"
@@ -159,7 +163,12 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Mobile hamburger */}
+          {/* Mobile: notifications + hamburger */}
+          {user && (
+            <div className="lg:hidden">
+              <NotificationsBell />
+            </div>
+          )}
           <button
             onClick={() => setOpen((o) => !o)}
             aria-label="Toggle menu"
@@ -203,16 +212,18 @@ export default function Navbar() {
                     <button
                       key={s.slug}
                       onClick={() => go(`/services/${s.slug}`)}
-                      className="block w-full rounded-xl px-4 py-2.5 text-left text-sm text-white/75 transition-colors hover:bg-white/10 hover:text-white"
+                      className="flex w-full items-center gap-2.5 rounded-xl px-4 py-2.5 text-left text-sm text-white/75 transition-colors hover:bg-white/10 hover:text-white"
                     >
-                      {s.icon} {s.name}
+                      <s.icon className="h-4 w-4 shrink-0 text-gold-300" />
+                      <span>{s.name}</span>
                     </button>
                   ))}
                   <button
                     onClick={() => go('/services')}
-                    className="mt-1 block w-full rounded-xl border border-white/20 px-4 py-2.5 text-left text-sm font-semibold text-gold-300 transition-colors hover:bg-white/10"
+                    className="mt-1 flex w-full items-center justify-between rounded-xl border border-white/20 px-4 py-2.5 text-left text-sm font-semibold text-gold-300 transition-colors hover:bg-white/10"
                   >
-                    View all services →
+                    View all services
+                    <ArrowRight className="h-4 w-4" />
                   </button>
                 </div>
               )}
@@ -229,9 +240,10 @@ export default function Navbar() {
             </button>
             <a
               href="tel:4103655556"
-              className="block w-full rounded-2xl px-4 py-3 text-left text-sm font-semibold text-gold-300"
+              className="flex w-full items-center gap-2.5 rounded-2xl px-4 py-3 text-left text-sm font-semibold text-gold-300"
             >
-              📞 (410) 365-5556
+              <Phone className="h-4 w-4" />
+              (410) 365-5556
             </a>
 
             {user && user.role === 'driver' && (
@@ -242,6 +254,11 @@ export default function Navbar() {
             {user && user.role === 'admin' && (
               <button onClick={() => go('/admin')} className="block w-full rounded-2xl px-4 py-3 text-left text-sm font-medium text-white/90 transition-colors hover:bg-white/10">
                 Admin dashboard
+              </button>
+            )}
+            {user && (
+              <button onClick={() => go('/profile')} className="block w-full rounded-2xl px-4 py-3 text-left text-sm font-medium text-white/90 transition-colors hover:bg-white/10">
+                Profile
               </button>
             )}
 

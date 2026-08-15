@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { Input } from '../components/ui/Input.jsx';
 import { Button } from '../components/ui/Button.jsx';
@@ -46,8 +47,8 @@ export default function Register() {
     return (
       <div className="mx-auto flex max-w-md flex-col px-4 py-12">
         <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-100 text-2xl text-green-700">
-            ✓
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-100 text-green-700">
+            <CheckCircle2 className="h-8 w-8" />
           </div>
           <h1 className="text-2xl font-bold">Account created</h1>
           <p className="mt-2 text-sm text-muted">

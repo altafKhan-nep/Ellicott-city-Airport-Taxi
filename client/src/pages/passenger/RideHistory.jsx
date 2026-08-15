@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { listRides } from '../../services/rideService.js';
 import { vehicleLabel } from '../../data/vehicles.js';
 import { Spinner } from '../../components/ui/Spinner.jsx';
+import PaymentModal from '../../components/rides/PaymentModal.jsx';
+import EditRideModal from '../../components/rides/EditRideModal.jsx';
 
 const STATUS_STYLE = {
   pending: 'bg-accent-50 text-accent-700',
@@ -13,14 +15,25 @@ const STATUS_STYLE = {
   cancelled: 'bg-slate-100 text-slate-500',
 };
 
+const PAY_STYLE = {
+  paid: 'bg-brand-50 text-brand-700',
+  refunded: 'bg-gold-50 text-gold-600',
+  pending: 'bg-slate-100 text-slate-500',
+};
+
 export default function RideHistory() {
   const [rides, setRides] = useState(null);
   const [error, setError] = useState('');
+  const [paying, setPaying] = useState(null);
+  const [editing, setEditing] = useState(null);
 
-  useEffect(() => {
+  const load = () =>
     listRides()
       .then(({ data }) => setRides(data.rides))
       .catch(() => setError('Could not load ride history'));
+
+  useEffect(() => {
+    load();
   }, []);
 
   if (error) return <p className="px-4 py-16 text-center text-muted">{error}</p>;
@@ -30,6 +43,8 @@ export default function RideHistory() {
         <Spinner label="Loading rides…" />
       </div>
     );
+
+  const patch = (id, fn) => setRides((prev) => prev.map((r) => (r._id === id ? fn(r) : r)));
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
@@ -55,10 +70,19 @@ export default function RideHistory() {
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className={`rounded-full px-3 py-1 text-xs font-medium capitalize ${STATUS_STYLE[r.status]}`}>
                       {r.status.replace('_', ' ')}
                     </span>
+                    {r.status === 'completed' && (
+                      <span className={`rounded-full px-3 py-1 text-xs font-semibold ${PAY_STYLE[r.payment?.status] || PAY_STYLE.pending}`}>
+                        {r.payment?.status === 'paid'
+                          ? 'Paid'
+                          : r.payment?.status === 'refunded'
+                            ? 'Refunded'
+                            : 'Unpaid'}
+                      </span>
+                    )}
                     <span className="text-xs text-muted">
                       {new Date(r.createdAt).toLocaleString()}
                     </span>
@@ -66,24 +90,63 @@ export default function RideHistory() {
                   <p className="mt-2 truncate text-sm font-medium">{r.pickup.address}</p>
                   <p className="truncate text-sm text-muted">→ {r.dropoff.address}</p>
                 </div>
-                <div className="text-right">
+                <div className="flex flex-col items-end gap-2">
                   <p className="font-bold text-brand-700">
                     ${(r.status === 'completed' ? r.fare.final : r.fare.estimated || 0).toFixed(2)}
                   </p>
                   <p className="text-xs text-muted">{vehicleLabel(r.vehicleType)}</p>
-                  {['pending', 'accepted', 'arriving', 'in_progress'].includes(r.status) && (
-                    <Link
-                      to={`/rides/track/${r._id}`}
-                      className="mt-2 inline-block rounded-lg bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-700"
-                    >
-                      Track
-                    </Link>
-                  )}
+                  <div className="flex gap-1.5">
+                    {['pending', 'accepted', 'arriving', 'in_progress'].includes(r.status) && (
+                      <Link
+                        to={`/rides/track/${r._id}`}
+                        className="rounded-lg bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-700"
+                      >
+                        Track
+                      </Link>
+                    )}
+                    {r.status === 'pending' && (
+                      <button
+                        onClick={() => setEditing(r)}
+                        className="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-brand-700 ring-1 ring-brand-200 hover:bg-brand-50"
+                      >
+                        Edit
+                      </button>
+                    )}
+                    {r.status === 'completed' && r.payment?.status === 'pending' && (
+                      <button
+                        onClick={() => setPaying(r)}
+                        className="rounded-lg bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-700"
+                      >
+                        Pay
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
           ))}
         </div>
+      )}
+
+      {paying && (
+        <PaymentModal
+          ride={paying}
+          onClose={() => setPaying(null)}
+          onPaid={(payment) => {
+            patch(paying._id, (r) => ({
+              ...r,
+              payment: { ...r.payment, status: 'paid', transactionId: payment.transactionId },
+            }));
+          }}
+        />
+      )}
+
+      {editing && (
+        <EditRideModal
+          ride={editing}
+          onClose={() => setEditing(null)}
+          onSaved={(updated) => patch(editing._id, () => updated)}
+        />
       )}
     </div>
   );

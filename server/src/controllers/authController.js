@@ -63,6 +63,16 @@ export const resetPassword = asyncHandler(async (req, res) => {
   res.json(result);
 });
 
+export const sendOtp = asyncHandler(async (req, res) => {
+  const result = await authService.sendOtp(req.body.phone);
+  res.json(result);
+});
+
+export const verifyOtp = asyncHandler(async (req, res) => {
+  const result = await authService.verifyOtp({ ...req.body, ...meta(req) });
+  res.json(result);
+});
+
 /* ---------- Social OAuth (Passport redirect flow) ---------- */
 
 const clientUrl = () => process.env.CLIENT_ORIGIN || 'http://localhost:5173';

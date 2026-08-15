@@ -14,6 +14,10 @@ import rideRoutes from './routes/rides.js';
 import driverRoutes from './routes/drivers.js';
 import adminRoutes from './routes/admin.js';
 import placeRoutes from './routes/places.js';
+import userRoutes from './routes/users.js';
+import paymentRoutes from './routes/payments.js';
+import notificationRoutes from './routes/notifications.js';
+import settingsRoutes from './routes/settings.js';
 
 dotenv.config();
 
@@ -54,10 +58,18 @@ const loginLimiter = rateLimit({
   legacyHeaders: false,
   message: { message: 'Too many login attempts. Please wait a few minutes.' },
 });
+const otpLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: Number(process.env.RATE_LIMIT_OTP || 5),
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Too many SMS requests. Please wait a few minutes.' },
+});
 
 app.use('/api', apiLimiter);
 app.use('/api/auth', authLimiter);
 app.use('/api/auth/login', loginLimiter);
+app.use('/api/auth/otp/send', otpLimiter);
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
@@ -66,6 +78,10 @@ app.use('/api/rides', rideRoutes);
 app.use('/api/drivers', driverRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/places', placeRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/settings', settingsRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

@@ -1,8 +1,10 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import RefreshToken from '../models/RefreshToken.js';
+import OtpCode from '../models/OtpCode.js';
 import { generateToken, hashToken } from '../utils/tokens.js';
 import { sendMail } from './mailService.js';
+import { sendSms, isSmsConfigured } from './smsService.js';
 
 const fail = (message, statusCode) => Object.assign(new Error(message), { statusCode });
 
@@ -65,6 +67,7 @@ export const refresh = async (rawToken) => {
 
   const user = await User.findById(claimed.user);
   if (!user) throw fail('Session ended', 401);
+  if (user.isSuspended) throw fail('Account suspended', 403);
 
   const tokens = await issueTokens(user, {
     rememberMe: claimed.rememberMe,
@@ -205,4 +208,65 @@ export const resetPassword = async ({ token, password }) => {
   // Security: resetting the password signs out every device.
   await logoutAll(user._id);
   return { success: true };
+};
+
+/* ---------- phone OTP login ---------- */
+const OTP_TTL_MS = 10 * 60 * 1000;
+const OTP_MAX_ATTEMPTS = 5;
+
+export const sendOtp = async (phone) => {
+  if (!phone || !PHONE_RE.test(phone)) throw fail('Enter a valid phone number.', 400);
+
+  const code = String(Math.floor(100000 + Math.random() * 900000));
+  await OtpCode.deleteMany({ phone });
+  await OtpCode.create({
+    phone,
+    codeHash: hashToken(code),
+    expiresAt: new Date(Date.now() + OTP_TTL_MS),
+    attempts: 0,
+  });
+
+  await sendSms({
+    to: phone,
+    body: `Your Ellicott City Airport Taxi verification code is ${code}. It expires in 10 minutes.`,
+  });
+  // In dev (no Twilio) return the code so the flow can be tested end-to-end.
+  return { devCode: isSmsConfigured() ? undefined : code };
+};
+
+export const verifyOtp = async ({ phone, code, userAgent = '', ip = '' }) => {
+  if (!phone || !code) throw fail('Phone number and code are required', 400);
+
+  const otp = await OtpCode.findOne({ phone });
+  if (!otp || otp.expiresAt < new Date()) {
+    if (otp) await otp.deleteOne();
+    throw fail('Code expired. Request a new one.', 400);
+  }
+  if (otp.attempts >= OTP_MAX_ATTEMPTS) {
+    await otp.deleteOne();
+    throw fail('Too many attempts. Request a new code.', 400);
+  }
+  if (otp.codeHash !== hashToken(String(code).trim())) {
+    otp.attempts += 1;
+    await otp.save();
+    throw fail('Invalid code.', 400);
+  }
+  await otp.deleteOne();
+
+  // Find-or-create a passenger account keyed by phone.
+  const phoneDigits = phone.replace(/\D/g, '');
+  let user = await User.findOne({ phone });
+  if (!user) {
+    user = await User.create({
+      name: `User ${phoneDigits.slice(-4)}`,
+      email: `${phoneDigits}@phone.local`,
+      phone,
+      password: generateToken(), // OTP users don't use a password
+      emailVerified: true,
+      authProvider: 'phone',
+    });
+  }
+
+  const tokens = await issueTokens(user, { rememberMe: true, userAgent, ip });
+  return { user: publicUser(user), tokens };
 };

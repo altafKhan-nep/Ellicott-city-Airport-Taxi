@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { CheckCircle2 } from 'lucide-react';
 import { Button } from '../components/ui/Button.jsx';
 import { verifyEmail } from '../services/authService.js';
 
@@ -41,8 +42,8 @@ export default function VerifyEmail() {
 
         {state === 'success' && (
           <>
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-100 text-2xl text-green-700">
-              ✓
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-100 text-green-700">
+              <CheckCircle2 className="h-8 w-8" />
             </div>
             <h1 className="text-2xl font-bold">Email verified</h1>
             <p className="mt-2 text-sm text-muted">

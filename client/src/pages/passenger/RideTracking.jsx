@@ -3,7 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Polyline, AttributionControl } from 'react-leaflet';
 import L from 'leaflet';
 import { getRide, cancelRide, driverEta } from '../../services/rideService.js';
+import { refundPayment, listPayments } from '../../services/paymentService.js';
 import { MapViewSelector, MAP_VIEWS } from '../../components/maps/MapViewSelector.jsx';
+import { PIN_CAR } from '../../components/maps/pinIcons.js';
 import { vehicleLabel } from '../../data/vehicles.js';
 import {
   joinRideRoom,
@@ -14,10 +16,12 @@ import {
 } from '../../services/socketService.js';
 import { Button } from '../../components/ui/Button.jsx';
 import { Spinner } from '../../components/ui/Spinner.jsx';
+import PaymentModal from '../../components/rides/PaymentModal.jsx';
+import EditRideModal from '../../components/rides/EditRideModal.jsx';
 
 const driverIcon = L.divIcon({
   className: '',
-  html: `<div class="map-pin map-pin-driver"><span>🚕</span></div>`,
+  html: `<div class="map-pin map-pin-driver"><span>${PIN_CAR}</span></div>`,
   iconSize: [30, 30],
   iconAnchor: [15, 30],
 });
@@ -49,6 +53,8 @@ export default function RideTracking() {
   const [eta, setEta] = useState(null);
   const [driverRoute, setDriverRoute] = useState([]);
   const [mapView, setMapView] = useState('streets');
+  const [showPay, setShowPay] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
   const timer = useRef(null);
 
   const stopPolling = () => {
@@ -134,6 +140,26 @@ export default function RideTracking() {
       navigate('/rides/history');
     } catch {
       setError('Could not cancel ride');
+    }
+  };
+
+  const handleRefund = async () => {
+    if (!window.confirm('Refund this payment? This is immediate in the sandbox.')) return;
+    try {
+      // Find the payment record for this ride by its transaction id.
+      const { data } = await listPayments();
+      const payment = (data.payments || []).find(
+        (p) => p.transactionId && p.transactionId === ride.payment?.transactionId
+      );
+      if (!payment) {
+        setError('Payment record not found');
+        return;
+      }
+      await refundPayment(payment._id);
+      setRide((r) => ({ ...r, payment: { ...r.payment, status: 'refunded' } }));
+      setError('');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Could not refund');
     }
   };
 
@@ -266,6 +292,67 @@ export default function RideTracking() {
             <Button variant="danger" className="w-full" onClick={handleCancel}>
               Cancel ride
             </Button>
+          )}
+
+          {status === 'pending' && (
+            <Button variant="secondary" className="w-full" onClick={() => setShowEdit(true)}>
+              Edit ride
+            </Button>
+          )}
+
+          {status === 'completed' && (
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted">Trip total</p>
+                  <p className="text-xl font-bold text-brand-700">
+                    ${(ride.fare.final || ride.fare.estimated || 0).toFixed(2)}
+                  </p>
+                </div>
+                {ride.payment?.status === 'paid' && (
+                  <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700">
+                    Paid
+                  </span>
+                )}
+                {ride.payment?.status === 'refunded' && (
+                  <span className="rounded-full bg-gold-50 px-3 py-1 text-xs font-semibold text-gold-600">
+                    Refunded
+                  </span>
+                )}
+                {ride.payment?.status === 'pending' && (
+                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">
+                    Unpaid
+                  </span>
+                )}
+              </div>
+              {ride.payment?.status === 'pending' && (
+                <Button className="mt-3 w-full" onClick={() => setShowPay(true)}>
+                  Pay ${(ride.fare.final || ride.fare.estimated || 0).toFixed(2)}
+                </Button>
+              )}
+              {ride.payment?.status === 'paid' && (
+                <Button variant="secondary" className="mt-3 w-full" onClick={handleRefund}>
+                  Request refund
+                </Button>
+              )}
+            </div>
+          )}
+
+          {showPay && (
+            <PaymentModal
+              ride={ride}
+              onClose={() => setShowPay(false)}
+              onPaid={(payment) =>
+                setRide((r) => ({
+                  ...r,
+                  payment: { ...r.payment, status: 'paid', transactionId: payment.transactionId },
+                }))
+              }
+            />
+          )}
+
+          {showEdit && (
+            <EditRideModal ride={ride} onClose={() => setShowEdit(false)} onSaved={setRide} />
           )}
 
           {eta && status === 'accepted' && (

@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import User from '../models/User.js';
 import Location from '../models/Location.js';
+import AppSetting from '../models/AppSetting.js';
 import { connectDB } from '../config/db.js';
 
 dotenv.config();
@@ -77,6 +78,7 @@ const run = async () => {
   await connectDB();
   await User.deleteMany({});
   await Location.deleteMany({});
+  await AppSetting.deleteMany({});
 
   const created = [];
   for (const u of users) {
@@ -86,6 +88,13 @@ const run = async () => {
 
   const drivers = created.filter((u) => u.role === 'driver');
   await seedLocations(drivers);
+
+  // Default app settings (editable from Admin CRM).
+  await AppSetting.create([
+    { key: 'paymentsEnabled', value: true },
+    { key: 'supportPhone', value: '(410) 365-5556' },
+    { key: 'supportEmail', value: 'chriskbonsu@gmail.com' },
+  ]);
 
   console.log('Seed complete:');
   users.forEach((u) => console.log(`  ${u.role.padEnd(9)} ${u.email} / ${u.password}`));

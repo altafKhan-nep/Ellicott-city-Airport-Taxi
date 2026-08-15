@@ -76,9 +76,11 @@ export default function LocationSearch({ label, icon, value, onSelect, placehold
     <label className="block">
       {label && <span className="mb-1.5 block text-sm font-medium text-ink">{label}</span>}
       <div className="relative" ref={boxRef}>
-        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-          {icon}
-        </span>
+        {icon && (
+          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+            <icon className="h-4 w-4" />
+          </span>
+        )}
         <input
           className="input-pill w-full border border-slate-300 bg-white py-3 pl-10 pr-9 text-sm outline-none transition-colors placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-200"
           value={query}
@@ -109,7 +111,11 @@ export default function LocationSearch({ label, icon, value, onSelect, placehold
                     i === active ? 'bg-brand-50 text-brand-900' : 'text-ink'
                   }`}
                 >
-                  <span className="mt-0.5 shrink-0 text-slate-400">{icon}</span>
+                  {icon && (
+                    <span className="mt-0.5 shrink-0 text-slate-400">
+                      <icon className="h-4 w-4" />
+                    </span>
+                  )}
                   <span className="leading-snug">{r.address}</span>
                 </button>
               </li>

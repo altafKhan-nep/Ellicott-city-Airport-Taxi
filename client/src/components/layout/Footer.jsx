@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { Phone, Mail, MapPin, Clock } from 'lucide-react';
 import { SERVICES } from '../../data/services.js';
 
 export default function Footer() {
@@ -17,16 +18,16 @@ export default function Footer() {
             <a
               href="tel:4103655556"
               aria-label="Call us"
-              className="grid h-9 w-9 place-items-center rounded-full bg-white/10 text-sm transition-colors hover:bg-white/20"
+              className="grid h-9 w-9 place-items-center rounded-full bg-white/10 transition-colors hover:bg-white/20"
             >
-              📞
+              <Phone className="h-4 w-4" />
             </a>
             <a
               href="mailto:chriskbonsu@gmail.com"
               aria-label="Email us"
-              className="grid h-9 w-9 place-items-center rounded-full bg-white/10 text-sm transition-colors hover:bg-white/20"
+              className="grid h-9 w-9 place-items-center rounded-full bg-white/10 transition-colors hover:bg-white/20"
             >
-              ✉️
+              <Mail className="h-4 w-4" />
             </a>
           </div>
         </div>
@@ -61,19 +62,19 @@ export default function Footer() {
           <h4 className="text-sm font-semibold text-white">Contact</h4>
           <ul className="mt-3 space-y-2.5 text-sm text-white/75">
             <li className="flex items-start gap-2">
-              <span className="mt-0.5">📍</span>
+              <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
               <span>9019 Early April Way, Ellicott City, MD</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="mt-0.5">📞</span>
+              <Phone className="mt-0.5 h-4 w-4 shrink-0" />
               <a href="tel:4103655556" className="transition-colors hover:text-white">(410) 365-5556</a>
             </li>
             <li className="flex items-start gap-2">
-              <span className="mt-0.5">✉️</span>
-              <a href="mailto:chriskbonsu@gmail.com" className="transition-colors hover:text-white">chriskbonsu@gmail.com</a>
+              <Mail className="mt-0.5 h-4 w-4 shrink-0" />
+              <a href="mailto:chriskbonsu@gmail.com" className="break-all transition-colors hover:text-white">chriskbonsu@gmail.com</a>
             </li>
             <li className="flex items-start gap-2">
-              <span className="mt-0.5">🕑</span>
+              <Clock className="mt-0.5 h-4 w-4 shrink-0" />
               <span>24/7 dispatch &amp; support</span>
             </li>
           </ul>

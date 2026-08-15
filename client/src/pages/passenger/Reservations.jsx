@@ -1,10 +1,18 @@
 import { useEffect, useState } from 'react';
+import { Car, CarFront, Bus } from 'lucide-react';
 import { BookingMap } from '../../components/maps/BookingMap.jsx';
 import BookingForm from '../../components/rides/BookingForm.jsx';
 import useGeolocation from '../../hooks/useGeolocation.js';
 import { nearbyDrivers, driverEta } from '../../services/rideService.js';
 
 const DEFAULT_CENTER = [39.267, -76.799]; // Ellicott City, MD
+
+const vehicleIcon = (type) => {
+  const t = String(type || '');
+  if (t.includes('van') || t.includes('coach') || t.includes('bus')) return Bus;
+  if (t.includes('suv')) return CarFront;
+  return Car;
+};
 
 export default function Reservations() {
   const { position } = useGeolocation();
@@ -149,8 +157,11 @@ export default function Reservations() {
                       : 'border-slate-200 hover:border-brand-300'
                   }`}
                 >
-                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-50 text-lg">
-                    {d.vehicleType === 'suv' ? '🚙' : d.vehicleType === 'van' ? '🚐' : '🚗'}
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-50 text-brand-700">
+                    {(() => {
+                      const Icon = vehicleIcon(d.vehicleType);
+                      return <Icon className="h-5 w-5" />;
+                    })()}
                   </span>
                   <span className="min-w-0">
                     <span className="block truncate text-sm font-semibold text-ink">{d.name}</span>

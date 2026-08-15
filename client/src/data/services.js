@@ -1,9 +1,11 @@
+import { Plane, Briefcase, Gem, PartyPopper, Bus, MoonStar, Heart, School, Car } from 'lucide-react';
+
 export const SERVICES = [
   {
     slug: 'airport',
     name: 'Airport Transfers',
     short: 'Airport',
-    icon: '✈️',
+    icon: Plane,
     tagline: 'BWI · Dulles · Reagan · Amtrak',
     summary:
       'Skip the parking lots, long TSA lines and the final dash to your gate. Our professional drivers deliver prompt, meet-and-greet airport transfers to and from BWI, Dulles, Reagan National, Amtrak and MARC terminals — monitored around the clock for schedule changes.',
@@ -18,7 +20,7 @@ export const SERVICES = [
     slug: 'corporate',
     name: 'Corporate Travel',
     short: 'Corporate',
-    icon: '💼',
+    icon: Briefcase,
     tagline: 'Punctual, private, professional',
     summary:
       'Tailored for corporate events, client meetings and frequent airport runs. Our fleet ensures punctuality, privacy and peace of mind — from live journey tracking to special requests, your business travel is fully covered.',
@@ -33,7 +35,7 @@ export const SERVICES = [
     slug: 'wedding',
     name: 'Wedding Transportation',
     short: 'Weddings',
-    icon: '💍',
+    icon: Gem,
     tagline: 'From ceremony to happily ever after',
     summary:
       'From bachelor(ette) parties to rehearsal dinners to newlywed getaways, we handle it all. We will help you create a customized transportation plan from the very beginning all the way to happily ever after.',
@@ -48,7 +50,7 @@ export const SERVICES = [
     slug: 'prom',
     name: 'Prom & Celebrations',
     short: 'Proms',
-    icon: '🎉',
+    icon: PartyPopper,
     tagline: 'Style, safety and peace of mind',
     summary:
       'Celebrate in style with our premium sedans and SUVs, perfect for an unforgettable prom night. Our state-certified, background-checked drivers ensure a safe, smooth ride for your teen — so you can relax.',
@@ -63,7 +65,7 @@ export const SERVICES = [
     slug: 'shuttle',
     name: 'Employee & Corporate Shuttles',
     short: 'Shuttles',
-    icon: '🚐',
+    icon: Bus,
     tagline: 'Stress-free K-12 to college & work',
     summary:
       'Enjoy stress-free transportation for schools, sports teams and corporate commuters. We create tailored itineraries with vetted and certified drivers — ask about ongoing corporate shuttle contracts.',
@@ -78,7 +80,7 @@ export const SERVICES = [
     slug: 'charter',
     name: 'Charter Bus Trips',
     short: 'Charter Bus',
-    icon: '🚌',
+    icon: Bus,
     tagline: 'Groups of every size',
     summary:
       'Whether you are heading to the city for the day or on a longer group trip, our coordinators ensure everything runs seamlessly. Our network of trusted motorcoach partners handles groups of any size.',
@@ -93,7 +95,7 @@ export const SERVICES = [
     slug: 'night-out',
     name: 'Night Out',
     short: 'Night Out',
-    icon: '🌃',
+    icon: MoonStar,
     tagline: 'Birthdays, concerts & dinners',
     summary:
       'From birthday dinners to concerts, we have you covered. Let us turn your night on the town into a one-of-a-kind experience — connect with our coordinators for a night to remember.',
@@ -108,7 +110,7 @@ export const SERVICES = [
     slug: 'funeral',
     name: 'Funeral & Memorial',
     short: 'Funerals',
-    icon: '🕊️',
+    icon: Heart,
     tagline: 'Dignified, respectful service',
     summary:
       'Whether you are planning a private service or a large memorial, our team ensures every ride is handled with care. Trusted, professional drivers provide dignified, reliable transportation during life’s most difficult moments.',
@@ -123,7 +125,7 @@ export const SERVICES = [
     slug: 'school',
     name: 'School Transportation',
     short: 'Schools',
-    icon: '🏫',
+    icon: School,
     tagline: 'Safe daily routes & field trips',
     summary:
       'Ellicott City Airport Taxi provides safe, dependable transportation tailored for private schools. From daily AM and PM routes to field trips and special events, our professional drivers ensure students travel comfortably, securely and on schedule.',
@@ -138,7 +140,7 @@ export const SERVICES = [
     slug: 'valet',
     name: 'Valet Parking',
     short: 'Valet',
-    icon: '🚗',
+    icon: Car,
     tagline: 'Seamless events, effortless arrival',
     summary:
       'Our valet service ensures seamless events. Professional attendants prioritize efficiency and courtesy, adding a touch of sophistication to your gatherings — elevate your occasions with top-notch valet service.',

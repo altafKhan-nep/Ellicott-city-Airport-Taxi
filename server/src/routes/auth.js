@@ -9,6 +9,8 @@ import {
   resendVerification,
   forgotPassword,
   resetPassword,
+  sendOtp,
+  verifyOtp,
   socialRedirect,
   socialCallback,
 } from '../controllers/authController.js';
@@ -20,6 +22,10 @@ router.post('/register', register);
 router.post('/login', login);
 router.post('/refresh', refresh);
 router.post('/logout', protect, logout);
+
+// Phone OTP login
+router.post('/otp/send', sendOtp);
+router.post('/otp/verify', verifyOtp);
 
 // Social OAuth (Passport redirect flow)
 router.get('/google', socialRedirect('google'));

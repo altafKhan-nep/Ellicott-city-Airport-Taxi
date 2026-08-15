@@ -1,46 +1,47 @@
 import { Link } from 'react-router-dom';
+import { UserRound, Clock, Sparkles, Receipt, ShieldCheck, Map, Smartphone, Headphones, Car, Phone } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { Button } from '../../components/ui/Button.jsx';
 import { Reveal } from '../../components/ui/Reveal.jsx';
 
 const WHY_US = [
   {
-    icon: '👨‍✈️',
+    icon: UserRound,
     title: 'Professional drivers',
     desc: 'Our drivers are not just skilled behind the wheel — they are trained professionals committed to a safe and comfortable ride.',
   },
   {
-    icon: '⏰',
+    icon: Clock,
     title: 'Guaranteed scheduled rides',
     desc: 'Count on us to be punctual. We prioritize on-time arrivals and departures, putting your schedule first.',
   },
   {
-    icon: '✨',
+    icon: Sparkles,
     title: 'Personalized amenities',
     desc: 'Make your journey unique. Enjoy a selection of amenities tailored to your preferences on every ride.',
   },
   {
-    icon: '🧾',
+    icon: Receipt,
     title: 'Transparent pricing',
     desc: 'Say goodbye to hidden fees. With our upfront pricing, you know exactly what to expect before you book.',
   },
   {
-    icon: '🛡️',
+    icon: ShieldCheck,
     title: 'Commercially insured',
     desc: 'Your safety is our top priority. Rest easy knowing our services are backed by comprehensive coverage.',
   },
   {
-    icon: '🗺️',
+    icon: Map,
     title: 'Local knowledge',
     desc: 'Our drivers know the area well, providing timely arrivals and valuable insight into the best routes.',
   },
   {
-    icon: '📲',
+    icon: Smartphone,
     title: 'Effortless booking',
     desc: 'Booking with us is a breeze. Use our app or web form to schedule your ride quickly and easily.',
   },
   {
-    icon: '🎧',
+    icon: Headphones,
     title: '24/7 support',
     desc: 'Our dispatch team is always available to help — day or night, weekdays or weekends.',
   },
@@ -120,8 +121,8 @@ export default function About() {
           <div className="overflow-hidden rounded-3xl bg-brand-gradient text-white shadow-xl">
             <div className="p-8 sm:p-10">
               <div className="flex items-center gap-4">
-                <span className="grid h-16 w-16 place-items-center rounded-2xl bg-white/10 text-3xl">
-                  🚕
+                <span className="grid h-16 w-16 place-items-center rounded-2xl bg-white/10">
+                  <Car className="h-8 w-8 text-white" />
                 </span>
                 <div>
                   <div className="text-xl font-bold">Ellicott City Airport Taxi</div>
@@ -137,7 +138,8 @@ export default function About() {
                   href="tel:4103655556"
                   className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-base font-semibold text-brand-900 shadow-sm transition-colors hover:bg-brand-50"
                 >
-                  📞 (410) 365-5556
+                  <Phone className="h-4 w-4" />
+                  (410) 365-5556
                 </a>
               </div>
             </div>
@@ -166,8 +168,8 @@ export default function About() {
             {WHY_US.map((f, i) => (
               <Reveal key={f.title} delay={(i % 4) * 80} className="h-full">
                 <div className="card-lift h-full rounded-3xl border border-slate-200 bg-white p-7 shadow-sm">
-                  <span className="grid h-14 w-14 place-items-center rounded-2xl bg-brand-gradient-soft text-2xl">
-                    {f.icon}
+                  <span className="grid h-14 w-14 place-items-center rounded-2xl bg-brand-gradient-soft">
+                    <f.icon className="h-7 w-7 text-brand-700" />
                   </span>
                   <h3 className="mt-4 text-base font-bold text-ink">{f.title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-muted">{f.desc}</p>

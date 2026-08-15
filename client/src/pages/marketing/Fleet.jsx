@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { Phone, Check } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { Button } from '../../components/ui/Button.jsx';
 import { Reveal } from '../../components/ui/Reveal.jsx';
@@ -104,7 +105,8 @@ export default function Fleet() {
               href="tel:4103655556"
               className="inline-flex items-center gap-2 rounded-full border border-white/30 px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-white/10"
             >
-              📞 (410) 365-5556
+              <Phone className="h-4 w-4" />
+              (410) 365-5556
             </a>
           </div>
         </div>
@@ -135,7 +137,7 @@ export default function Fleet() {
                   <ul className="mt-5 space-y-2">
                     {v.features.map((f) => (
                       <li key={f} className="flex items-start gap-2.5 text-sm text-muted">
-                        <span className="mt-0.5 text-brand-600" aria-hidden>✓</span>
+                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-600" aria-hidden />
                         {f}
                       </li>
                     ))}
@@ -147,10 +149,10 @@ export default function Fleet() {
                     </Link>
                     <a
                       href="tel:4103655556"
-                      className="grid h-11 w-11 place-items-center rounded-full border border-slate-200 text-base text-brand-700 transition-colors hover:border-brand-300 hover:bg-brand-50"
+                      className="grid h-11 w-11 place-items-center rounded-full border border-slate-200 text-brand-700 transition-colors hover:border-brand-300 hover:bg-brand-50"
                       aria-label={`Call about ${v.name}`}
                     >
-                      📞
+                      <Phone className="h-4 w-4" />
                     </a>
                   </div>
                 </div>

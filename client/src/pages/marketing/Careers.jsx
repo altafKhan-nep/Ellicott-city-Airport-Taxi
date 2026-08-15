@@ -1,12 +1,13 @@
 import { useState } from 'react';
+import { BadgeDollarSign, Clock, Smartphone, Handshake, Trophy, ShieldCheck, Check, FileText, MailCheck } from 'lucide-react';
 
 const PERKS = [
-  { icon: '💵', title: 'Competitive earnings', desc: 'Keep more of what you earn with a strong per-ride payout.' },
-  { icon: '⏰', title: 'Flexible hours', desc: 'Drive on your schedule — day, night or weekends.' },
-  { icon: '📱', title: 'Your own fleet app', desc: 'Accept rides, navigate and track earnings from the driver app.' },
-  { icon: '🤝', title: 'Professional support', desc: 'Backed by a 24/7 dispatch and service team that has your back.' },
-  { icon: '🏆', title: 'Driver of the Month', desc: 'Top performers are recognized and rewarded for excellence.' },
-  { icon: '🛡️', title: 'Safety first', desc: 'Vehicle standards, insurance and protocols that protect you and riders.' },
+  { icon: BadgeDollarSign, title: 'Competitive earnings', desc: 'Keep more of what you earn with a strong per-ride payout.' },
+  { icon: Clock, title: 'Flexible hours', desc: 'Drive on your schedule — day, night or weekends.' },
+  { icon: Smartphone, title: 'Your own fleet app', desc: 'Accept rides, navigate and track earnings from the driver app.' },
+  { icon: Handshake, title: 'Professional support', desc: 'Backed by a 24/7 dispatch and service team that has your back.' },
+  { icon: Trophy, title: 'Driver of the Month', desc: 'Top performers are recognized and rewarded for excellence.' },
+  { icon: ShieldCheck, title: 'Safety first', desc: 'Vehicle standards, insurance and protocols that protect you and riders.' },
 ];
 
 const REQUIREMENTS = [
@@ -93,8 +94,8 @@ export default function Careers() {
         <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {PERKS.map((p) => (
             <div key={p.title} className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm">
-              <span className="grid h-12 w-12 place-items-center rounded-2xl bg-brand-gradient-soft text-2xl">
-                {p.icon}
+              <span className="grid h-12 w-12 place-items-center rounded-2xl bg-brand-gradient-soft">
+                <p.icon className="h-6 w-6 text-brand-700" />
               </span>
               <h3 className="mt-4 text-base font-bold text-ink">{p.title}</h3>
               <p className="mt-2 text-sm leading-relaxed text-muted">{p.desc}</p>
@@ -121,8 +122,8 @@ export default function Careers() {
             <ul className="mt-8 space-y-4">
               {REQUIREMENTS.map((r) => (
                 <li key={r} className="flex items-start gap-3">
-                  <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand-100 text-xs font-bold text-brand-700">
-                    ✓
+                  <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand-100 text-brand-700">
+                    <Check className="h-3.5 w-3.5" />
                   </span>
                   <span className="text-sm font-medium text-ink">{r}</span>
                 </li>
@@ -142,7 +143,8 @@ export default function Careers() {
                   rel="noreferrer"
                   className="inline-flex items-center gap-2 rounded-full bg-brand-gradient px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
                 >
-                  📄 Driver application
+                  <FileText className="h-4 w-4" />
+                  Driver application
                 </a>
                 <a
                   href="https://chriskbonsu@gmail.com/wp-content/uploads/2020/05/New-Drivers-Application-1.pdf"
@@ -165,7 +167,9 @@ export default function Careers() {
 
             {sent ? (
               <div className="mt-8 rounded-2xl bg-brand-50 p-6 text-center">
-                <div className="text-3xl">📨</div>
+                <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-brand-100">
+                  <MailCheck className="h-7 w-7 text-brand-700" />
+                </div>
                 <h3 className="mt-2 text-lg font-bold text-brand-900">Thank you!</h3>
                 <p className="mt-1 text-sm text-brand-700">
                   Your email draft has been opened in your mail app. Send it to{' '}
