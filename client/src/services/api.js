@@ -6,21 +6,52 @@ export const API_ROOT = import.meta.env.VITE_API_URL || '';
 
 const api = axios.create({ baseURL: `${API_ROOT}/api` });
 
-// Store tokens in memory + localStorage fallback (MVP-friendly)
+// Tokens are stored PER ROLE (rt_admin_* / rt_driver_* / rt_passenger_*) so an
+// admin and a driver can stay signed in at the same time in different tabs —
+// one role's login never overwrites another role's session. Each tab tracks its
+// own "active role" in sessionStorage (per-tab, not shared), so both dashboards
+// keep working side by side.
+const ROLES = ['passenger', 'driver', 'admin'];
+
+function roleFromUrl() {
+  const p = window.location.pathname;
+  if (p.startsWith('/driver')) return 'driver';
+  if (p.startsWith('/admin')) return 'admin';
+  return 'passenger';
+}
+
+let activeRole = sessionStorage.getItem('rt_active_role') || roleFromUrl();
+
 const store = {
+  get role() {
+    return activeRole;
+  },
+  setActiveRole(role) {
+    activeRole = ROLES.includes(role) ? role : 'passenger';
+    sessionStorage.setItem('rt_active_role', activeRole);
+  },
+  key(role = activeRole) {
+    return `rt_${role}`;
+  },
   get access() {
-    return localStorage.getItem('rt_access');
+    return localStorage.getItem(`${store.key()}_access`);
   },
   get refresh() {
-    return localStorage.getItem('rt_refresh');
+    return localStorage.getItem(`${store.key()}_refresh`);
   },
-  setTokens(access, refresh) {
-    localStorage.setItem('rt_access', access);
-    localStorage.setItem('rt_refresh', refresh);
+  setTokens(access, refresh, role = activeRole) {
+    localStorage.setItem(`${store.key(role)}_access`, access);
+    localStorage.setItem(`${store.key(role)}_refresh`, refresh);
   },
-  clear() {
-    localStorage.removeItem('rt_access');
-    localStorage.removeItem('rt_refresh');
+  clear(role = activeRole) {
+    localStorage.removeItem(`${store.key(role)}_access`);
+    localStorage.removeItem(`${store.key(role)}_refresh`);
+  },
+  // Pick which role's session a freshly-opened tab should use: the tab's own
+  // active role first, otherwise the first remembered session we find.
+  resolveRole() {
+    if (localStorage.getItem(`${store.key()}_access`)) return activeRole;
+    return ROLES.find((r) => localStorage.getItem(`${store.key(r)}_access`)) || 'passenger';
   },
 };
 export const tokenStore = store;
@@ -71,6 +102,16 @@ api.interceptors.response.use(
       } finally {
         isRefreshing = false;
       }
+    }
+
+    // 403 "Insufficient permissions" means the stored token belongs to a different
+    // role/user than the one the app believes is logged in (e.g. a second role was
+    // signed in in the same browser and overwrote localStorage). Force a fresh login
+    // instead of leaving a broken dashboard showing errors forever.
+    if (status === 403 && error.response?.data?.message === 'Insufficient permissions') {
+      store.clear();
+      if (!window.location.pathname.startsWith('/login')) window.location.href = '/login';
+      return Promise.reject(error);
     }
 
     return Promise.reject(error);

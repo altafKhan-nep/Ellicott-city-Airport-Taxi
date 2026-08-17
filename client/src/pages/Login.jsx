@@ -41,6 +41,11 @@ export default function Login() {
     { label: 'Admin', email: 'admin@ridetaxi.com', password: 'admin123' },
   ];
 
+  const quickFill = (q) => {
+    setForm((f) => ({ ...f, identifier: q.email }));
+    setError('');
+  };
+
   return (
     <div className="mx-auto flex max-w-md flex-col px-4 py-12">
       <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
@@ -97,7 +102,7 @@ export default function Login() {
             {quick.map((q) => (
               <button
                 key={q.label}
-                onClick={() => setForm({ ...form, identifier: q.email, password: q.password })}
+                onClick={() => quickFill(q)}
                 className="rounded-lg border border-slate-200 px-2 py-2 text-xs font-medium transition-colors hover:border-brand-400 hover:text-brand-700"
               >
                 {q.label}

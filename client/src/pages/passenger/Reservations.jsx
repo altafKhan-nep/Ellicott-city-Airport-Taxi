@@ -3,7 +3,7 @@ import { Car, CarFront, Bus } from 'lucide-react';
 import { BookingMap } from '../../components/maps/BookingMap.jsx';
 import BookingForm from '../../components/rides/BookingForm.jsx';
 import useGeolocation from '../../hooks/useGeolocation.js';
-import { nearbyDrivers, driverEta } from '../../services/rideService.js';
+import { nearbyDrivers, driverEta, reverseGeocode } from '../../services/rideService.js';
 
 const DEFAULT_CENTER = [39.267, -76.799]; // Ellicott City, MD
 
@@ -15,15 +15,48 @@ const vehicleIcon = (type) => {
 };
 
 export default function Reservations() {
-  const { position } = useGeolocation();
-  const [pickup, setPickup] = useState(
-    position ? { lat: position.lat, lng: position.lng, address: 'Current location' } : null
-  );
+  const { position, error: geoError, locate } = useGeolocation();
+  const [locateRequested, setLocateRequested] = useState(false);
+  const [pickup, setPickup] = useState(null);
   const [dropoff, setDropoff] = useState(null);
   const [drivers, setDrivers] = useState([]);
   const [driverRoute, setDriverRoute] = useState(null);
   const [selectedDriver, setSelectedDriver] = useState(null);
   const [loadingDrivers, setLoadingDrivers] = useState(false);
+
+  // When the browser resolves the user's location, auto-select it as the
+  // pickup so the map and driver search immediately reflect the current area.
+  // The position is reverse-geocoded so the pickup shows the user's REAL
+  // address (e.g. "9009 Main St, Ellicott City, MD") instead of a generic
+  // "Current location" label.
+  useEffect(() => {
+    if (!position) return;
+    if (pickup && !locateRequested) return;
+    let cancelled = false;
+    (async () => {
+      let address = 'Current location';
+      try {
+        const { data } = await reverseGeocode(position.lat, position.lng);
+        if (!cancelled && data?.place?.address) address = data.place.address;
+      } catch {
+        /* keep the generic fallback */
+      }
+      if (!cancelled) {
+        setPickup({ lat: position.lat, lng: position.lng, address });
+        setLocateRequested(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [position, pickup, locateRequested]);
+
+  // Explicit "Use my location" — re-fetch the position and move the pickup to
+  // it even if the user already picked something else.
+  const useMyLocation = () => {
+    setLocateRequested(true);
+    locate();
+  };
 
   // Load nearby drivers once pickup is chosen
   useEffect(() => {
@@ -90,6 +123,23 @@ export default function Reservations() {
         </div>
       </section>
 
+      {/* Geolocation notice */}
+      {geoError && (
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
+          <p className="text-sm text-amber-800">
+            We couldn't access your location{geoError ? ` (${geoError})` : ''} — the map is
+            showing a default area.
+          </p>
+          <button
+            type="button"
+            onClick={useMyLocation}
+            className="rounded-full bg-brand-600 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-brand-700"
+          >
+            Use my location
+          </button>
+        </div>
+      )}
+
       {/* Booking card */}
       <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
         <div className="grid lg:grid-cols-5">
@@ -119,6 +169,8 @@ export default function Reservations() {
                 dropoff={dropoff}
                 drivers={drivers}
                 route={driverRoute}
+                userPosition={position}
+                onLocate={useMyLocation}
                 onPick={handlePick}
               />
             </div>

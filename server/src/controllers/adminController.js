@@ -5,6 +5,10 @@ import Payment from '../models/Payment.js';
 import Location from '../models/Location.js';
 import RefreshToken from '../models/RefreshToken.js';
 import { getSettings, updateSettings } from '../services/settingsService.js';
+import * as rideService from '../services/rideService.js';
+import { notify } from '../services/notificationService.js';
+
+const ioOf = (req) => req.app.get('io');
 
 // GET /api/admin/analytics
 export const analytics = asyncHandler(async (req, res) => {
@@ -50,6 +54,57 @@ export const rides = asyncHandler(async (req, res) => {
 export const drivers = asyncHandler(async (req, res) => {
   const drivers = await User.find({ role: 'driver' }).select('-password');
   res.json({ drivers });
+});
+
+// PATCH /api/admin/rides/:id/driver { driverId } - assign a driver to a ride,
+// or { driverId: null } to remove the assigned driver and return to the board.
+export const assignDriver = asyncHandler(async (req, res) => {
+  const { ride, removedDriverId } = await rideService.assignDriver(
+    req.params.id,
+    req.body.driverId ?? null
+  );
+  const io = ioOf(req);
+
+  io.to(`ride:${ride._id}`).emit('ride:update', { ride, status: ride.status });
+  io.to('admins').emit('ride:update', { ride, status: ride.status });
+
+  if (ride.driver) {
+    await notify({
+      user: ride.passenger._id,
+      type: 'ride',
+      title: 'Driver assigned',
+      message: `${ride.driver.name} has been assigned to your ride.`,
+      data: { rideId: ride._id },
+      io,
+    });
+    await notify({
+      user: ride.driver._id,
+      type: 'ride',
+      title: 'New ride assigned',
+      message: `Pick up ${ride.passenger.name} at ${ride.pickup.address}.`,
+      data: { rideId: ride._id },
+      io,
+    });
+  } else if (removedDriverId) {
+    await notify({
+      user: ride.passenger._id,
+      type: 'ride',
+      title: 'Driver reassigned',
+      message: 'Your ride is back on the board; dispatch is finding you another driver.',
+      data: { rideId: ride._id },
+      io,
+    });
+    await notify({
+      user: removedDriverId,
+      type: 'ride',
+      title: 'Assignment removed',
+      message: 'Your assignment to a ride was reassigned by dispatch.',
+      data: { rideId: ride._id },
+      io,
+    });
+  }
+
+  res.json({ ride });
 });
 
 // PATCH /api/admin/drivers/:id { driverDetails.isAvailable }

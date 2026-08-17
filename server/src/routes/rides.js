@@ -17,5 +17,6 @@ router.patch('/:id/status', requireRole('driver'), ride.updateStatus);
 router.patch('/:id/cancel', ride.cancelRide);
 router.post('/:id/rate', requireRole('passenger'), ride.rateRide);
 router.post('/:rideId/pay', requireRole('passenger'), payment.payRide);
+router.post('/:rideId/payment-intent', requireRole('passenger'), payment.createIntent);
 
 export default router;

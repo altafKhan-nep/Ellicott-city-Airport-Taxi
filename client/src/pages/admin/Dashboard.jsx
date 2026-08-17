@@ -13,7 +13,9 @@ import {
   adminPayments,
   adminSettings,
   adminUpdateSettings,
+  adminAssignDriver,
 } from '../../services/adminService.js';
+import { onRideUpdate, offRideUpdate, onRideNew, offRideNew } from '../../services/socketService.js';
 import { Spinner } from '../../components/ui/Spinner.jsx';
 import { Button } from '../../components/ui/Button.jsx';
 import { vehicleLabel } from '../../data/vehicles.js';
@@ -28,10 +30,19 @@ const STATUS_STYLE = {
 };
 
 const PAY_STYLE = {
-  succeeded: 'bg-brand-50 text-brand-700',
+  succeeded: 'bg-green-50 text-green-700',
+  cash: 'bg-gold-100 text-gold-700',
   failed: 'bg-red-50 text-red-700',
-  refunded: 'bg-gold-50 text-gold-600',
-  pending: 'bg-slate-100 text-slate-500',
+  refunded: 'bg-blue-50 text-blue-700',
+  pending: 'bg-yellow-50 text-yellow-700',
+};
+
+const PAY_ACCENT = {
+  succeeded: { dot: 'bg-green-500', text: 'text-green-700', top: 'border-t-green-500' },
+  cash: { dot: 'bg-gold-500', text: 'text-gold-700', top: 'border-t-gold-500' },
+  failed: { dot: 'bg-red-500', text: 'text-red-700', top: 'border-t-red-500' },
+  refunded: { dot: 'bg-blue-500', text: 'text-blue-700', top: 'border-t-blue-500' },
+  pending: { dot: 'bg-yellow-500', text: 'text-yellow-700', top: 'border-t-yellow-500' },
 };
 
 export default function Dashboard() {
@@ -46,6 +57,7 @@ export default function Dashboard() {
   const [active, setActive] = useState('overview');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState('');
+  const [assignSel, setAssignSel] = useState({});
 
   const load = async () => {
     try {
@@ -94,7 +106,21 @@ export default function Dashboard() {
     if (active === 'users') loadUsers(userSearch);
     if (active === 'payments') loadPayments();
     if (active === 'settings') loadSettings();
+    if (active === 'rides') load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active]);
+
+  // Live refresh of the rides table when dispatch assigns/removes or a new
+  // reservation arrives (admin socket is joined to the `admins` room).
+  useEffect(() => {
+    if (active !== 'rides') return;
+    const refresh = () => load();
+    onRideUpdate(refresh);
+    onRideNew(refresh);
+    return () => {
+      offRideUpdate();
+      offRideNew();
+    };
   }, [active]);
 
   const tabs = [
@@ -148,6 +174,35 @@ export default function Dashboard() {
   };
 
   const setSetting = (key, value) => setSettings((s) => ({ ...s, [key]: value }));
+
+  const assignDriver = async (r) => {
+    const driverId = assignSel[r._id];
+    if (!driverId) return;
+    setBusy(r._id);
+    try {
+      await adminAssignDriver(r._id, driverId);
+      setError('');
+      await load();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Could not assign driver');
+    } finally {
+      setBusy('');
+    }
+  };
+
+  const removeDriver = async (r) => {
+    if (!window.confirm(`Remove ${r.driver?.name} from this ride?`)) return;
+    setBusy(r._id);
+    try {
+      await adminAssignDriver(r._id, null);
+      setError('');
+      await load();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Could not remove driver');
+    } finally {
+      setBusy('');
+    }
+  };
 
   const card = 'rounded-2xl border border-slate-200 bg-white p-5 shadow-sm';
 
@@ -222,10 +277,12 @@ export default function Dashboard() {
                 <tr>
                   <th className="px-4 py-3">Status</th>
                   <th className="px-4 py-3">Passenger</th>
+                  <th className="px-4 py-3">Driver</th>
                   <th className="px-4 py-3">Pickup</th>
                   <th className="px-4 py-3">Dropoff</th>
                   <th className="px-4 py-3">Fare</th>
                   <th className="px-4 py-3">Created</th>
+                  <th className="px-4 py-3 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -237,6 +294,9 @@ export default function Dashboard() {
                       </span>
                     </td>
                     <td className="px-4 py-3">{r.passenger?.name || '—'}</td>
+                    <td className="px-4 py-3">
+                      {r.driver ? r.driver.name : <span className="text-muted">Unassigned</span>}
+                    </td>
                     <td className="max-w-[160px] truncate px-4 py-3 text-muted">{r.pickup.address}</td>
                     <td className="max-w-[160px] truncate px-4 py-3 text-muted">{r.dropoff.address}</td>
                     <td className="px-4 py-3 font-medium">
@@ -244,6 +304,46 @@ export default function Dashboard() {
                     </td>
                     <td className="px-4 py-3 text-xs text-muted">
                       {new Date(r.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-4 py-3">
+                      {['pending', 'accepted', 'arriving', 'in_progress'].includes(r.status) &&
+                        (r.driver ? (
+                          <div className="flex justify-end">
+                            <Button
+                              variant="danger"
+                              size="sm"
+                              loading={busy === r._id}
+                              onClick={() => removeDriver(r)}
+                            >
+                              Remove
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-end gap-1.5">
+                            <select
+                              value={assignSel[r._id] || ''}
+                              onChange={(e) =>
+                                setAssignSel((m) => ({ ...m, [r._id]: e.target.value }))
+                              }
+                              className="input-pill border border-slate-300 bg-white px-2 py-1.5 text-xs outline-none focus:border-brand-500"
+                            >
+                              <option value="">Select driver…</option>
+                              {drivers.map((d) => (
+                                <option key={d._id} value={d._id}>
+                                  {d.name} · {vehicleLabel(d.driverDetails?.vehicleType)}
+                                </option>
+                              ))}
+                            </select>
+                            <Button
+                              size="sm"
+                              loading={busy === r._id}
+                              disabled={!assignSel[r._id]}
+                              onClick={() => assignDriver(r)}
+                            >
+                              Assign
+                            </Button>
+                          </div>
+                        ))}
                     </td>
                   </tr>
                 ))}
@@ -360,11 +460,14 @@ export default function Dashboard() {
 
       {active === 'payments' && (
         <div className="mt-6">
-          <div className="grid gap-4 sm:grid-cols-4">
-            {(['succeeded', 'pending', 'failed', 'refunded']).map((s) => (
-              <div key={s} className={card}>
-                <p className="text-sm capitalize text-muted">{s}</p>
-                <p className="mt-1 text-xl font-bold">
+          <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-5">
+            {(['succeeded', 'cash', 'pending', 'failed', 'refunded']).map((s) => (
+              <div key={s} className={`${card} border-t-4 ${PAY_ACCENT[s].top}`}>
+                <p className="flex items-center gap-2 text-sm capitalize text-muted">
+                  <span className={`h-2 w-2 rounded-full ${PAY_ACCENT[s].dot}`} />
+                  {s}
+                </p>
+                <p className={`mt-1 text-xl font-bold ${PAY_ACCENT[s].text}`}>
                   {paySummary[s] ? `$${paySummary[s].total.toFixed(2)}` : '$0.00'}
                 </p>
                 <p className="text-xs text-muted">{paySummary[s]?.count || 0} payments</p>
@@ -376,6 +479,7 @@ export default function Dashboard() {
               <thead className="bg-slate-50 text-xs uppercase tracking-wide text-muted">
                 <tr>
                   <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3">Method</th>
                   <th className="px-4 py-3">User</th>
                   <th className="px-4 py-3">Route</th>
                   <th className="px-4 py-3">Amount</th>
@@ -389,6 +493,14 @@ export default function Dashboard() {
                       <span className={`rounded-full px-2.5 py-1 text-xs font-medium capitalize ${PAY_STYLE[p.status]}`}>
                         {p.status}
                       </span>
+                    </td>
+                    <td className="px-4 py-3 text-xs">
+                      <span className="capitalize">{p.method}</span>
+                      {p.provider === 'stripe' && (
+                        <span className="ml-1.5 rounded-full bg-accent-100 px-2 py-0.5 text-[10px] font-semibold text-accent-700">
+                          Stripe
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-3">{p.user?.name || '—'}</td>
                     <td className="max-w-[220px] truncate px-4 py-3 text-muted">

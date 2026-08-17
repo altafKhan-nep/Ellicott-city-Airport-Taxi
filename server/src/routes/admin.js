@@ -8,6 +8,7 @@ router.use(protect, requireRole('admin'));
 
 router.get('/analytics', admin.analytics);
 router.get('/rides', admin.rides);
+router.patch('/rides/:id/driver', admin.assignDriver);
 router.get('/drivers', admin.drivers);
 router.patch('/drivers/:id', admin.toggleDriver);
 router.get('/users', admin.users);

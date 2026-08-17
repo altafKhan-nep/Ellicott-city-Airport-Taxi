@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Polyline, AttributionControl } from 'react-leaflet';
 import L from 'leaflet';
+import useGeolocation from '../../hooks/useGeolocation.js';
 import { getRide, cancelRide, driverEta } from '../../services/rideService.js';
 import { refundPayment, listPayments } from '../../services/paymentService.js';
 import { MapViewSelector, MAP_VIEWS } from '../../components/maps/MapViewSelector.jsx';
@@ -12,7 +13,9 @@ import {
   onDriverFound,
   onRideUpdate,
   onDriverLocation,
+  offDriverLocation,
   offRideUpdate,
+  emitPassengerLocation,
 } from '../../services/socketService.js';
 import { Button } from '../../components/ui/Button.jsx';
 import { Spinner } from '../../components/ui/Spinner.jsx';
@@ -56,6 +59,8 @@ export default function RideTracking() {
   const [showPay, setShowPay] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const timer = useRef(null);
+  const lastPax = useRef(0);
+  const { position } = useGeolocation();
 
   const stopPolling = () => {
     if (timer.current) {
@@ -63,6 +68,20 @@ export default function RideTracking() {
       timer.current = null;
     }
   };
+
+  // Share the passenger's live position with the assigned driver while active.
+  useEffect(() => {
+    if (!['accepted', 'arriving', 'in_progress'].includes(ride?.status) || !position) return;
+    const tick = () => {
+      const now = Date.now();
+      if (now - lastPax.current < 2000) return; // throttle to 1 per 2s
+      lastPax.current = now;
+      emitPassengerLocation(position.lat, position.lng);
+    };
+    tick();
+    const id = setInterval(tick, 2000);
+    return () => clearInterval(id);
+  }, [ride?.status, position]);
 
   useEffect(() => {
     let cancelled = false;
@@ -91,16 +110,22 @@ export default function RideTracking() {
     });
     onRideUpdate(({ ride: updatedRide }) => setRide(updatedRide));
     onDriverLocation(({ driverId, lat, lng }) => {
-      if (driverId === ride?.driver?._id) setDriverPos({ lat, lng });
+      if (driverId === driverRef.current) setDriverPos({ lat, lng });
     });
 
     return () => {
       cancelled = true;
       stopPolling();
       offRideUpdate();
+      offDriverLocation();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
+
+  // Keep the driver id current for the socket handler (avoids stale closures).
+  const driverRef = useRef(null);
+  useEffect(() => {
+    driverRef.current = ride?.driver?._id || null;
+  }, [ride?.driver?._id]);
 
   useEffect(() => {
     if (ride?.status === 'accepted' && ride?.driver) setDriverPos(null);
@@ -144,7 +169,7 @@ export default function RideTracking() {
   };
 
   const handleRefund = async () => {
-    if (!window.confirm('Refund this payment? This is immediate in the sandbox.')) return;
+    if (!window.confirm('Refund this payment?')) return;
     try {
       // Find the payment record for this ride by its transaction id.
       const { data } = await listPayments();
@@ -310,17 +335,19 @@ export default function RideTracking() {
                   </p>
                 </div>
                 {ride.payment?.status === 'paid' && (
-                  <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700">
-                    Paid
+                  <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                    ride.payment?.method === 'cash' ? 'bg-gold-100 text-gold-700' : 'bg-green-50 text-green-700'
+                  }`}>
+                    {ride.payment?.method === 'cash' ? 'Cash' : 'Paid'}
                   </span>
                 )}
                 {ride.payment?.status === 'refunded' && (
-                  <span className="rounded-full bg-gold-50 px-3 py-1 text-xs font-semibold text-gold-600">
+                  <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
                     Refunded
                   </span>
                 )}
                 {ride.payment?.status === 'pending' && (
-                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">
+                  <span className="rounded-full bg-yellow-50 px-3 py-1 text-xs font-semibold text-yellow-700">
                     Unpaid
                   </span>
                 )}
@@ -330,7 +357,7 @@ export default function RideTracking() {
                   Pay ${(ride.fare.final || ride.fare.estimated || 0).toFixed(2)}
                 </Button>
               )}
-              {ride.payment?.status === 'paid' && (
+              {ride.payment?.status === 'paid' && ride.payment?.method !== 'cash' && (
                 <Button variant="secondary" className="mt-3 w-full" onClick={handleRefund}>
                   Request refund
                 </Button>
@@ -345,7 +372,12 @@ export default function RideTracking() {
               onPaid={(payment) =>
                 setRide((r) => ({
                   ...r,
-                  payment: { ...r.payment, status: 'paid', transactionId: payment.transactionId },
+                  payment: {
+                    ...r.payment,
+                    status: 'paid',
+                    method: payment.method,
+                    transactionId: payment.transactionId,
+                  },
                 }))
               }
             />

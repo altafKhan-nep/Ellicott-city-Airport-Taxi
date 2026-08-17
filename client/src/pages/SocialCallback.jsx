@@ -12,6 +12,17 @@ const getQuery = (key) => {
   return match ? decodeURIComponent(match[1]) : '';
 };
 
+// Access JWTs embed { id, role, v } — decode the payload so the OAuth session is
+// stored under the right per-role key (admin/driver/passenger).
+const roleFromToken = (token) => {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+    return payload.role || 'passenger';
+  } catch {
+    return 'passenger';
+  }
+};
+
 export default function SocialCallback() {
   const [status, setStatus] = useState('loading');
 
@@ -28,6 +39,7 @@ export default function SocialCallback() {
       setStatus('error');
       return;
     }
+    tokenStore.setActiveRole(roleFromToken(access));
     tokenStore.setTokens(access, refresh);
     window.location.replace('/');
   }, []);

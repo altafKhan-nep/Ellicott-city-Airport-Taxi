@@ -15,12 +15,14 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   const loadUser = useCallback(async () => {
+    tokenStore.setActiveRole(tokenStore.resolveRole());
     if (!tokenStore.access) {
       setLoading(false);
       return;
     }
     try {
       const { data } = await getMe();
+      tokenStore.setActiveRole(data.user.role);
       setUser(data.user);
     } catch {
       tokenStore.clear();
@@ -40,6 +42,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (payload) => {
     const { data } = await apiLogin(payload);
+    tokenStore.setActiveRole(data.user.role);
     tokenStore.setTokens(data.tokens.accessToken, data.tokens.refreshToken);
     setUser(data.user);
     return data.user;
@@ -47,6 +50,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (payload) => {
     const { data } = await apiRegister(payload);
+    tokenStore.setActiveRole(data.user.role);
     tokenStore.setTokens(data.tokens.accessToken, data.tokens.refreshToken);
     setUser(data.user);
     return data; // includes user + verificationLink (dev)

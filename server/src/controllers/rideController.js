@@ -8,8 +8,35 @@ const ioOf = (req) => req.app.get('io');
 // POST /api/rides - passenger requests a ride
 export const createRide = asyncHandler(async (req, res) => {
   const ride = await rideService.createRide(req.user._id, req.body);
-  // Notify nearby drivers
-  ioOf(req).to('drivers').emit('ride:new', { ride });
+  const io = ioOf(req);
+
+  // Notify nearby, available drivers whose vehicle matches the request in real time.
+  const nearby = await rideService.findNearbyDrivers({
+    lat: ride.pickup.lat,
+    lng: ride.pickup.lng,
+    radius: rideService.NOTIFY_RADIUS_M,
+    vehicleType: ride.vehicleType,
+  });
+  for (const driver of nearby) {
+    io.to(`user:${driver._id}`).emit('ride:new', { ride });
+  }
+
+  // Live dispatch: admins see the new reservation on their rides board.
+  io.to('admins').emit('ride:new', { ride });
+
+  // Notify every admin so dispatch can assign a driver if no one accepts.
+  const admins = await rideService.findAdmins();
+  for (const admin of admins) {
+    await notify({
+      user: admin._id,
+      type: 'ride',
+      title: 'New reservation',
+      message: `${ride.passenger.name} booked a ride to ${ride.dropoff.address}.`,
+      data: { rideId: ride._id },
+      io,
+    });
+  }
+
   res.status(201).json({ ride });
 });
 

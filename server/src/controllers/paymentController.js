@@ -2,13 +2,32 @@ import { asyncHandler } from '../middleware/error.js';
 import * as paymentService from '../services/paymentService.js';
 import { notify } from '../services/notificationService.js';
 
+// POST /api/rides/:rideId/payment-intent
+export const createIntent = asyncHandler(async (req, res) => {
+  const { rideId } = req.params;
+  const { clientSecret, amount } = await paymentService.createPaymentIntent(
+    req.user._id,
+    rideId
+  );
+  res.json({ clientSecret, amount });
+});
+
 // POST /api/rides/:rideId/pay
 export const payRide = asyncHandler(async (req, res) => {
   const { rideId } = req.params;
   const payment = await paymentService.processPayment(req.user._id, rideId, req.body);
   const io = req.app.get('io');
 
-  if (payment.status === 'succeeded') {
+  if (payment.status === 'cash') {
+    await notify({
+      user: req.user._id,
+      type: 'payment',
+      title: 'Cash payment',
+      message: `Pay $${payment.amount.toFixed(2)} in cash to your driver.`,
+      data: { rideId, paymentId: payment._id },
+      io,
+    });
+  } else if (payment.status === 'succeeded') {
     await notify({
       user: req.user._id,
       type: 'payment',

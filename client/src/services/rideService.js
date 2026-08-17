@@ -25,6 +25,8 @@ export const driverEta = (driverId, to) =>
 
 export const searchPlaces = (q) => api.get('/places/search', { params: { q } });
 
+export const reverseGeocode = (lat, lng) => api.get('/places/reverse', { params: { lat, lng } });
+
 export const setAvailability = (isAvailable) =>
   api.patch('/drivers/availability', { isAvailable });
 
@@ -50,6 +52,7 @@ export default {
   nearbyDrivers,
   driverEta,
   searchPlaces,
+  reverseGeocode,
   setAvailability,
   updateLocation,
   driverStats,

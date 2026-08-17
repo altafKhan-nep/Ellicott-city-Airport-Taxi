@@ -105,7 +105,7 @@ const validateRegistration = ({ name, email, phone, password }) => {
 };
 
 /* ---------- email helpers ---------- */
-const appUrl = () => process.env.APP_URL || process.env.CLIENT_ORIGIN || 'http://localhost:5173';
+const appUrl = () => process.env.CLIENT_ORIGIN || 'http://localhost:5173';
 
 const devLink = (link) => (process.env.NODE_ENV === 'production' ? undefined : link);
 

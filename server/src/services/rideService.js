@@ -5,6 +5,9 @@ import { getSettings } from './settingsService.js';
 
 const RADIUS_M = 5000;
 
+// Radius used to notify nearby drivers about a new reservation (10 km).
+export const NOTIFY_RADIUS_M = 10000;
+
 // Geocoding via Nominatim (OpenStreetMap) - free, no API key
 // e.g. GET https://nominatim.openstreetmap.org/search?q=...&format=json
 const GEOCODE_URL = 'https://nominatim.openstreetmap.org/search';
@@ -96,8 +99,9 @@ export const findNearbyDrivers = async ({ lat, lng, radius = RADIUS_M, vehicleTy
       },
     },
   };
-  if (vehicleType) match.vehicleType = vehicleType;
 
+  // Vehicle type filters on the populated driver (Location docs carry no
+  // vehicleType); non-matching drivers are dropped by the populate match.
   const locations = await Location.find(match).populate({
     path: 'driver',
     match: vehicleType
@@ -123,6 +127,13 @@ export const acceptRide = async (rideId, driverId) => {
   const ride = await Ride.findOne({ _id: rideId, status: 'pending' });
   if (!ride) throw Object.assign(new Error('Ride is no longer available'), { statusCode: 409 });
 
+  const busy = await Ride.findOne({
+    driver: driverId,
+    status: { $in: ['accepted', 'arriving', 'in_progress'] },
+    _id: { $ne: rideId },
+  }).select('_id');
+  if (busy) throw Object.assign(new Error('You already have an active ride'), { statusCode: 409 });
+
   ride.driver = driverId;
   ride.status = 'accepted';
   ride.timestamps.accepted = new Date();
@@ -130,6 +141,48 @@ export const acceptRide = async (rideId, driverId) => {
 
   return Ride.findById(rideId).populate('passenger driver', 'name phone avatar driverDetails');
 };
+
+// Dispatch (admin) assigns or removes a driver on a ride. `driverId: null`
+// returns the ride to the pending board. Returns the populated ride plus the
+// id of the driver who was unassigned (if any).
+export const assignDriver = async (rideId, driverId) => {
+  const ride = await Ride.findOne({ _id: rideId, status: { $nin: ['completed', 'cancelled'] } });
+  if (!ride) throw Object.assign(new Error('Ride not found or no longer assignable'), { statusCode: 404 });
+
+  const removedDriverId = ride.driver ? String(ride.driver) : null;
+
+  if (driverId) {
+    if (removedDriverId === String(driverId)) {
+      const populated = await Ride.findById(rideId).populate('passenger driver', 'name phone avatar driverDetails');
+      return { ride: populated, removedDriverId: null };
+    }
+    const driver = await User.findOne({ _id: driverId, role: 'driver' });
+    if (!driver) throw Object.assign(new Error('Driver not found'), { statusCode: 400 });
+    if (driver.isSuspended) throw Object.assign(new Error('Driver is suspended'), { statusCode: 400 });
+
+    const busy = await Ride.findOne({
+      driver: driverId,
+      status: { $in: ['accepted', 'arriving', 'in_progress'] },
+      _id: { $ne: rideId },
+    }).select('_id');
+    if (busy) throw Object.assign(new Error('Driver already has an active ride'), { statusCode: 409 });
+
+    ride.driver = driverId;
+    ride.status = 'accepted';
+    ride.timestamps.accepted = new Date();
+  } else {
+    ride.driver = null;
+    ride.status = 'pending';
+    ride.timestamps.accepted = undefined;
+  }
+
+  await ride.save();
+  const populated = await Ride.findById(rideId).populate('passenger driver', 'name phone avatar driverDetails');
+  return { ride: populated, removedDriverId };
+};
+
+export const findAdmins = () =>
+  User.find({ role: 'admin', isSuspended: false }).select('_id').lean();
 
 export const updateStatus = async (rideId, status, driverId) => {
   const allowed = ['arriving', 'in_progress', 'completed'];

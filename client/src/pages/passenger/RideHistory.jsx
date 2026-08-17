@@ -16,9 +16,10 @@ const STATUS_STYLE = {
 };
 
 const PAY_STYLE = {
-  paid: 'bg-brand-50 text-brand-700',
-  refunded: 'bg-gold-50 text-gold-600',
-  pending: 'bg-slate-100 text-slate-500',
+  paid: 'bg-green-50 text-green-700',
+  cash: 'bg-gold-100 text-gold-700',
+  refunded: 'bg-blue-50 text-blue-700',
+  pending: 'bg-yellow-50 text-yellow-700',
 };
 
 export default function RideHistory() {
@@ -75,9 +76,11 @@ export default function RideHistory() {
                       {r.status.replace('_', ' ')}
                     </span>
                     {r.status === 'completed' && (
-                      <span className={`rounded-full px-3 py-1 text-xs font-semibold ${PAY_STYLE[r.payment?.status] || PAY_STYLE.pending}`}>
+                      <span className={`rounded-full px-3 py-1 text-xs font-semibold ${r.payment?.status === 'paid' && r.payment?.method === 'cash' ? PAY_STYLE.cash : PAY_STYLE[r.payment?.status] || PAY_STYLE.pending}`}>
                         {r.payment?.status === 'paid'
-                          ? 'Paid'
+                          ? r.payment?.method === 'cash'
+                            ? 'Cash'
+                            : 'Paid'
                           : r.payment?.status === 'refunded'
                             ? 'Refunded'
                             : 'Unpaid'}
@@ -135,7 +138,12 @@ export default function RideHistory() {
           onPaid={(payment) => {
             patch(paying._id, (r) => ({
               ...r,
-              payment: { ...r.payment, status: 'paid', transactionId: payment.transactionId },
+              payment: {
+                ...r.payment,
+                status: 'paid',
+                method: payment.method,
+                transactionId: payment.transactionId,
+              },
             }));
           }}
         />

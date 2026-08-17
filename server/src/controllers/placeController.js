@@ -11,3 +11,14 @@ export const search = asyncHandler(async (req, res) => {
   });
   res.json({ places });
 });
+
+// GET /api/places/reverse?lat=&lng=  ->  { place: { address, lat, lng } | null }
+export const reverse = asyncHandler(async (req, res) => {
+  const lat = +req.query.lat;
+  const lng = +req.query.lng;
+  if (!Number.isFinite(lat) || !Number.isFinite(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+    return res.status(400).json({ message: 'Invalid coordinates' });
+  }
+  const place = await placeService.reverseGeocode(lat, lng);
+  res.json({ place });
+});

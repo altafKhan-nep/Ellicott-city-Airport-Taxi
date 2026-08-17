@@ -48,6 +48,7 @@ Usage rules:
 | Maps | Leaflet + OpenStreetMap | Free, no API key |
 | Backend | Express.js + Socket.io | Real-time events |
 | Database | MongoDB + Mongoose | Flexible schema, geospatial queries |
+| Payments | Stripe (Payment Intents) + cash option; sandbox fallback | Real card charges, cash-at-end, no-key dev |
 | Auth | Passport.js (local + OAuth2 + JWT strategies) | Stateless JWT, horizontally scalable |
 | Email | Nodemailer (SMTP) | Optional — verification + password reset; console fallback in dev |
 | Social | Passport Google/Facebook OAuth2 (redirect flow) | Server-side verification, no app secret needed for token flows |
@@ -251,22 +252,42 @@ match the enum above — same ids are used for driver matching and fares.
 }
 ```
 
-### Payment (sandbox gateway)
+### Payment (Stripe + cash + sandbox fallback)
 ```js
 {
   user: ref(User), ride: ref(Ride),
-  amount, currency, method: "card" | "wallet",
-  status: "pending" | "succeeded" | "failed" | "refunded",
-  transactionId,                  // unique + sparse (set on success)
+  amount, currency,
+  method: "card" | "wallet" | "cash",
+  provider: "stripe" | "sandbox" | "cash",
+  status: "pending" | "succeeded" | "failed" | "refunded" | "cash",
+  transactionId,                  // unique + sparse; pi_… for Stripe, txn_… for sandbox
   idempotencyKey,                 // unique + sparse — caller key prevents double-charge
   failureReason, cardLast4,
   refundedAt, refundTransactionId,
   createdAt, updatedAt
 }
 ```
-**Sandbox rules**: charging is simulated — card ending `0002` always declines,
-`0000` always succeeds, otherwise ~95% success. A succeeded payment for a ride
-is returned as-is (no double-charge); a repeated `idempotencyKey` → 409.
+**Cash**: `POST pay` with `{ method: "cash" }` records a no-charge payment (status
+`cash`, provider `cash`); the passenger pays the driver at trip end. Never
+refundable, allowed even when `paymentsEnabled=false`. Once a ride is settled
+(either `succeeded` or `cash`) it is returned as-is — never charged again.
+
+**Stripe (online card)**: when `STRIPE_SECRET_KEY` is set in `server/.env`,
+card payments go through real Stripe Payment Intents. Flow:
+1. `POST /api/rides/:rideId/payment-intent` → `{ clientSecret, amount }` (idempotent per ride).
+2. Client confirms with the Payment Element (`stripe.confirmPayment`, `redirect: 'if_required'`).
+3. `POST pay` with `{ method: "card", paymentIntentId }` — server retrieves the
+   intent, verifies `status === 'succeeded'` and amount == ride fare, then records
+   it (provider `stripe`, transactionId = `pi_…`).
+Unconfirmed/declined intents are rejected (400). Refunds call `stripe.refunds.create`.
+The account's Payment Method Configuration is applied automatically via
+`automatic_payment_methods: { enabled: true }` — the `pmd_…` Payment Method
+Domain id in `server/.env` is informational (dashboard config); do NOT pass it as
+`payment_method_configuration` (that param needs a `pmc_…` id).
+
+**Sandbox (fallback)**: when `STRIPE_SECRET_KEY` is unset, card payments use the
+simulated gateway — card ending `0002` always declines, `0000` always succeeds,
+otherwise ~95% success. Stripe is preferred once configured.
 
 ### Notification (in-app)
 ```js
@@ -317,7 +338,11 @@ Known keys (defaults in `settingsService.DEFAULTS`): `baseFare`, `perKm`,
 - `PATCH /api/rides/:id/status` - Update status (driver). Sets `fare.final` on completion.
 - `PATCH /api/rides/:id/cancel` - Cancel ride
 - `POST /api/rides/:id/rate` - Rate completed ride (passenger)
-- `POST /api/rides/:rideId/pay` - Charge for a ride (passenger). Idempotent (see Payment model).
+- `POST /api/rides/:rideId/pay` - Charge/settle a ride (passenger): `{ method: "cash" }`
+  records a no-charge cash payment; `{ method: "card", paymentIntentId }` records a
+  Stripe charge. Idempotent (see Payment model).
+- `POST /api/rides/:rideId/payment-intent` - Stripe PaymentIntent `{ clientSecret, amount }`
+  for the card tab of the pay modal (idempotent per ride).
 
 ### Users / Profile
 - `GET /api/users/me` - Profile (name, email, phone, avatar, role)
@@ -327,10 +352,10 @@ Known keys (defaults in `settingsService.DEFAULTS`): `baseFare`, `perKm`,
 - `PATCH /api/users/me/password` - Body `{ currentPassword, newPassword }` (≥6 chars). Keeps current session.
 
 ### Payments
-- `POST /api/rides/:rideId/pay` - Sandbox charge (see Rides above)
+- `POST /api/rides/:rideId/pay` - Settle a ride (see Rides above: cash or Stripe card)
 - `GET /api/payments` - User's payments (with ride ref)
 - `GET /api/payments/:id` - Payment detail
-- `POST /api/payments/:id/refund` - Refund a succeeded payment (payer or admin)
+- `POST /api/payments/:id/refund` - Refund a succeeded payment (payer or admin); cash payments are rejected
 
 ### Notifications
 - `GET /api/notifications` - User's notifications (50 newest)
@@ -352,6 +377,7 @@ Known keys (defaults in `settingsService.DEFAULTS`): `baseFare`, `perKm`,
 
 ### Admin/CRM
 - `GET /api/admin/rides` - All rides with pagination
+- `PATCH /api/admin/rides/:id/driver` - **Dispatch**: body `{ driverId }` assigns a driver (status → `accepted`, notified via socket + in-app); body `{ driverId: null }` removes the assigned driver (status → `pending`, back on the board). Rejects suspended drivers, drivers already on an active ride (409), and rides that are completed/cancelled.
 - `GET /api/admin/drivers` - Driver list
 - `GET /api/admin/analytics` - Dashboard stats
 - `GET /api/admin/users?search=&role=&page=&limit=` - User list (search name/email/phone)
@@ -363,17 +389,19 @@ Known keys (defaults in `settingsService.DEFAULTS`): `baseFare`, `perKm`,
 ## Socket.io Events
 
 ### Client → Server
-- `authenticate` `{ userId, role }` - Join `user:{id}` room (drivers also join `drivers` room)
-- `ride:join` `{ rideId }` - Join `ride:{rideId}` room (passenger + driver)
+- `authenticate` `{ userId, role }` - Join `user:{id}` room (drivers also join `drivers` room; admins join `admins` room)
+- `ride:join` `{ rideId }` - Join `ride:{rideId}` room. **Authorized only for the ride's passenger, its assigned driver, or admins** (locations flow through these rooms — unauthenticated joins are rejected).
 - `driver:location` `{ lat, lng, heading, speed }` - Driver position. **Server looks up the driver's active ride and forwards to `ride:{id}` room only.** Do NOT broadcast to all drivers/passengers.
+- `passenger:location` `{ lat, lng, heading, speed }` - Passenger position. Mirror of `driver:location` — forwarded to the passenger's active `ride:{id}` room so the assigned driver sees them live.
 - `ride:cancel` `{ rideId }` - Cancel ride (server re-validates)
 
 ### Server → Client
-- `ride:update` `{ ride, status }` - Ride status changed
-- `ride:new` `{ ride }` - New pending ride → all drivers (used for driver feed)
+- `ride:update` `{ ride, status }` - Ride status changed (ride room; admins also receive via `admins` room for live dispatch UI)
+- `ride:new` `{ ride }` - New pending ride → **only the nearby, available drivers whose vehicle matches** (per-driver `user:{id}` rooms; the ride's passenger + admin also see it via `notification:new`). Used for the driver feed.
 - `ride:driverFound` `{ driver, ride }` - Driver assigned (via REST accept → socket)
 - `ride:completed` `{ ride, fare }` - Fare final
 - `driver:location` `{ driverId, lat, lng, heading, speed }` - Live driver position (ride room)
+- `passenger:location` `{ passengerId, lat, lng, heading, speed }` - Live passenger position (ride room)
 - `notification:new` `{ _id, type, title, message, data, read, createdAt }` - New in-app notification (user room)
 
 ## Seed Credentials
@@ -400,7 +428,8 @@ Driver positions are seeded near Howard County, MD (~39.20, -76.85). "Nearby dri
 5. Refresh tokens are **opaque, stored hashed** in the `RefreshToken` collection with a TTL index (auto-cleanup). `POST /refresh` **atomically rotates** (`findOneAndUpdate` on `revokedAt: null`) → replaying or racing the same token yields exactly one success. `POST /logout` revokes that device's token. Password reset revokes all + bumps `tokenVersion`.
 6. Social login is the **Passport OAuth2 redirect flow**: `/auth/google` → Google → `/auth/google/callback` → find-or-create/link user → redirect to `/auth/social?accessToken=&refreshToken=` (SPA stores tokens, hard-redirects to `/`). Strategies register only when `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` or `FACEBOOK_APP_ID`/`FACEBOOK_APP_SECRET` are set; buttons render only when `VITE_GOOGLE_CLIENT_ID`/`VITE_FACEBOOK_APP_ID` are set in `client/.env`.
 7. Phone OTP (`/otp/send` + `/otp/verify`) find-or-creates a `phone`-provider user and issues tokens. One-time code (10 min TTL, 5 attempts); without Twilio the code is logged and returned as `devCode`. OTP send is rate-limited per IP. **Currently disabled in the frontend** (no phone button on Login/Register) — backend endpoints remain for later re-enable.
-8. On 401, `api.js` queued-refresh pattern calls `/refresh`, stores the rotated token, retries; on failure clears storage + redirects to `/login`.
+8. On 401, `api.js` queued-refresh pattern calls `/refresh`, stores the rotated token, retries; on failure clears storage + redirects to `/login`. A `403 Insufficient permissions` also clears + redirects.
+9. **Per-role client sessions**: `api.js` stores tokens under per-role keys (`rt_<role>_access` / `rt_<role>_refresh`) with a per-tab active-role marker in `sessionStorage`, so admin/driver/passenger can stay signed in simultaneously in different tabs without overwriting each other. `tokenStore.setActiveRole()` is set on login/register/social and after `getMe`.
 
 > **Stateless & scalable**: every Passport strategy runs `session:false` — no session store, no sticky sessions, any instance serves any request. Rate limits are per-IP and in-memory per instance (use Redis or a shared store for multi-instance).
 
