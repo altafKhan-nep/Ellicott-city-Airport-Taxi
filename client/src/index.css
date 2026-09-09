@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@custom-variant dark (&:where(.dark, .dark *));
 
 /*
  * RideTaxi Design Tokens
@@ -56,6 +57,16 @@
   --color-paper: #f8f9fa;
 }
 
+html.dark {
+  --color-paper: #0b0d0f;
+  --color-ink: #f8f9fa;
+  --color-muted: #8f8f9a;
+  --color-surface: #15181c;
+}
+.dark body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
 html,
 body,
 #root {

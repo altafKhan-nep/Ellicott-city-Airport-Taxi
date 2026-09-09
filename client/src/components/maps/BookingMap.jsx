@@ -2,7 +2,7 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline, useMapEvents, useMap,
 import L from 'leaflet';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { MapViewSelector, MAP_VIEWS } from './MapViewSelector.jsx';
-import { PIN_CAR, PIN_SUV, PIN_BUS, PIN_FLAG } from './pinIcons.js';
+import { PIN_FLAG, UBER_SEDAN, UBER_SUV, UBER_VAN } from './pinIcons.js';
 
 const pickupIcon = L.divIcon({
   className: '',
@@ -29,38 +29,19 @@ const userIcon = L.divIcon({
   popupAnchor: [0, -12],
 });
 
-const vehicleIcons = {
-  sedan: L.divIcon({
-    className: '',
-    html: `<div class="map-pin map-pin-vehicle"><span>${PIN_CAR}</span></div>`,
-    iconSize: [30, 30],
-    iconAnchor: [15, 30],
-  }),
-  suv: L.divIcon({
-    className: '',
-    html: `<div class="map-pin map-pin-vehicle"><span>${PIN_SUV}</span></div>`,
-    iconSize: [30, 30],
-    iconAnchor: [15, 30],
-  }),
-  van: L.divIcon({
-    className: '',
-    html: `<div class="map-pin map-pin-vehicle"><span>${PIN_BUS}</span></div>`,
-    iconSize: [30, 30],
-    iconAnchor: [15, 30],
-  }),
-};
-
-// Pick the right vehicle glyph from a full fleet id (e.g. "executive-sedan").
-const divIconFor = (type) => {
+// Uber-style top-down car icons — heading-rotatable like Uber Driver
+const uberIconFor = (type, heading = 0) => {
   const t = String(type || '');
-  let glyph = PIN_CAR;
-  if (t.includes('van') || t.includes('coach') || t.includes('bus')) glyph = PIN_BUS;
-  else if (t.includes('suv')) glyph = PIN_SUV;
+  let glyph = UBER_SEDAN;
+  if (t.includes('van') || t.includes('coach') || t.includes('bus')) glyph = UBER_VAN;
+  else if (t.includes('suv')) glyph = UBER_SUV;
+  const rot = Number.isFinite(heading) ? heading : 0;
   return L.divIcon({
     className: '',
-    html: `<div class="map-pin map-pin-vehicle"><span>${glyph}</span></div>`,
-    iconSize: [30, 30],
-    iconAnchor: [15, 30],
+    html: `<div style="transform: rotate(${rot}deg); transition: transform 0.6s cubic-bezier(0.22,1,0.36,1); filter: drop-shadow(0 3px 6px rgba(0,0,0,0.28));">${glyph}</div>`,
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
+    popupAnchor: [0, -16],
   });
 };
 
@@ -169,13 +150,13 @@ export function BookingMap({ center, pickup, dropoff, route, drivers = [], userP
           </Marker>
         )}
 
-        {/* Nearby available drivers */}
+        {/* Nearby available drivers — Uber-style oriented cars */}
         {drivers.map((d) =>
           d.lat != null && d.lng != null ? (
             <Marker
               key={d._id}
               position={[d.lat, d.lng]}
-              icon={vehicleIcons[d.vehicleType] || divIconFor(d.vehicleType)}
+              icon={uberIconFor(d.vehicleType, d.heading)}
             >
               <Popup>
                 <div className="text-sm">

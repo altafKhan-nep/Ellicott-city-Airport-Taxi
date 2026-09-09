@@ -91,36 +91,76 @@ export const createRide = async (passengerId, input) => {
 };
 
 export const findNearbyDrivers = async ({ lat, lng, radius = RADIUS_M, vehicleType }) => {
-  const match = {
+  const makeMatch = (r) => ({
     coordinates: {
       $near: {
         $geometry: { type: 'Point', coordinates: [lng, lat] },
-        $maxDistance: radius,
+        $maxDistance: r,
       },
     },
-  };
-
-  // Vehicle type filters on the populated driver (Location docs carry no
-  // vehicleType); non-matching drivers are dropped by the populate match.
-  const locations = await Location.find(match).populate({
-    path: 'driver',
-    match: vehicleType
-      ? { role: 'driver', 'driverDetails.isAvailable': true, 'driverDetails.vehicleType': vehicleType }
-      : { role: 'driver', 'driverDetails.isAvailable': true },
   });
 
-  return locations
-    .filter((l) => l.driver)
-    .map((l) => ({
-      _id: l.driver._id,
-      name: l.driver.name,
-      phone: l.driver.phone,
-      avatar: l.driver.avatar,
-      vehicleType: l.driver.driverDetails?.vehicleType,
-      plateNumber: l.driver.driverDetails?.plateNumber,
-      lat: l.coordinates.coordinates[1],
-      lng: l.coordinates.coordinates[0],
-    }));
+  // Progressive radius expansion: 10km → 25km → 50km → show distance
+  // This handles service-area edge (Nepal 12,347km away correctly returns 0) but also ensures
+  // passenger near Ellicott City (8km) always finds drivers
+  const radii = [radius, 25000, 50000];
+  for (const r of radii) {
+    const match = makeMatch(r);
+    // Try exact vehicle match first
+    if (vehicleType) {
+      const exact = await Location.find(match).populate({
+        path: 'driver',
+        match: { role: 'driver', 'driverDetails.isAvailable': true, 'driverDetails.vehicleType': vehicleType },
+      });
+      const filtered = exact.filter((l) => l.driver);
+      if (filtered.length > 0) {
+        return filtered.map((l) => ({
+          _id: l.driver._id,
+          name: l.driver.name,
+          phone: l.driver.phone,
+          avatar: l.driver.avatar,
+          vehicleType: l.driver.driverDetails?.vehicleType,
+          plateNumber: l.driver.driverDetails?.plateNumber,
+          lat: l.coordinates.coordinates[1],
+          lng: l.coordinates.coordinates[0],
+          heading: l.heading ?? 0,
+          speed: l.speed ?? 0,
+          distanceKm: Math.round((() => {
+            const R=6371, dLat=(l.coordinates.coordinates[1]-lat)*Math.PI/180, dLon=(l.coordinates.coordinates[0]-lng)*Math.PI/180;
+            const a=Math.sin(dLat/2)**2 + Math.cos(lat*Math.PI/180)*Math.cos(l.coordinates.coordinates[1]*Math.PI/180)*Math.sin(dLon/2)**2;
+            return  R*2*Math.asin(Math.sqrt(a));
+          })()*10)/10,
+        }));
+      }
+    }
+    const fallback = await Location.find(match).populate({
+      path: 'driver',
+      match: { role: 'driver', 'driverDetails.isAvailable': true },
+    });
+    const filtered = fallback.filter((l) => l.driver);
+    if (filtered.length > 0) {
+      return filtered.map((l) => ({
+        _id: l.driver._id,
+        name: l.driver.name,
+        phone: l.driver.phone,
+        avatar: l.driver.avatar,
+        vehicleType: l.driver.driverDetails?.vehicleType,
+        plateNumber: l.driver.driverDetails?.plateNumber,
+        lat: l.coordinates.coordinates[1],
+        lng: l.coordinates.coordinates[0],
+        heading: l.heading ?? 0,
+        speed: l.speed ?? 0,
+        distanceKm: Math.round((() => {
+          const R=6371, dLat=(l.coordinates.coordinates[1]-lat)*Math.PI/180, dLon=(l.coordinates.coordinates[0]-lng)*Math.PI/180;
+          const a=Math.sin(dLat/2)**2 + Math.cos(lat*Math.PI/180)*Math.cos(l.coordinates.coordinates[1]*Math.PI/180)*Math.sin(dLon/2)**2;
+          return  R*2*Math.asin(Math.sqrt(a));
+        })()*10)/10,
+      }));
+    }
+  }
+
+  // If still none, return empty — caller should show service-area warning (MD/DC/VA)
+  return [];
 };
 
 export const acceptRide = async (rideId, driverId) => {
@@ -193,8 +233,10 @@ export const updateStatus = async (rideId, status, driverId) => {
   const ride = await Ride.findOne({ _id: rideId, driver: driverId, status: { $ne: 'completed' } });
   if (!ride) throw Object.assign(new Error('Ride not found or not assigned to you'), { statusCode: 404 });
 
+  // Map driver-facing status to schema timestamp key (arriving -> arrived)
+  const tsKey = status === 'arriving' ? 'arrived' : status === 'in_progress' ? 'started' : status;
   ride.status = status;
-  ride.timestamps[status] = new Date();
+  ride.timestamps[tsKey] = new Date();
   if (status === 'completed') {
     ride.timestamps.completed = new Date();
     // Final fare: use the estimate at completion (no metering in sandbox).
@@ -252,7 +294,10 @@ export const editRide = async (rideId, passengerId, input) => {
   ride.passengerCount = input.passengerCount ?? ride.passengerCount;
   ride.bags = input.bags ?? ride.bags;
   ride.route = route;
-  ride.fare = { estimated, distanceKm, durationMin };
+  // preserve currency/final when recomputing fare
+  ride.fare.estimated = estimated;
+  ride.fare.distanceKm = distanceKm;
+  ride.fare.durationMin = durationMin;
 
   await ride.save();
   return Ride.findById(rideId).populate('passenger', 'name phone avatar');
@@ -282,9 +327,17 @@ export const rateRide = async (rideId, userId, { score, comment }) => {
   return ride;
 };
 
-export const getRideById = async (id) => {
+export const getRideById = async (id, requester = null) => {
   const ride = await Ride.findById(id).populate('passenger driver', 'name phone avatar');
   if (!ride) throw Object.assign(new Error('Ride not found'), { statusCode: 404 });
+  if (requester) {
+    const privileged = ['admin', 'super_admin', 'dispatcher', 'manager', 'finance', 'support'].includes(requester.role);
+    if (!privileged) {
+      const isPassenger = String(ride.passenger?._id || ride.passenger) === String(requester._id);
+      const isDriver = ride.driver && String(ride.driver?._id || ride.driver) === String(requester._id);
+      if (!isPassenger && !isDriver) throw Object.assign(new Error('Not authorized to view this ride'), { statusCode: 403 });
+    }
+  }
   return ride;
 };
 

@@ -42,10 +42,7 @@ export default function BookingForm({ pickup, dropoff, onPickupChange, onDropoff
       setError('Please select your vehicle type.');
       return;
     }
-    if (!serviceType) {
-      setError('Please select your service type.');
-      return;
-    }
+    // serviceType optional — defaults to '' (general)
     if (!user) {
       navigate('/login', { state: { from: '/' } });
       return;
@@ -71,8 +68,9 @@ export default function BookingForm({ pickup, dropoff, onPickupChange, onDropoff
     }
   };
 
+  const [showMore, setShowMore] = useState(false);
   const field =
-    'input-pill w-full border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition-colors placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-200';
+    'input-pill min-h-11 w-full border border-accent-200 bg-white px-4 py-3 text-sm outline-none transition-colors placeholder:text-accent-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 focus-visible:ring-2 focus-visible:ring-brand-500';
 
   return (
     <form onSubmit={submit} className="flex h-full flex-col gap-5 p-6">
@@ -139,15 +137,16 @@ export default function BookingForm({ pickup, dropoff, onPickupChange, onDropoff
         </div>
       )}
 
-      {/* Vehicle type */}
+      {/* Essentials only — progressive disclosure */}
       <label className="block">
-        <span className="mb-1.5 block text-sm font-medium text-ink">Vehicle type</span>
+        <span className="mb-1.5 block text-sm font-medium text-ink">Vehicle</span>
         <select
           value={vehicleType}
           onChange={(e) => setVehicleType(e.target.value)}
           className={field}
+          aria-label="Vehicle type"
         >
-          <option value="" disabled>Select your vehicle type</option>
+          <option value="" disabled>Choose vehicle — fare updates instantly</option>
           {VEHICLES.map((v) => (
             <option key={v.id} value={v.id}>
               {v.label} — {v.desc}
@@ -156,57 +155,67 @@ export default function BookingForm({ pickup, dropoff, onPickupChange, onDropoff
         </select>
       </label>
 
-      {/* Service type */}
-      <label className="block">
-        <span className="mb-1.5 block text-sm font-medium text-ink">Service type</span>
-        <select
-          value={serviceType}
-          onChange={(e) => setServiceType(e.target.value)}
-          className={field}
-        >
-          <option value="" disabled>Select your service type</option>
-          {SERVICES.map((s) => (
-            <option key={s.slug} value={s.slug}>
-              {s.name}
-            </option>
-          ))}
-        </select>
-      </label>
+      <button
+        type="button"
+        onClick={() => setShowMore(v => !v)}
+        className="text-left text-sm font-medium text-brand-700 hover:text-brand-800 focus-visible:ring-2 focus-visible:ring-brand-500 rounded-full"
+        aria-expanded={showMore}
+      >
+        {showMore ? '− Fewer options' : '+ More options (passengers, bags, service)'}
+      </button>
 
-      {/* Counts */}
-      <div className="grid grid-cols-2 gap-3">
-        <label className="block">
-          <span className="mb-1.5 block text-sm font-medium text-ink">Passengers</span>
-          <select value={passengerCount} onChange={(e) => setPassengerCount(+e.target.value)} className={field}>
-            {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
-              <option key={n} value={n}>{n}</option>
-            ))}
-          </select>
-        </label>
-        <label className="block">
-          <span className="mb-1.5 block text-sm font-medium text-ink">Bags</span>
-          <select value={bags} onChange={(e) => setBags(+e.target.value)} className={field}>
-            {[0, 1, 2, 3, 4, 5].map((n) => (
-              <option key={n} value={n}>{n}</option>
-            ))}
-          </select>
-        </label>
-      </div>
+      {showMore && (
+        <div className="space-y-3 rounded-2xl border border-accent-100 bg-accent-50/50 p-4">
+          <label className="block">
+            <span className="mb-1.5 block text-sm font-medium text-ink">Service type</span>
+            <select
+              value={serviceType}
+              onChange={(e) => setServiceType(e.target.value)}
+              className={field}
+            >
+              <option value="" disabled>Select service (optional)</option>
+              {SERVICES.map((s) => (
+                <option key={s.slug} value={s.slug}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div className="grid grid-cols-2 gap-3">
+            <label className="block">
+              <span className="mb-1.5 block text-sm font-medium text-ink">Passengers</span>
+              <select value={passengerCount} onChange={(e) => setPassengerCount(+e.target.value)} className={field}>
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+                  <option key={n} value={n}>{n}</option>
+                ))}
+              </select>
+            </label>
+            <label className="block">
+              <span className="mb-1.5 block text-sm font-medium text-ink">Bags</span>
+              <select value={bags} onChange={(e) => setBags(+e.target.value)} className={field}>
+                {[0, 1, 2, 3, 4, 5].map((n) => (
+                  <option key={n} value={n}>{n}</option>
+                ))}
+              </select>
+            </label>
+          </div>
+          <Input
+            label="Notes for driver (optional)"
+            placeholder="Luggage, accessibility, flight number"
+            value={extra}
+            onChange={(e) => setExtra(e.target.value)}
+          />
+        </div>
+      )}
 
-      <Input
-        label="Extra information (optional)"
-        placeholder="Luggage, accessibility, notes for the driver"
-        value={extra}
-        onChange={(e) => setExtra(e.target.value)}
-      />
+      {error && <p role="alert" className="rounded-xl bg-red-50 px-4 py-2.5 text-sm text-red-700">{error} <button type="button" onClick={() => setError('')} className="ml-2 font-semibold underline">Dismiss</button></p>}
 
-      {error && <p className="rounded-xl bg-red-50 px-4 py-2.5 text-sm text-red-700">{error}</p>}
-
-      {/* Sticky CTA on mobile, in-flow on desktop */}
-      <div className="sticky bottom-0 -mx-6 -mb-6 mt-auto bg-white/90 px-6 pb-6 pt-3 backdrop-blur lg:static lg:bg-transparent lg:p-0">
-        <Button type="submit" size="lg" loading={loading} className="w-full py-3.5 text-[15px]">
-          {user ? 'Request taxi' : 'Sign in to book'}
+      {/* Sticky CTA — always 44px, guest can see fare before login */}
+      <div className="sticky bottom-0 -mx-6 -mb-6 mt-auto bg-white/95 px-6 pb-6 pt-3 backdrop-blur lg:static lg:bg-transparent lg:p-0">
+        <Button type="submit" size="lg" loading={loading} className="w-full min-h-11 py-3.5 text-[15px] focus-visible:ring-2 focus-visible:ring-brand-500">
+          {user ? 'Request taxi — see fare' : 'See fare estimate (no login needed)'}
         </Button>
+        {!user && <p className="mt-2 text-center text-xs text-muted">You’ll sign in only to confirm — fare is shown first.</p>}
       </div>
     </form>
   );

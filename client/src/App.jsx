@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './context/AuthContext.jsx';
 import Navbar from './components/layout/Navbar.jsx';
 import Footer from './components/layout/Footer.jsx';
@@ -23,8 +23,37 @@ import AdminDashboard from './pages/admin/Dashboard.jsx';
 import Profile from './pages/Profile.jsx';
 import { Spinner } from './components/ui/Spinner.jsx';
 import VerifyEmailBanner from './components/auth/VerifyEmailBanner.jsx';
+import CrmShell from './modules/crm/layout/CrmShell.tsx';
+import OverviewPage from './modules/crm/features/overview/OverviewPage.tsx';
+import DispatchBoard from './modules/crm/features/dispatch/DispatchBoard.tsx';
+import LiveMapPage from './modules/crm/features/operations/LiveMapPage.tsx';
+import ReservationsPage from './modules/crm/features/reservations/ReservationsPage.tsx';
+import DriversPage from './modules/crm/features/drivers/DriversPage.tsx';
+import PassengersPage from './modules/crm/features/passengers/PassengersPage.tsx';
+import FleetPage from './modules/crm/features/fleet/FleetPage.tsx';
+import FinancePage from './modules/crm/features/finance/FinancePage.tsx';
+import AnalyticsPage from './modules/crm/features/analytics/AnalyticsPage.tsx';
+import SupportPage from './modules/crm/features/support/SupportPage.tsx';
+import NotificationsPage from './modules/crm/features/notifications/NotificationsPage.tsx';
+import AuditPage from './modules/crm/features/audit/AuditPage.tsx';
+import SettingsPage from './modules/crm/features/settings/SettingsPage.tsx';
+import DriverShell from './modules/driver/layout/DriverShell.tsx';
+import DriverDashboardPage from './modules/driver/features/dashboard/DashboardPage.tsx';
+import DriverRequestsPage from './modules/driver/features/requests/RequestsPage.tsx';
+import DriverCurrentPage from './modules/driver/features/current/CurrentRidePage.tsx';
+import DriverHistoryPage from './modules/driver/features/history/HistoryPage.tsx';
+import DriverEarningsPage from './modules/driver/features/earnings/EarningsPage.tsx';
+import DriverWalletPage from './modules/driver/features/wallet/WalletPage.tsx';
+import DriverVehiclePage from './modules/driver/features/vehicle/VehiclePage.tsx';
+import DriverDocumentsPage from './modules/driver/features/documents/DocumentsPage.tsx';
+import DriverRatingsPage from './modules/driver/features/ratings/RatingsPage.tsx';
+import DriverPerformancePage from './modules/driver/features/performance/PerformancePage.tsx';
+import DriverNotificationsPage from './modules/driver/features/notifications/NotificationsPage.tsx';
+import DriverSupportPage from './modules/driver/features/support/SupportPage.tsx';
+import DriverSettingsPage from './modules/driver/features/settings/SettingsPage.tsx';
+import DriverMapPage from './modules/driver/features/map/MapPage.tsx';
 
-const RequireRole = ({ role, children }) => {
+const RequireRole = ({ role, roles, children }) => {
   const { user, loading } = useAuth();
   if (loading) {
     return (
@@ -34,11 +63,82 @@ const RequireRole = ({ role, children }) => {
     );
   }
   if (!user) return <Navigate to="/login" replace />;
-  if (role && user.role !== role) return <Navigate to="/" replace />;
+  const allowed = roles || (role ? [role] : null);
+  if (allowed) {
+    const effective = user.role === 'admin' ? ['admin','super_admin'] : [user.role];
+    if (!allowed.some(r=> effective.includes(r) || r===user.role)) return <Navigate to="/" replace />;
+  }
   return children;
 };
 
 export default function App() {
+  const location = useLocation();
+  const isAdmin = location.pathname.startsWith('/admin');
+  const isDriver = location.pathname.startsWith('/driver');
+  if (isAdmin) {
+    if (location.pathname.startsWith('/admin/legacy')) {
+      return (
+        <Routes>
+          <Route path="/admin/legacy" element={<RequireRole roles={['admin','super_admin']}><div className="min-h-screen bg-paper"><div className="mx-auto max-w-7xl px-4 py-6"><p className="mb-4 rounded-xl bg-gold-50 border border-gold-200 px-4 py-3 text-sm text-gold-700">Legacy CRM — <a href="/admin" className="underline font-medium">Go to new Admin</a></p><AdminDashboard /></div></div></RequireRole>} />
+          <Route path="*" element={<Navigate to="/admin/legacy" replace />} />
+        </Routes>
+      );
+    }
+    return (
+      <Routes>
+        <Route path="/admin" element={<RequireRole roles={['admin','super_admin','dispatcher','manager','finance','support']}><CrmShell /></RequireRole>}>
+          <Route index element={<OverviewPage />} />
+          <Route path="dispatch" element={<DispatchBoard />} />
+          <Route path="operations" element={<LiveMapPage />} />
+          <Route path="reservations" element={<ReservationsPage />} />
+          <Route path="drivers" element={<DriversPage />} />
+          <Route path="passengers" element={<PassengersPage />} />
+          <Route path="fleet" element={<FleetPage />} />
+          <Route path="finance" element={<FinancePage />} />
+          <Route path="analytics" element={<AnalyticsPage />} />
+          <Route path="support" element={<SupportPage />} />
+          <Route path="notifications" element={<NotificationsPage />} />
+          <Route path="audit" element={<AuditPage />} />
+          <Route path="settings" element={<SettingsPage />} />
+        </Route>
+        <Route path="/crm" element={<Navigate to="/admin" replace />} />
+        <Route path="/crm/*" element={<Navigate to="/admin" replace />} />
+        <Route path="*" element={<Navigate to="/admin" replace />} />
+      </Routes>
+    );
+  }
+  if (isDriver) {
+    if (location.pathname.startsWith('/driver/legacy')) {
+      return (
+        <Routes>
+          <Route path="/driver/legacy" element={<RequireRole role="driver"><div className="min-h-screen bg-paper"><div className="mx-auto max-w-5xl px-4 py-6"><p className="mb-4 rounded-xl bg-gold-50 border border-gold-200 px-4 py-3 text-sm">Legacy Driver — <a href="/driver" className="underline font-medium text-brand-700">Go to new Portal</a></p><DriverDashboard /></div></div></RequireRole>} />
+          <Route path="*" element={<Navigate to="/driver/legacy" replace />} />
+        </Routes>
+      );
+    }
+    return (
+      <Routes>
+        <Route path="/driver" element={<RequireRole role="driver"><DriverShell /></RequireRole>}>
+          <Route index element={<DriverDashboardPage />} />
+          <Route path="requests" element={<DriverRequestsPage />} />
+          <Route path="current" element={<DriverCurrentPage />} />
+          <Route path="upcoming" element={<DriverHistoryPage />} />
+          <Route path="history" element={<DriverHistoryPage />} />
+          <Route path="earnings" element={<DriverEarningsPage />} />
+          <Route path="wallet" element={<DriverWalletPage />} />
+          <Route path="vehicle" element={<DriverVehiclePage />} />
+          <Route path="documents" element={<DriverDocumentsPage />} />
+          <Route path="ratings" element={<DriverRatingsPage />} />
+          <Route path="performance" element={<DriverPerformancePage />} />
+          <Route path="notifications" element={<DriverNotificationsPage />} />
+          <Route path="support" element={<DriverSupportPage />} />
+          <Route path="settings" element={<DriverSettingsPage />} />
+          <Route path="map" element={<DriverMapPage />} />
+        </Route>
+        <Route path="*" element={<Navigate to="/driver" replace />} />
+      </Routes>
+    );
+  }
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
@@ -60,49 +160,14 @@ export default function App() {
           <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/auth/social" element={<SocialCallback />} />
 
-          <Route
-            path="/rides/history"
-            element={
-              <RequireRole role="passenger">
-                <RideHistory />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/rides/track/:id"
-            element={
-              <RequireRole role="passenger">
-                <RideTracking />
-              </RequireRole>
-            }
-          />
+          <Route path="/rides/history" element={<RequireRole role="passenger"><RideHistory /></RequireRole>} />
+          <Route path="/rides/track/:id" element={<RequireRole role="passenger"><RideTracking /></RequireRole>} />
 
-          <Route
-            path="/profile"
-            element={
-              <RequireRole>
-                <Profile />
-              </RequireRole>
-            }
-          />
+          <Route path="/profile" element={<RequireRole><Profile /></RequireRole>} />
 
-          <Route
-            path="/driver"
-            element={
-              <RequireRole role="driver">
-                <DriverDashboard />
-              </RequireRole>
-            }
-          />
-
-          <Route
-            path="/admin"
-            element={
-              <RequireRole role="admin">
-                <AdminDashboard />
-              </RequireRole>
-            }
-          />
+          <Route path="/driver/legacy" element={<Navigate to="/driver" replace />} />
+          <Route path="/crm" element={<Navigate to="/admin" replace />} />
+          <Route path="/crm/*" element={<Navigate to="/admin" replace />} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

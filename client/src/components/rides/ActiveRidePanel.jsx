@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, AttributionControl } from 'react-leaflet';
 import L from 'leaflet';
 import { MapViewSelector, MAP_VIEWS } from '../maps/MapViewSelector.jsx';
-import { PIN_CAR, PIN_FLAG, PIN_USER } from '../maps/pinIcons.js';
+import { PIN_FLAG, PIN_USER, UBER_SEDAN } from '../maps/pinIcons.js';
 import { Button } from '../ui/Button.jsx';
 
 const pickupIcon = L.divIcon({
@@ -27,11 +27,11 @@ const passengerIcon = L.divIcon({
   iconAnchor: [15, 30],
 });
 
-const driverIcon = L.divIcon({
+const uberDriverIcon = (heading = 0) => L.divIcon({
   className: '',
-  html: `<div class="map-pin map-pin-driver"><span>${PIN_CAR}</span></div>`,
-  iconSize: [30, 30],
-  iconAnchor: [15, 30],
+  html: `<div style="transform: rotate(${heading}deg); transition: transform 0.6s; filter: drop-shadow(0 3px 6px rgba(0,0,0,0.28));">${UBER_SEDAN}</div>`,
+  iconSize: [32, 32],
+  iconAnchor: [16, 16],
 });
 
 const STATUS_TEXT = {
@@ -105,8 +105,8 @@ export default function ActiveRidePanel({ ride, driverPos, passengerPos, onStatu
               </Marker>
             )}
             {driverPos && (
-              <Marker position={[driverPos.lat, driverPos.lng]} icon={driverIcon}>
-                <Popup>You</Popup>
+              <Marker position={[driverPos.lat, driverPos.lng]} icon={uberDriverIcon(driverPos.heading || 0)}>
+                <Popup>You — heading {Math.round(driverPos.heading || 0)}°</Popup>
               </Marker>
             )}
             {routePositions.length > 0 && (

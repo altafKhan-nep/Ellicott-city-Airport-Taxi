@@ -6,7 +6,7 @@ import useGeolocation from '../../hooks/useGeolocation.js';
 import { getRide, cancelRide, driverEta } from '../../services/rideService.js';
 import { refundPayment, listPayments } from '../../services/paymentService.js';
 import { MapViewSelector, MAP_VIEWS } from '../../components/maps/MapViewSelector.jsx';
-import { PIN_CAR } from '../../components/maps/pinIcons.js';
+import { UBER_SEDAN } from '../../components/maps/pinIcons.js';
 import { vehicleLabel } from '../../data/vehicles.js';
 import {
   joinRideRoom,
@@ -22,11 +22,11 @@ import { Spinner } from '../../components/ui/Spinner.jsx';
 import PaymentModal from '../../components/rides/PaymentModal.jsx';
 import EditRideModal from '../../components/rides/EditRideModal.jsx';
 
-const driverIcon = L.divIcon({
+const uberDriverIcon = (heading = 0) => L.divIcon({
   className: '',
-  html: `<div class="map-pin map-pin-driver"><span>${PIN_CAR}</span></div>`,
-  iconSize: [30, 30],
-  iconAnchor: [15, 30],
+  html: `<div style="transform: rotate(${heading}deg); transition: transform 0.6s; filter: drop-shadow(0 3px 6px rgba(0,0,0,0.28));">${UBER_SEDAN}</div>`,
+  iconSize: [32, 32],
+  iconAnchor: [16, 16],
 });
 
 const pickupIcon = L.divIcon({
@@ -109,8 +109,8 @@ export default function RideTracking() {
       setEta(null);
     });
     onRideUpdate(({ ride: updatedRide }) => setRide(updatedRide));
-    onDriverLocation(({ driverId, lat, lng }) => {
-      if (driverId === driverRef.current) setDriverPos({ lat, lng });
+    onDriverLocation(({ driverId, lat, lng, heading }) => {
+      if (driverId === driverRef.current) setDriverPos({ lat, lng, heading });
     });
 
     return () => {
@@ -229,7 +229,7 @@ export default function RideTracking() {
                 <Marker position={[ride.pickup.lat, ride.pickup.lng]} icon={pickupIcon} />
               )}
               {driverPos && (
-                <Marker position={[driverPos.lat, driverPos.lng]} icon={driverIcon} />
+                <Marker position={[driverPos.lat, driverPos.lng]} icon={uberDriverIcon(driverPos.heading || 0)} />
               )}
               {driverRoute.length > 0 && (
                 <>

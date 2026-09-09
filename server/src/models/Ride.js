@@ -37,10 +37,13 @@ const rideSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ['pending', 'accepted', 'arriving', 'in_progress', 'completed', 'cancelled'],
+      enum: ['pending', 'scheduled', 'accepted', 'arriving', 'in_progress', 'completed', 'cancelled', 'no_show', 'refunded'],
       default: 'pending',
     },
     cancelReason: { type: String, default: '' },
+    scheduledAt: Date,
+    noShowReason: String,
+    refundReason: String,
 
     fare: {
       estimated: { type: Number, default: 0 },
@@ -60,6 +63,8 @@ const rideSchema = new mongoose.Schema(
       started: Date,
       completed: Date,
       cancelled: Date,
+      noShow: Date,
+      refunded: Date,
     },
 
     payment: {

@@ -1,0 +1,11 @@
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
+import { Card, CardTitle } from '../../components/ui/card';
+import { Navigation, MapPin, TrendingUp } from 'lucide-react';
+import useGeolocation from '../../../../hooks/useGeolocation.js';
+const meIcon = L.divIcon({ className:'', html:'<div class="map-pin-user"></div>', iconSize:[20,20], iconAnchor:[10,10] });
+export default function MapPage(){
+  const { position } = useGeolocation();
+  const center = position ? [position.lat, position.lng] : [39.20,-76.857] as [number,number];
+  return (<div className="space-y-6"><h1 className="font-display text-2xl font-bold dark:text-white">Live Map</h1><Card className="p-0 overflow-hidden"><div className="flex items-center justify-between border-b border-accent-200 p-4 dark:border-white/5"><CardTitle>Howard County • Live Traffic</CardTitle><span className="inline-flex items-center gap-1 rounded-full bg-brand-50 px-2.5 py-1 text-xs font-medium text-brand-700"><span className="h-2 w-2 animate-pulse rounded-full bg-brand-500" /> Live</span></div><div className="overflow-hidden rounded-b-3xl"><MapContainer center={center} zoom={13} style={{height:'520px', width:'100%'}}><TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap" /><Marker position={center} icon={meIcon}><Popup>You • Howard County</Popup></Marker></MapContainer></div></Card><div className="grid gap-4 sm:grid-cols-3"><Card><div className="flex items-center gap-2"><Navigation className="h-4 w-4 text-brand-600" /><p className="text-xs uppercase tracking-widest text-muted">Traffic</p></div><p className="mt-1 font-medium dark:text-white">Normal • No delays</p></Card><Card><div className="flex items-center gap-2"><MapPin className="h-4 w-4 text-brand-600" /><p className="text-xs uppercase tracking-widest text-muted">Airport</p></div><p className="mt-1 font-medium dark:text-white">BWI 12 min • DCA 28 min</p></Card><Card><div className="flex items-center gap-2"><TrendingUp className="h-4 w-4 text-brand-600" /><p className="text-xs uppercase tracking-widest text-muted">Demand</p></div><p className="mt-1 font-medium dark:text-white">High near BWI</p></Card></div></div>);
+}

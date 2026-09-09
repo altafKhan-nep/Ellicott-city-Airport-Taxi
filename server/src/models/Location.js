@@ -18,8 +18,8 @@ const locationSchema = new mongoose.Schema(
 // 2dsphere index for $near queries
 locationSchema.index({ coordinates: '2dsphere' });
 
-// TTL index: remove driver positions not updated in 10 minutes
-locationSchema.index({ updatedAt: 1 }, { expireAfterSeconds: 600 });
+// TTL index: remove driver positions not updated in 24 hours (was 10 min, too aggressive for nearby search)
+locationSchema.index({ updatedAt: 1 }, { expireAfterSeconds: 86400 });
 
 const Location = mongoose.model('Location', locationSchema);
 export default Location;

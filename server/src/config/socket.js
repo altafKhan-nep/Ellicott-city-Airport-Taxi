@@ -1,22 +1,79 @@
+import jwt from 'jsonwebtoken';
 import Ride from '../models/Ride.js';
+import User from '../models/User.js';
 
 export const initSocket = (io) => {
-  io.on('connection', (socket) => {
-    console.log(`Socket connected: ${socket.id}`);
+  // JWT auth for sockets — prefers verified token, falls back to legacy userId/role during transition
+  io.use(async (socket, next) => {
+    try {
+      const token = socket.handshake.auth?.token || socket.handshake.headers?.authorization?.replace('Bearer ', '');
+      if (token) {
+        const payload = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
+        const user = await User.findById(payload.id).select('role isSuspended tokenVersion');
+        if (!user || user.isSuspended || user.tokenVersion !== payload.v) return next(new Error('UNAUTHORIZED'));
+        socket.userId = String(user._id);
+        socket.role = user.role;
+        socket.tokenPayload = payload;
+        return next();
+      }
+      // Legacy fallback: allow userId/role sent by older clients (less secure, but keeps dispatch working)
+      const { userId, role } = socket.handshake.auth || {};
+      if (userId) {
+        const user = await User.findById(userId).select('role isSuspended');
+        if (!user || user.isSuspended) return next(new Error('UNAUTHORIZED'));
+        socket.userId = String(user._id);
+        socket.role = role || user.role;
+        return next();
+      }
+      return next(); // anon for public pages
+    } catch {
+      return next(new Error('UNAUTHORIZED'));
+    }
+  });
 
-    // Associate socket with a user id and join user-scoped room. The client
-    // passes { userId, role } via socket.auth on connect (handshake.auth).
-    const associate = ({ userId, role } = {}) => {
-      if (!userId) return;
-      if (socket.userId) socket.leave(`user:${socket.userId}`);
-      socket.userId = userId;
-      socket.role = role;
-      socket.join(`user:${userId}`);
-      if (role === 'driver') socket.join('drivers');
-      if (role === 'admin') socket.join('admins');
+  io.on('connection', (socket) => {
+    console.log(`Socket connected: ${socket.id} user:${socket.userId || 'anon'} role:${socket.role || '-'}`);
+
+    // Associate: supports both {token} and legacy {userId, role}
+    const associate = async (payload = {}) => {
+      const { token, userId, role } = payload;
+      if (token) {
+        try {
+          const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
+          const user = await User.findById(decoded.id).select('role isSuspended tokenVersion');
+          if (!user || user.isSuspended || user.tokenVersion !== decoded.v) return;
+          if (socket.userId) socket.leave(`user:${socket.userId}`);
+          socket.userId = String(user._id);
+          socket.role = user.role;
+          socket.join(`user:${socket.userId}`);
+          if (socket.role === 'driver') socket.join('drivers');
+          if (['admin', 'super_admin', 'dispatcher', 'manager'].includes(socket.role)) socket.join('admins');
+          return;
+        } catch { return; }
+      }
+      if (userId) {
+        // Legacy path
+        if (socket.userId) socket.leave(`user:${socket.userId}`);
+        socket.userId = String(userId);
+        socket.role = role;
+        socket.join(`user:${socket.userId}`);
+        if (role === 'driver') socket.join('drivers');
+        if (['admin', 'super_admin', 'dispatcher'].includes(role)) socket.join('admins');
+        return;
+      }
+      if (socket.userId) {
+        socket.join(`user:${socket.userId}`);
+        if (socket.role === 'driver') socket.join('drivers');
+        if (['admin', 'super_admin', 'dispatcher', 'manager'].includes(socket.role)) socket.join('admins');
+      }
     };
 
-    associate(socket.handshake.auth);
+    // auto-join rooms for JWT-authenticated sockets on connect
+    if (socket.userId) {
+      socket.join(`user:${socket.userId}`);
+      if (socket.role === 'driver') socket.join('drivers');
+      if (['admin', 'super_admin', 'dispatcher', 'manager'].includes(socket.role)) socket.join('admins');
+    }
     socket.on('authenticate', associate);
 
     // Join a ride-scoped room so passenger + driver share live events. Only the
@@ -66,15 +123,7 @@ export const initSocket = (io) => {
       }
     });
 
-    // Client-triggered ride status publish (validation happens in services)
-    socket.on('ride:cancel', ({ rideId } = {}) => {
-      if (!rideId) return;
-      io.to(`ride:${rideId}`).emit('ride:update', {
-        rideId,
-        status: 'cancelled',
-        by: socket.userId,
-      });
-    });
+    // Removed insecure client-triggered ride:cancel broadcast — cancellations must go via REST POST /api/rides/:id/cancel (validated in rideService.cancelRide)
 
     socket.on('disconnect', () => {
       console.log(`Socket disconnected: ${socket.id}`);

@@ -123,20 +123,22 @@ export default function Reservations() {
         </div>
       </section>
 
-      {/* Geolocation notice */}
+      {/* One-tap location + guest estimate — always visible */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={useMyLocation}
+          className="inline-flex min-h-11 items-center gap-2 rounded-full bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-700 focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+          aria-label="Use my current location for pickup"
+        >
+          <span className="h-2 w-2 animate-pulse rounded-full bg-white" />
+          Use my location
+        </button>
+        <span className="text-xs text-muted">or tap the map — fare estimate works without sign-in</span>
+      </div>
       {geoError && (
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
-          <p className="text-sm text-amber-800">
-            We couldn't access your location{geoError ? ` (${geoError})` : ''} — the map is
-            showing a default area.
-          </p>
-          <button
-            type="button"
-            onClick={useMyLocation}
-            className="rounded-full bg-brand-600 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-brand-700"
-          >
-            Use my location
-          </button>
+        <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
+          <p className="text-sm text-amber-800">We couldn't access your location{geoError ? ` (${geoError})` : ''}.</p>
         </div>
       )}
 
@@ -191,11 +193,16 @@ export default function Reservations() {
           </div>
 
           {drivers.length === 0 && !loadingDrivers ? (
-            <p className="text-sm text-muted">
-              {pickup
-                ? 'No drivers nearby yet. Set a pickup to search the area.'
-                : 'Choose a pickup location to find drivers near you.'}
-            </p>
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+              <p className="text-sm font-medium text-amber-800">
+                {pickup && (pickup.lat < 38 || pickup.lat > 40 || pickup.lng < -77.5 || pickup.lng > -76)
+                  ? `No drivers in ${pickup.address?.slice(0,40)} — 12,347km from Maryland. Service area is MD/DC/VA. Try pickup near Ellicott City (e.g., 9019 Early April Way) or tap "Use my location" when in Maryland.`
+                  : pickup
+                    ? 'No drivers within 50km. They may be offline — use "Use my location" near Ellicott City or try Executive Sedan / Premium SUV.'
+                    : 'Choose a pickup near Ellicott City, MD to find drivers. Service area: Maryland, DC, Virginia.'}
+              </p>
+              <p className="mt-1 text-xs text-amber-700">For testing: the 2 seeded drivers are at 39.207,-76.857 (Howard County). Pickups in Nepal will not notify them without fallback.</p>
+            </div>
           ) : (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {drivers.map((d) => (

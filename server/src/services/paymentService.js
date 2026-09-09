@@ -16,7 +16,6 @@ const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SEC
 const stripeEnabled = !!stripe;
 
 const cents = (amount) => Math.round(amount * 100);
-const dollars = (cents) => cents / 100;
 
 const assertPayable = async (userId, rideId) => {
   const settings = await getSettings();
@@ -84,7 +83,6 @@ export const processPayment = async (userId, rideId, opts = {}) => {
 
   // Cash — no online charge; recorded so the driver collects at the end.
   if (method === 'cash') {
-    const settings = await getSettings();
     const ride = await Ride.findOne({
       _id: rideId,
       passenger: userId,

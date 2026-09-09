@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     phone: { type: String, trim: true },
     password: { type: String, required: true, select: false },
-    role: { type: String, enum: ['passenger', 'driver', 'admin'], default: 'passenger' },
+    role: { type: String, enum: ['passenger', 'driver', 'admin', 'super_admin', 'dispatcher', 'manager', 'finance', 'support'], default: 'passenger' },
     avatar: { type: String, default: '' },
     emailVerified: { type: Boolean, default: false },
     isSuspended: { type: Boolean, default: false },

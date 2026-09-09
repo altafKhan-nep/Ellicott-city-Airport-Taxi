@@ -13,11 +13,13 @@ import authRoutes from "./routes/auth.js";
 import rideRoutes from "./routes/rides.js";
 import driverRoutes from "./routes/drivers.js";
 import adminRoutes from "./routes/admin.js";
+import crmRoutes from "./routes/crm.js";
 import placeRoutes from "./routes/places.js";
 import userRoutes from "./routes/users.js";
 import paymentRoutes from "./routes/payments.js";
 import notificationRoutes from "./routes/notifications.js";
 import settingsRoutes from "./routes/settings.js";
+import { initRedis } from "./config/redis.js";
 
 dotenv.config();
 
@@ -80,6 +82,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/rides", rideRoutes);
 app.use("/api/drivers", driverRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/crm", crmRoutes);
 app.use("/api/places", placeRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/payments", paymentRoutes);
@@ -99,7 +102,8 @@ initSocket(io);
 
 const PORT = process.env.PORT || 5001;
 
-connectDB().then(() => {
+connectDB().then(async () => {
+  await initRedis().catch(() => {});
   server.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
   });
