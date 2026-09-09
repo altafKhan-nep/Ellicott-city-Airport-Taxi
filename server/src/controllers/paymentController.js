@@ -58,15 +58,57 @@ export const getPayment = asyncHandler(async (req, res) => {
 });
 
 export const refundPayment = asyncHandler(async (req, res) => {
-  const payment = await paymentService.refundPayment(req.user._id, req.params.id);
+  // Admin only — passenger should POST /:id/request-refund
+  const payment = await paymentService.refundPayment(req.user._id, req.params.id, true);
   const io = req.app.get('io');
   await notify({
-    user: req.user._id,
+    user: payment.user,
     type: 'payment',
     title: 'Refund issued',
-    message: `Your refund of $${payment.amount.toFixed(2)} was issued.`,
+    message: `Your refund of $${payment.amount.toFixed(2)} was approved and issued.`,
     data: { rideId: payment.ride, paymentId: payment._id },
     io,
   });
   res.json({ payment });
+});
+
+export const requestRefund = asyncHandler(async (req, res) => {
+  const reqDoc = await paymentService.requestRefund(req.user._id, req.params.id, req.body.reason);
+  const io = req.app.get('io');
+  // Notify admins via socket + in-app
+  const admins = await (await import('../services/rideService.js')).findAdmins();
+  for (const admin of admins) {
+    await notify({
+      user: admin._id,
+      type: 'payment',
+      title: 'Refund requested',
+      message: `Refund $${reqDoc.amount.toFixed(2)} requested: ${reqDoc.reason}`,
+      data: { refundRequestId: reqDoc._id, rideId: reqDoc.ride },
+      io,
+    });
+  }
+  res.status(201).json({ request: reqDoc });
+});
+
+export const listRefundRequests = asyncHandler(async (req, res) => {
+  const isAdmin = ['admin','super_admin','finance'].includes(req.user.role);
+  const list = await paymentService.listRefundRequests(req.user._id, isAdmin);
+  res.json({ requests: list });
+});
+
+export const decideRefund = asyncHandler(async (req, res) => {
+  const { approve, note } = req.body;
+  const result = await paymentService.decideRefund(req.params.requestId, req.user._id, !!approve, note);
+  const io = req.app.get('io');
+  // Notify passenger of decision
+  const targetUser = result.request.user;
+  await notify({
+    user: targetUser,
+    type: 'payment',
+    title: approve ? 'Refund approved' : 'Refund rejected',
+    message: approve ? `Your refund of $${result.request.amount.toFixed(2)} was approved.` : `Your refund request was rejected. ${note || ''}`,
+    data: { refundRequestId: result.request._id },
+    io,
+  });
+  res.json(result);
 });

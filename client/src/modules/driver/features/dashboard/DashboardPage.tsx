@@ -1,8 +1,12 @@
 import { motion } from 'framer-motion';
-import { Car, DollarSign, Star, Clock, TrendingUp, MapPin, Phone, Navigation, ShieldAlert, Sun, Cloud, AlertTriangle } from 'lucide-react';
+import { Car, DollarSign, Star, Clock, TrendingUp, MapPin, Phone, Navigation, ShieldAlert, Sun, Cloud, AlertTriangle, LocateFixed } from 'lucide-react';
 import { Card, CardTitle, StatTile } from '../../components/ui/card';
 import { useDriverStats, useDriverRides, useDriverProfile } from '../../hooks/useDriverQuery';
 import { Link } from 'react-router-dom';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
+import useGeolocation from '../../../../hooks/useGeolocation.js';
+import { UBER_SEDAN } from '../../../../components/maps/pinIcons.js';
 
 export default function DashboardPage() {
   const { data: statsData, isLoading: sLoading } = useDriverStats() as any;
@@ -14,6 +18,13 @@ export default function DashboardPage() {
   const upcoming = rides.filter((r:any)=> ['pending','scheduled'].includes(r.status)).slice(0,3);
   const driver = profile?.user;
 
+  const { position: livePos, locate: refreshLocation } = useGeolocation();
+  const driverCarIcon = L.divIcon({
+    className: '',
+    html: `<div style="filter: drop-shadow(0 3px 6px rgba(0,0,0,0.28));">${UBER_SEDAN}</div>`,
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
+  });
   const kpis = [
     { label:"Today's Earnings", value: stats ? `$${stats.totalEarnings.toFixed(2)}` : '—', sub:'Collected', icon: DollarSign },
     { label:"Today's Trips", value: stats?.completedRides ?? '—', sub:'Completed', icon: Car },
@@ -58,6 +69,28 @@ export default function DashboardPage() {
           </motion.div>
         ))}
       </div>
+
+      {/* Live Location */}
+      <Card className="p-0 overflow-hidden">
+        <div className="flex items-center justify-between border-b border-accent-200 p-4 dark:border-white/5">
+          <div className="flex items-center gap-2"><LocateFixed className="h-4 w-4 text-brand-600" /><CardTitle>Your Live Location</CardTitle><span className="ml-2 inline-flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-1 text-xs font-medium text-green-700"><span className="h-2 w-2 animate-pulse rounded-full bg-green-500" /> Live sharing</span></div>
+          <button onClick={refreshLocation} className="rounded-full border border-accent-200 bg-white px-3 py-1.5 text-xs font-semibold hover:bg-accent-50 dark:border-white/10 dark:bg-transparent">Refresh</button>
+        </div>
+        <div className="h-[280px] w-full">
+          {livePos ? (
+            <MapContainer center={[livePos.lat, livePos.lng]} zoom={14} style={{height:'100%', width:'100%'}} attributionControl={false}>
+              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap" />
+              <Marker position={[livePos.lat, livePos.lng]} icon={driverCarIcon}><Popup>You • {livePos.lat.toFixed(4)}, {livePos.lng.toFixed(4)}<br/>Sharing with dispatch</Popup></Marker>
+            </MapContainer>
+          ) : (
+            <div className="flex h-full items-center justify-center bg-accent-50 dark:bg-white/5"><p className="text-sm text-muted">Getting your location…</p></div>
+          )}
+        </div>
+        <div className="flex items-center justify-between bg-accent-50 px-4 py-2 text-xs dark:bg-white/5">
+          <span className="text-muted">{livePos ? `${livePos.lat.toFixed(5)}, ${livePos.lng.toFixed(5)}` : 'Locating...'}</span>
+          <span className="font-medium text-brand-700">{livePos ? 'Visible to passengers in 10km' : 'Enable location to appear on map'}</span>
+        </div>
+      </Card>
 
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2">

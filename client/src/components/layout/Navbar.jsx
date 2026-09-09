@@ -47,7 +47,7 @@ export default function Navbar() {
   }, [servicesOpen]);
 
   return (
-    <header className="bg-brand-gradient sticky top-0 z-50 shadow-md">
+    <header className="bg-brand-gradient sticky top-0 z-[1001] shadow-md">
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
         <Link to="/" onClick={() => setOpen(false)} className="flex items-center gap-2">
           <span className="text-lg font-bold tracking-tight text-white sm:text-xl">

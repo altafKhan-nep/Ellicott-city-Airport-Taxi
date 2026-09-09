@@ -4,7 +4,7 @@ import { MapContainer, TileLayer, Marker, Polyline, AttributionControl } from 'r
 import L from 'leaflet';
 import useGeolocation from '../../hooks/useGeolocation.js';
 import { getRide, cancelRide, driverEta } from '../../services/rideService.js';
-import { refundPayment, listPayments } from '../../services/paymentService.js';
+import { requestRefund, listPayments } from '../../services/paymentService.js';
 import { MapViewSelector, MAP_VIEWS } from '../../components/maps/MapViewSelector.jsx';
 import { UBER_SEDAN } from '../../components/maps/pinIcons.js';
 import { vehicleLabel } from '../../data/vehicles.js';
@@ -21,6 +21,8 @@ import { Button } from '../../components/ui/Button.jsx';
 import { Spinner } from '../../components/ui/Spinner.jsx';
 import PaymentModal from '../../components/rides/PaymentModal.jsx';
 import EditRideModal from '../../components/rides/EditRideModal.jsx';
+import RatingModal from '../../components/rides/RatingModal.jsx';
+import RideChat from '../../components/rides/RideChat.jsx';
 
 const uberDriverIcon = (heading = 0) => L.divIcon({
   className: '',
@@ -58,6 +60,7 @@ export default function RideTracking() {
   const [mapView, setMapView] = useState('streets');
   const [showPay, setShowPay] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
+  const [showRating, setShowRating] = useState(false);
   const timer = useRef(null);
   const lastPax = useRef(0);
   const { position } = useGeolocation();
@@ -168,23 +171,21 @@ export default function RideTracking() {
     }
   };
 
+  const [refundReason, setRefundReason] = useState('');
+  const [showRefund, setShowRefund] = useState(false);
   const handleRefund = async () => {
-    if (!window.confirm('Refund this payment?')) return;
+    if (!refundReason.trim()) { setError('Please enter a reason'); return; }
     try {
-      // Find the payment record for this ride by its transaction id.
       const { data } = await listPayments();
       const payment = (data.payments || []).find(
         (p) => p.transactionId && p.transactionId === ride.payment?.transactionId
       );
-      if (!payment) {
-        setError('Payment record not found');
-        return;
-      }
-      await refundPayment(payment._id);
-      setRide((r) => ({ ...r, payment: { ...r.payment, status: 'refunded' } }));
-      setError('');
+      if (!payment) { setError('Payment record not found'); return; }
+      await requestRefund(payment._id, refundReason);
+      setError('Refund requested — admin will review in Reports');
+      setShowRefund(false);
     } catch (err) {
-      setError(err.response?.data?.message || 'Could not refund');
+      setError(err.response?.data?.message || 'Could not request refund');
     }
   };
 
@@ -358,9 +359,30 @@ export default function RideTracking() {
                 </Button>
               )}
               {ride.payment?.status === 'paid' && ride.payment?.method !== 'cash' && (
-                <Button variant="secondary" className="mt-3 w-full" onClick={handleRefund}>
-                  Request refund
+                <>
+                  <Button variant="secondary" className="mt-3 w-full" onClick={()=>setShowRefund(true)}>
+                    Request Refund (Admin Approval)
+                  </Button>
+                  {showRefund && (
+                    <div className="mt-3 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                      <p className="text-sm font-medium text-amber-800">Report Issue — Request Refund</p>
+                      <textarea value={refundReason} onChange={e=>setRefundReason(e.target.value)} placeholder="Reason for $27.70 refund — e.g., overcharged, driver issue" className="mt-2 w-full rounded-xl border border-amber-300 bg-white p-2 text-sm" rows={3} />
+                      <div className="mt-2 flex gap-2"><button onClick={()=>setShowRefund(false)} className="flex-1 rounded-full border border-accent-200 py-2 text-sm">Cancel</button><button onClick={handleRefund} className="flex-1 rounded-full bg-amber-600 py-2 text-sm font-semibold text-white">Send Request</button></div>
+                    </div>
+                  )}
+                </>
+              )}
+              {ride.status === 'completed' && ride.payment?.status === 'paid' && !ride.rating?.score && (
+                <Button className="mt-3 w-full" onClick={()=>setShowRating(true)}>
+                  Rate your driver ★
                 </Button>
+              )}
+              {ride.rating?.score && (
+                <div className="mt-3 rounded-2xl bg-gold-50 border border-gold-200 p-4 text-center">
+                  <p className="font-display font-bold text-gold-700">You rated ★ {ride.rating.score}</p>
+                  <p className="text-xs text-muted">{ride.rating.compliments?.join(' • ')}</p>
+                  {ride.rating.comment && <p className="mt-1 text-sm">“{ride.rating.comment}”</p>}
+                </div>
               )}
             </div>
           )}
@@ -387,6 +409,10 @@ export default function RideTracking() {
             <EditRideModal ride={ride} onClose={() => setShowEdit(false)} onSaved={setRide} />
           )}
 
+          {showRating && (
+            <RatingModal ride={ride} onClose={()=>setShowRating(false)} onRated={(updated)=>{ setRide(updated); setShowRating(false); }} />
+          )}
+
           {eta && status === 'accepted' && (
             <div className="rounded-2xl bg-brand-500/10 px-5 py-4 text-sm">
               <div className="flex items-center gap-2 font-semibold text-brand-600">
@@ -400,6 +426,10 @@ export default function RideTracking() {
                 Arriving in <span className="font-bold text-brand-700">~{eta} min</span>
               </p>
             </div>
+          )}
+
+          {['accepted','arriving','in_progress'].includes(status) && (
+            <RideChat rideId={id} />
           )}
         </div>
       </div>

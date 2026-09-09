@@ -5,8 +5,8 @@ dotenv.config();
 const GEOCODE_URL = 'https://nominatim.openstreetmap.org/search';
 const REVERSE_URL = 'https://nominatim.openstreetmap.org/reverse';
 
-// Howard County, MD bounding box for bias: [minLon, minLat, maxLon, maxLat]
-const DEFAULT_VIEWBOX = '-77.4,39.7,-76.4,38.7';
+// Howard County, MD bounding box for bias: [minLon, minLat, maxLon, maxLat] — corrected (was inverted lat)
+const DEFAULT_VIEWBOX = '-77.4,38.7,-76.4,39.7';
 
 export const searchPlaces = async (query, { limit = 6, viewbox = DEFAULT_VIEWBOX } = {}) => {
   const url = new URL(GEOCODE_URL);

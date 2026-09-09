@@ -11,11 +11,16 @@ export const nearbyDrivers = asyncHandler(async (req, res) => {
   res.json({ drivers });
 });
 
-// GET /api/drivers/:id/eta?toLat=&toLng=  - route + ETA from driver to a point
+// GET /api/drivers/:id/eta?toLat=&toLng=&fromLat=&fromLng=  - ETA from driver (live if provided) to pickup
 export const driverEta = asyncHandler(async (req, res) => {
-  const { toLat, toLng } = req.query;
+  const { toLat, toLng, fromLat, fromLng } = req.query;
   if (!toLat || !toLng) return res.status(400).json({ message: 'toLat and toLng are required' });
-
+  // If driver sends live position, use it (no DB staleness); else fallback to last known DB
+  if (fromLat && fromLng && Number.isFinite(+fromLat) && Number.isFinite(+fromLng)) {
+    const { getRoute } = await import('../services/rideService.js');
+    const result = await getRoute({ lat: +fromLat, lng: +fromLng }, { lat: +toLat, lng: +toLng });
+    return res.json({ distanceKm: result.distanceKm, durationMin: result.durationMin, route: result.polyline, from: { lat: +fromLat, lng: +fromLng } });
+  }
   const result = await driverService.getDriverEta(req.params.id, { lat: +toLat, lng: +toLng });
   res.json(result);
 });

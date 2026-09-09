@@ -57,6 +57,18 @@ const userSchema = new mongoose.Schema(
       plateNumber: { type: String, default: '' },
       licenseNo: { type: String, default: '' },
       isAvailable: { type: Boolean, default: false },
+      // Uber-like driver metrics
+      stats: {
+        totalRides: { type: Number, default: 0 },
+        rating: { type: Number, default: 0 }, // average 0-5
+        ratingCount: { type: Number, default: 0 },
+        compliments: {
+          clean: { type: Number, default: 0 },
+          professional: { type: Number, default: 0 },
+          friendly: { type: Number, default: 0 },
+          safe: { type: Number, default: 0 },
+        },
+      },
     },
   },
   { timestamps: true }

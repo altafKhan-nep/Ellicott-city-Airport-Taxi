@@ -32,6 +32,9 @@ export const onDriverLocation = (cb) => socket.on('driver:location', cb);
 export const onPassengerLocation = (cb) => socket.on('passenger:location', cb);
 export const onRideCompleted = (cb) => socket.on('ride:completed', cb);
 export const onNotification = (cb) => socket.on('notification:new', cb);
+export const onChatMessage = (cb) => socket.on('ride:message', cb);
+export const offChatMessage = () => socket.off('ride:message');
+export const sendChatMessage = (rideId, text) => socket.emit('ride:message', { rideId, text });
 
 export const offNotification = () => socket.off('notification:new');
 

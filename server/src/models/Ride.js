@@ -76,13 +76,27 @@ const rideSchema = new mongoose.Schema(
     rating: {
       score: { type: Number, min: 1, max: 5 },
       comment: String,
+      compliments: [{ type: String, enum: ['clean', 'professional', 'friendly', 'safe'] }],
       createdAt: Date,
     },
+
+    // Uber-like live chat between passenger and driver (ride room)
+    messages: [
+      {
+        sender: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        text: { type: String, required: true, maxlength: 500 },
+        at: { type: Date, default: Date.now },
+      },
+    ],
   },
   { timestamps: true }
 );
 
 rideSchema.index({ status: 1, createdAt: -1 });
+rideSchema.index({ passenger: 1, status: 1 });
+rideSchema.index({ driver: 1, status: 1 });
+rideSchema.index({ driver: 1, createdAt: -1 });
+rideSchema.index({ passenger: 1, createdAt: -1 });
 
 const Ride = mongoose.model('Ride', rideSchema);
 export default Ride;

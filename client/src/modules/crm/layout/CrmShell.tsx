@@ -3,6 +3,7 @@ import { NavLink, Outlet, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { LayoutDashboard, Radio, Map, CalendarDays, Users, Car, Wallet, BarChart3, LifeBuoy, Bell, ShieldCheck, Settings, Moon, Sun, Menu, X, LogOut, Phone } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext.jsx';
+import NotificationsBell from '../../../components/layout/NotificationsBell.jsx';
 
 const NAV = [
   { to: '/admin', label: 'Overview', icon: LayoutDashboard, end: true },
@@ -58,9 +59,12 @@ export default function CrmShell() {
               <p className="mt-0.5 inline-flex items-center gap-1.5 text-[11px] font-medium tracking-widest text-white/70 uppercase"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-gold-400" /> CRM • Dispatch</p>
             </div>
           )}
-          <button onClick={() => setDark(v => !v)} className="ml-auto grid h-8 w-8 place-items-center rounded-full bg-white/10 text-white hover:bg-white/15" title="Toggle theme">
-            {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          </button>
+          <div className="ml-auto flex items-center gap-1">
+            <NotificationsBell />
+            <button onClick={() => setDark(v => !v)} className="grid h-8 w-8 place-items-center rounded-full bg-white/10 text-white hover:bg-white/15" title="Toggle theme">
+              {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </button>
+          </div>
         </div>
         {!collapsed && (
           <div className="relative mt-4 flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-2 backdrop-blur">
@@ -97,15 +101,18 @@ export default function CrmShell() {
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] text-ink dark:bg-accent-900 dark:text-white">
-      <aside className={`fixed inset-y-0 left-0 z-30 hidden border-r border-accent-200 bg-white shadow-sm transition-all dark:border-accent-800 dark:bg-accent-900 lg:block ${collapsed ? 'w-[72px]' : 'w-[280px]'}`}>
+      <aside className={`fixed inset-y-0 left-0 z-[1001] hidden border-r border-accent-200 bg-white shadow-sm transition-all dark:border-accent-800 dark:bg-accent-900 lg:block ${collapsed ? 'w-[72px]' : 'w-[280px]'}`}>
         {SidebarInner}
         <button onClick={() => setCollapsed(v => !v)} className="absolute -right-3 top-24 grid h-7 w-7 place-items-center rounded-full border border-accent-200 bg-surface text-xs shadow-md hover:bg-accent-50 dark:border-accent-700 dark:bg-accent-800">{collapsed ? '›' : '‹'}</button>
       </aside>
 
-      <div className="sticky top-0 z-20 flex h-[56px] items-center gap-3 border-b border-accent-200 bg-brand-gradient px-4 text-white shadow-md dark:border-accent-800 lg:hidden">
+      <div className="sticky top-0 z-[1001] flex h-[56px] items-center gap-3 border-b border-accent-200 bg-brand-gradient px-4 text-white shadow-md dark:border-accent-800 lg:hidden">
         <button onClick={() => setMobileOpen(true)} className="grid h-9 w-9 place-items-center rounded-full bg-white/10"><Menu className="h-5 w-5" /></button>
         <span className="font-display font-bold tracking-tight">Ellicott City <span className="text-gold-300">Airport Taxi</span></span>
-        <span className="ml-auto text-xs text-white/70">CRM</span>
+        <div className="ml-auto flex items-center gap-1">
+          <NotificationsBell />
+          <span className="text-xs text-white/70">CRM</span>
+        </div>
       </div>
       {mobileOpen && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 z-40 bg-ink/40 backdrop-blur-sm lg:hidden" onClick={() => setMobileOpen(false)}>

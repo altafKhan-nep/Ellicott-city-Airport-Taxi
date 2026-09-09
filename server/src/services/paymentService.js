@@ -243,16 +243,13 @@ const processSandboxPayment = async (userId, rideId, { idempotencyKey, cardLast4
   return payment;
 };
 
-// Refund a settled payment. Only the payer (or an admin via admin routes).
+// Refund a settled payment — ADMIN ONLY (passenger must request via RefundRequest)
 export const refundPayment = async (userId, paymentId, admin = false) => {
-  const query = { _id: paymentId, status: { $in: ['succeeded', 'cash'] } };
-  if (!admin) query.user = userId;
-
+  if (!admin) throw fail('Only admin can issue refunds. Please request a refund via support.', 403);
+  const query = { _id: paymentId, status: { $in: ['succeeded'] } };
+  // admin flag already checked, no user filter needed for admin
   const payment = await Payment.findOne(query);
   if (!payment) throw fail('No successful payment found to refund', 404);
-  if (payment.status === 'cash') {
-    throw fail('Cash payments cannot be refunded online.', 400);
-  }
 
   if (stripeEnabled && payment.provider === 'stripe') {
     await stripe.refunds.create({ payment_intent: payment.transactionId });
@@ -288,3 +285,52 @@ export const listPayments = async (userId) =>
     .populate('ride', 'pickup dropoff fare status');
 
 export const isStripeEnabled = () => stripeEnabled;
+
+// --- Refund Request flow (passenger asks, admin approves) ---
+import RefundRequest from '../models/RefundRequest.js';
+
+export const requestRefund = async (userId, paymentId, reason) => {
+  if (!reason || !reason.trim()) throw fail('Please provide a reason for refund', 400);
+  const payment = await Payment.findOne({ _id: paymentId, user: userId, status: 'succeeded' });
+  if (!payment) throw fail('No successful payment found', 404);
+  if (payment.provider === 'cash') throw fail('Cash payments cannot be refunded', 400);
+  const existing = await RefundRequest.findOne({ payment: paymentId, status: 'pending' });
+  if (existing) throw fail('Refund already requested and pending admin review', 409);
+  const alreadyRefunded = await RefundRequest.findOne({ payment: paymentId, status: 'approved' });
+  if (alreadyRefunded) throw fail('Already refunded', 409);
+  const reqDoc = await RefundRequest.create({
+    user: userId,
+    ride: payment.ride,
+    payment: paymentId,
+    amount: payment.amount,
+    reason: reason.trim(),
+  });
+  return reqDoc;
+};
+
+export const listRefundRequests = async (userId = null, admin = false) => {
+  const query = admin ? {} : { user: userId };
+  return RefundRequest.find(query).sort({ createdAt: -1 }).limit(100).populate('user ride payment');
+};
+
+export const decideRefund = async (requestId, adminId, approve, note = '') => {
+  const reqDoc = await RefundRequest.findOne({ _id: requestId, status: 'pending' });
+  if (!reqDoc) throw fail('Refund request not found or already decided', 404);
+  if (approve) {
+    // Perform actual refund via existing logic (admin)
+    const payment = await refundPayment(adminId, reqDoc.payment, true);
+    reqDoc.status = 'approved';
+    reqDoc.decidedBy = adminId;
+    reqDoc.decidedAt = new Date();
+    reqDoc.adminNote = note;
+    await reqDoc.save();
+    return { request: reqDoc, payment };
+  } else {
+    reqDoc.status = 'rejected';
+    reqDoc.decidedBy = adminId;
+    reqDoc.decidedAt = new Date();
+    reqDoc.adminNote = note;
+    await reqDoc.save();
+    return { request: reqDoc };
+  }
+};

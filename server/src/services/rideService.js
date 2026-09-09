@@ -8,11 +8,28 @@ const RADIUS_M = 5000;
 // Radius used to notify nearby drivers about a new reservation (10 km).
 export const NOTIFY_RADIUS_M = 10000;
 
+// Simple in-memory cache for external APIs (Nominatim 1 req/s, OSRM)
+const GEOCODE_CACHE = new Map(); // key: query -> {value, expiry}
+const ROUTE_CACHE = new Map(); // key: from-to -> {value, expiry}
+const cacheGet = (cache, key) => {
+  const hit = cache.get(key);
+  if (hit && hit.expiry > Date.now()) return hit.value;
+  if (hit) cache.delete(key);
+  return null;
+};
+const cacheSet = (cache, key, value, ttlMs = 5 * 60 * 1000) => {
+  if (cache.size > 200) cache.delete(cache.keys().next().value);
+  cache.set(key, { value, expiry: Date.now() + ttlMs });
+};
+
 // Geocoding via Nominatim (OpenStreetMap) - free, no API key
 // e.g. GET https://nominatim.openstreetmap.org/search?q=...&format=json
 const GEOCODE_URL = 'https://nominatim.openstreetmap.org/search';
 
 export const geocode = async (query) => {
+  const q = String(query).trim().toLowerCase();
+  const cached = cacheGet(GEOCODE_CACHE, q);
+  if (cached) return cached;
   const url = new URL(GEOCODE_URL);
   url.searchParams.set('q', query);
   url.searchParams.set('format', 'json');
@@ -22,13 +39,18 @@ export const geocode = async (query) => {
   if (!res.ok) throw Object.assign(new Error('Geocoding failed'), { statusCode: 502 });
   const data = await res.json();
   if (!data.length) throw Object.assign(new Error('Location not found'), { statusCode: 404 });
-  return { address: data[0].display_name, lat: +data[0].lat, lng: +data[0].lon };
+  const result = { address: data[0].display_name, lat: +data[0].lat, lng: +data[0].lon };
+  cacheSet(GEOCODE_CACHE, q, result, 10 * 60 * 1000);
+  return result;
 };
 
 // OSRM route calculation - returns distance, duration, and polyline
 export const getRoute = async (from, to) => {
+  const key = `${from.lat.toFixed(4)},${from.lng.toFixed(4)}-${to.lat.toFixed(4)},${to.lng.toFixed(4)}`;
+  const cached = cacheGet(ROUTE_CACHE, key);
+  if (cached) return cached;
   const url = `https://router.project-osrm.org/route/v1/driving/${from.lng},${from.lat};${to.lng},${to.lat}?overview=full&geometries=geojson`;
-  const res = await fetch(url);
+  const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
   if (!res.ok) throw Object.assign(new Error('Route calculation failed'), { statusCode: 502 });
   const data = await res.json();
   const route = data.routes?.[0];
@@ -37,7 +59,9 @@ export const getRoute = async (from, to) => {
   const distanceKm = Math.round(route.distance / 1000);
   const durationMin = Math.round(route.duration / 60);
   const polyline = route.geometry.coordinates.map(([lng, lat]) => ({ lat, lng }));
-  return { distanceKm, durationMin, polyline };
+  const result = { distanceKm, durationMin, polyline };
+  cacheSet(ROUTE_CACHE, key, result, 5 * 60 * 1000);
+  return result;
 };
 
 // Simple fare: base + per-km (vehicle-specific, overridable from Admin Settings).
@@ -91,6 +115,8 @@ export const createRide = async (passengerId, input) => {
 };
 
 export const findNearbyDrivers = async ({ lat, lng, radius = RADIUS_M, vehicleType }) => {
+  // Guard against NaN/Infinity from map clicks or geocoding edge
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return [];
   const makeMatch = (r) => ({
     coordinates: {
       $near: {
@@ -318,12 +344,37 @@ export const cancelRide = async (rideId, userId, reason = '') => {
   return ride;
 };
 
-export const rateRide = async (rideId, userId, { score, comment }) => {
+export const rateRide = async (rideId, userId, { score, comment, compliments = [] }) => {
   const ride = await Ride.findOne({ _id: rideId, status: 'completed', passenger: userId });
   if (!ride) throw Object.assign(new Error('Completed ride not found'), { statusCode: 404 });
+  if (ride.rating?.score) throw Object.assign(new Error('Already rated'), { statusCode: 409 });
+  if (!score || score < 1 || score > 5) throw Object.assign(new Error('Score 1-5 required'), { statusCode: 400 });
 
-  ride.rating = { score, comment, createdAt: new Date() };
+  ride.rating = { score, comment: (comment||'').slice(0,500), compliments: compliments.filter(c=>['clean','professional','friendly','safe'].includes(c)), createdAt: new Date() };
   await ride.save();
+
+  // Update driver's aggregate — Uber-like: avg = (oldAvg*count + score)/(count+1)
+  if (ride.driver) {
+    const driver = await User.findById(ride.driver);
+    if (driver) {
+      const s = driver.driverDetails.stats || { rating:0, ratingCount:0, compliments:{clean:0,professional:0,friendly:0,safe:0} };
+      const newCount = (s.ratingCount||0)+1;
+      const newAvg = ((s.rating||0)*(s.ratingCount||0) + score)/newCount;
+      await User.findByIdAndUpdate(ride.driver, {
+        $set: {
+          'driverDetails.stats.rating': Math.round(newAvg*10)/10,
+          'driverDetails.stats.ratingCount': newCount,
+        },
+        $inc: {
+          ...(compliments.includes('clean') ? {'driverDetails.stats.compliments.clean':1} : {}),
+          ...(compliments.includes('professional') ? {'driverDetails.stats.compliments.professional':1} : {}),
+          ...(compliments.includes('friendly') ? {'driverDetails.stats.compliments.friendly':1} : {}),
+          ...(compliments.includes('safe') ? {'driverDetails.stats.compliments.safe':1} : {}),
+          'driverDetails.stats.totalRides': 0, // keep count separate via Ride aggregate, not here
+        }
+      });
+    }
+  }
   return ride;
 };
 
@@ -358,4 +409,12 @@ export const listRides = async (user, filters = {}) => {
 
 export const listDrivers = async () => {
   return User.find({ role: 'driver' }).select('-password');
+};
+
+export const listAvailableRides = async (driverId) => {
+  const driver = await User.findById(driverId).select('role driverDetails');
+  if (!driver || driver.role !== 'driver') return [];
+  // Available = pending + not yet assigned, regardless of vehicle (for demo, show all pending)
+  // In production, filter by service area bbox MD/DC/VA
+  return Ride.find({ status: 'pending' }).sort({ createdAt: -1 }).limit(20).populate('passenger', 'name phone avatar');
 };

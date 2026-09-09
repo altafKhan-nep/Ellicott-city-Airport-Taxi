@@ -128,3 +128,28 @@ export const rateRide = asyncHandler(async (req, res) => {
   const ride = await rideService.rateRide(req.params.id, req.user._id, req.body);
   res.json({ ride });
 });
+
+export const availableRides = asyncHandler(async (req, res) => {
+  const rides = await rideService.listAvailableRides(req.user._id);
+  res.json({ rides });
+});
+
+export const getMessages = asyncHandler(async (req, res) => {
+  const ride = await rideService.getRideById(req.params.id, req.user);
+  const messages = (ride.messages || []).slice(-50);
+  res.json({ messages });
+});
+
+export const postMessage = asyncHandler(async (req, res) => {
+  const { text } = req.body;
+  if (!text || !String(text).trim()) return res.status(400).json({ message: 'Message required' });
+  const ride = await rideService.getRideById(req.params.id, req.user);
+  const isParticipant = String(ride.passenger._id||ride.passenger)===String(req.user._id) || (ride.driver && String(ride.driver._id||ride.driver)===String(req.user._id));
+  if (!isParticipant) return res.status(403).json({ message: 'Not in this ride' });
+  const msg = { sender: req.user._id, text: String(text).trim().slice(0,500), at: new Date() };
+  ride.messages.push(msg);
+  await ride.save();
+  const io = req.app.get('io');
+  io.to(`ride:${ride._id}`).emit('ride:message', { rideId: ride._id, sender: req.user._id, text: msg.text, at: msg.at, senderRole: req.user.role, senderName: req.user.name });
+  res.status(201).json({ message: msg });
+});

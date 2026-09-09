@@ -123,6 +123,19 @@ export const initSocket = (io) => {
       }
     });
 
+    // Uber-like live chat: passenger ↔ driver in ride room (only participants)
+    socket.on('ride:message', async ({ rideId, text } = {}) => {
+      if (!rideId || !text || !socket.userId) return;
+      const trimmed = String(text).trim().slice(0, 500);
+      if (!trimmed) return;
+      const ride = await Ride.findOne({ _id: rideId }).select('passenger driver').lean();
+      if (!ride) return;
+      const isParticipant = String(ride.passenger) === String(socket.userId) || (ride.driver && String(ride.driver) === String(socket.userId));
+      if (!isParticipant) return;
+      await Ride.findByIdAndUpdate(rideId, { $push: { messages: { sender: socket.userId, text: trimmed, at: new Date() } } });
+      io.to(`ride:${rideId}`).emit('ride:message', { rideId, sender: socket.userId, text: trimmed, at: new Date(), senderRole: socket.role });
+    });
+
     // Removed insecure client-triggered ride:cancel broadcast — cancellations must go via REST POST /api/rides/:id/cancel (validated in rideService.cancelRide)
 
     socket.on('disconnect', () => {

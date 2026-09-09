@@ -58,32 +58,37 @@ export default function Reservations() {
     locate();
   };
 
-  // Load nearby drivers once pickup is chosen
+  // Load nearby drivers once pickup is chosen + live poll every 8s (moving cars)
   useEffect(() => {
     if (!pickup?.lat) {
       setDrivers([]);
       return;
     }
     let cancelled = false;
-    setLoadingDrivers(true);
-    nearbyDrivers({ lat: pickup.lat, lng: pickup.lng, radius: 10000 })
-      .then(({ data }) => {
-        if (!cancelled) setDrivers(data.drivers || []);
-      })
-      .catch(() => {})
-      .finally(() => !cancelled && setLoadingDrivers(false));
+    const fetchDrivers = () => {
+      setLoadingDrivers(true);
+      nearbyDrivers({ lat: pickup.lat, lng: pickup.lng, radius: 10000 })
+        .then(({ data }) => {
+          if (!cancelled) setDrivers(data.drivers || []);
+        })
+        .catch(() => {})
+        .finally(() => !cancelled && setLoadingDrivers(false));
+    };
+    fetchDrivers();
+    const id = setInterval(fetchDrivers, 8000); // live moving Premium cars
     return () => {
       cancelled = true;
+      clearInterval(id);
     };
   }, [pickup?.lat, pickup?.lng]);
 
-  // Fetch route + ETA from a selected driver to pickup
+  // Fetch route + ETA from a selected driver's LIVE location to pickup (no DB staleness)
   const selectDriver = async (d) => {
     if (!pickup) return;
     setSelectedDriver(d);
     setDriverRoute(null);
     try {
-      const { data } = await driverEta(d._id, { lat: pickup.lat, lng: pickup.lng });
+      const { data } = await driverEta(d._id, { lat: pickup.lat, lng: pickup.lng }, { lat: d.lat, lng: d.lng });
       setDriverRoute(data.route || []);
     } catch {
       setDriverRoute([]);
@@ -210,10 +215,10 @@ export default function Reservations() {
                   key={d._id}
                   type="button"
                   onClick={() => selectDriver(d)}
-                  className={`flex items-center gap-3 rounded-2xl border bg-white p-3 text-left transition-all ${
+                  className={`card-lift flex items-center gap-3 rounded-2xl border bg-white p-3 text-left transition-all ${
                     selectedDriver?._id === d._id
                       ? 'border-brand-500 ring-2 ring-brand-200'
-                      : 'border-slate-200 hover:border-brand-300'
+                      : 'border-accent-200 hover:border-brand-300'
                   }`}
                 >
                   <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-50 text-brand-700">

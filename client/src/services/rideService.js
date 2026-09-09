@@ -18,9 +18,9 @@ export const rateRide = (id, payload) => api.post(`/rides/${id}/rate`, payload);
 
 export const nearbyDrivers = (params) => api.get('/drivers/nearby', { params });
 
-export const driverEta = (driverId, to) =>
+export const driverEta = (driverId, to, from) =>
   api.get(`/drivers/${driverId}/eta`, {
-    params: { toLat: to.lat, toLng: to.lng },
+    params: { toLat: to.lat, toLng: to.lng, ...(from ? { fromLat: from.lat, fromLng: from.lng } : {}) },
   });
 
 export const searchPlaces = (q) => api.get('/places/search', { params: { q } });

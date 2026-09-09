@@ -5,6 +5,7 @@ import { LayoutDashboard, Radio, Navigation, CalendarDays, History, Wallet, Car,
 import { useAuth } from '../../../context/AuthContext.jsx';
 import { useDriverProfile, useToggleAvailability } from '../hooks/useDriverQuery';
 import { Switch } from '../../../components/ui/Switch.jsx';
+import NotificationsBell from '../../../components/layout/NotificationsBell.jsx';
 
 const PRIMARY_NAV = [
   { to: '/driver', label: 'Dashboard', icon: LayoutDashboard, end: true },
@@ -45,7 +46,10 @@ export default function DriverShell() {
         <div className="relative flex items-center gap-3">
           <span className="grid h-9 w-9 place-items-center rounded-xl bg-white text-sm font-bold text-brand-800 shadow-sm">E</span>
           {!collapsed && <div className="min-w-0"><p className="font-display text-[15px] font-bold leading-none">Ellicott City <span className="text-gold-300">Airport Taxi</span></p><p className="mt-0.5 inline-flex items-center gap-1.5 text-[11px] font-medium tracking-widest text-white/70 uppercase"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-gold-400" /> Driver • {online ? 'Online' : 'Offline'}</p></div>}
-          <button onClick={() => setDark(v=>!v)} className="ml-auto grid h-7 w-7 place-items-center rounded-full bg-white/10 text-white">{dark ? '☀' : '☾'}</button>
+          <div className="ml-auto flex items-center gap-1">
+            <NotificationsBell />
+            <button onClick={() => setDark(v=>!v)} className="grid h-7 w-7 place-items-center rounded-full bg-white/10 text-white">{dark ? '☀' : '☾'}</button>
+          </div>
         </div>
         {!collapsed && (
           <div className="relative mt-4 rounded-2xl border border-white/15 bg-white/10 p-3 backdrop-blur">
@@ -91,14 +95,17 @@ export default function DriverShell() {
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] text-ink dark:bg-accent-900 dark:text-white">
-      <aside className={`fixed inset-y-0 left-0 z-30 hidden border-r border-accent-200 bg-white shadow-sm dark:border-accent-800 dark:bg-accent-900 lg:block ${collapsed ? 'w-[72px]' : 'w-[280px]'}`}>
+      <aside className={`fixed inset-y-0 left-0 z-[1001] hidden border-r border-accent-200 bg-white shadow-sm dark:border-accent-800 dark:bg-accent-900 lg:block ${collapsed ? 'w-[72px]' : 'w-[280px]'}`}>
         {SidebarInner}
         <button onClick={() => setCollapsed(v=>!v)} className="absolute -right-3 top-24 grid h-7 w-7 place-items-center rounded-full border border-accent-200 bg-white text-xs shadow-md dark:border-accent-700 dark:bg-accent-800">{collapsed?'›':'‹'}</button>
       </aside>
-      <div className="sticky top-0 z-20 flex h-[56px] items-center gap-3 border-b border-accent-200 bg-brand-gradient px-4 text-white shadow-md lg:hidden">
+      <div className="sticky top-0 z-[1001] flex h-[56px] items-center gap-3 border-b border-accent-200 bg-brand-gradient px-4 text-white shadow-md lg:hidden">
         <button onClick={() => setMobileOpen(true)} className="grid h-9 w-9 place-items-center rounded-full bg-white/10"><Menu className="h-5 w-5" /></button>
         <span className="font-display font-bold">Ellicott City <span className="text-gold-300">Driver</span></span>
-        <span className={`ml-auto flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${online ? 'bg-gold-400 text-ink' : 'bg-white/15 text-white'}`}><span className={`h-2 w-2 rounded-full ${online ? 'bg-ink animate-pulse' : 'bg-white/60'}`} />{online ? 'Online' : 'Offline'}</span>
+        <div className="ml-auto flex items-center gap-1">
+          <NotificationsBell />
+          <span className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${online ? 'bg-gold-400 text-ink' : 'bg-white/15 text-white'}`}><span className={`h-2 w-2 rounded-full ${online ? 'bg-ink animate-pulse' : 'bg-white/60'}`} />{online ? 'Online' : 'Offline'}</span>
+        </div>
       </div>
       {mobileOpen && (
         <motion.div initial={{opacity:0}} animate={{opacity:1}} className="fixed inset-0 z-40 bg-ink/40 backdrop-blur-sm lg:hidden" onClick={()=>setMobileOpen(false)}>

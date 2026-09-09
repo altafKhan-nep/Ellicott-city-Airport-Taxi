@@ -29,7 +29,7 @@ const userIcon = L.divIcon({
   popupAnchor: [0, -12],
 });
 
-// Uber-style top-down car icons — heading-rotatable like Uber Driver
+// Premium top-down car icons — heading-rotatable like Premium Driver
 const uberIconFor = (type, heading = 0) => {
   const t = String(type || '');
   let glyph = UBER_SEDAN;
@@ -150,7 +150,7 @@ export function BookingMap({ center, pickup, dropoff, route, drivers = [], userP
           </Marker>
         )}
 
-        {/* Nearby available drivers — Uber-style oriented cars */}
+        {/* Nearby available drivers — Premium oriented cars */}
         {drivers.map((d) =>
           d.lat != null && d.lng != null ? (
             <Marker
