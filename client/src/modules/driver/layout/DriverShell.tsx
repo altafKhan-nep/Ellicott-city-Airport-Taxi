@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { NavLink, Outlet, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Radio, Navigation, CalendarDays, History, Wallet, Car, FileText, Star, TrendingUp, Bell, LifeBuoy, Settings, LogOut, Menu, X, Phone, MapPin } from 'lucide-react';
+import { LayoutDashboard, Radio, Navigation, CalendarDays, History, Wallet, Car, FileText, Star, TrendingUp, LifeBuoy, Settings, LogOut, Menu, X, Phone, MapPin } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext.jsx';
 import { useDriverProfile, useToggleAvailability } from '../hooks/useDriverQuery';
 import { Switch } from '../../../components/ui/Switch.jsx';
@@ -21,7 +21,7 @@ const MORE_NAV = [
   { to: '/driver/documents', label: 'Documents', icon: FileText },
   { to: '/driver/ratings', label: 'Ratings', icon: Star },
   { to: '/driver/performance', label: 'Performance', icon: TrendingUp },
-  { to: '/driver/notifications', label: 'Notifications', icon: Bell },
+  { to: '/driver/notifications', label: 'Notifications' },
   { to: '/driver/support', label: 'Support', icon: LifeBuoy },
   { to: '/driver/settings', label: 'Settings', icon: Settings },
 ];
@@ -47,8 +47,7 @@ export default function DriverShell() {
           <span className="grid h-9 w-9 place-items-center rounded-xl bg-white text-sm font-bold text-brand-800 shadow-sm">E</span>
           {!collapsed && <div className="min-w-0"><p className="font-display text-[15px] font-bold leading-none">Ellicott City <span className="text-gold-300">Airport Taxi</span></p><p className="mt-0.5 inline-flex items-center gap-1.5 text-[11px] font-medium tracking-widest text-white/70 uppercase"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-gold-400" /> Driver • {online ? 'Online' : 'Offline'}</p></div>}
           <div className="ml-auto flex items-center gap-1">
-            <NotificationsBell />
-            <button onClick={() => setDark(v=>!v)} className="grid h-7 w-7 place-items-center rounded-full bg-white/10 text-white">{dark ? '☀' : '☾'}</button>
+            <span className="h-7 w-7 place-items-center rounded-full bg-white/10 text-white">{dark ? '☀' : '☾'}</span>
           </div>
         </div>
         {!collapsed && (
@@ -95,7 +94,7 @@ export default function DriverShell() {
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] text-ink dark:bg-accent-900 dark:text-white">
-      <aside className={`fixed inset-y-0 left-0 z-[1001] hidden border-r border-accent-200 bg-white shadow-sm dark:border-accent-800 dark:bg-accent-900 lg:block ${collapsed ? 'w-[72px]' : 'w-[280px]'}`}>
+      <aside className={`fixed inset-y-0 left-0 z-[1001] hidden border-r border-accent-200 bg-white shadow-sm dark:border-accent-800 dark:bg-accent-900 lg:block ${collapsed ? 'w-20' : 'w-72'}`}>
         {SidebarInner}
         <button onClick={() => setCollapsed(v=>!v)} className="absolute -right-3 top-24 grid h-7 w-7 place-items-center rounded-full border border-accent-200 bg-white text-xs shadow-md dark:border-accent-700 dark:bg-accent-800">{collapsed?'›':'‹'}</button>
       </aside>
@@ -103,7 +102,6 @@ export default function DriverShell() {
         <button onClick={() => setMobileOpen(true)} className="grid h-9 w-9 place-items-center rounded-full bg-white/10"><Menu className="h-5 w-5" /></button>
         <span className="font-display font-bold">Ellicott City <span className="text-gold-300">Driver</span></span>
         <div className="ml-auto flex items-center gap-1">
-          <NotificationsBell />
           <span className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${online ? 'bg-gold-400 text-ink' : 'bg-white/15 text-white'}`}><span className={`h-2 w-2 rounded-full ${online ? 'bg-ink animate-pulse' : 'bg-white/60'}`} />{online ? 'Online' : 'Offline'}</span>
         </div>
       </div>
@@ -115,7 +113,7 @@ export default function DriverShell() {
           </motion.aside>
         </motion.div>
       )}
-      <main className={`${collapsed?'lg:pl-[72px]':'lg:pl-[280px]'} transition-all`}>
+      <main className={`${collapsed ? 'lg:pl-20' : 'lg:pl-72'} transition-all`}>
         <div className="mx-auto max-w-[1600px] p-4 sm:p-6 lg:p-8">
           <Outlet />
         </div>

@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { NavLink, Outlet, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Radio, Map, CalendarDays, Users, Car, Wallet, BarChart3, LifeBuoy, Bell, ShieldCheck, Settings, Moon, Sun, Menu, X, LogOut, Phone } from 'lucide-react';
+import { LayoutDashboard, Radio, Map, CalendarDays, Users, Car, Wallet, BarChart3, LifeBuoy, ShieldCheck, Settings, Moon, Sun, Menu, X, LogOut, Phone } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext.jsx';
-import NotificationsBell from '../../../components/layout/NotificationsBell.jsx';
 
 const NAV = [
   { to: '/admin', label: 'Overview', icon: LayoutDashboard, end: true },
@@ -16,7 +15,7 @@ const NAV = [
   { to: '/admin/finance', label: 'Finance', icon: Wallet },
   { to: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
   { to: '/admin/support', label: 'Support', icon: LifeBuoy },
-  { to: '/admin/notifications', label: 'Notifications', icon: Bell },
+  { to: '/admin/notifications', label: 'Notifications' },
   { to: '/admin/audit', label: 'Audit Log', icon: ShieldCheck },
   { to: '/admin/settings', label: 'Settings', icon: Settings },
 ];
@@ -60,7 +59,6 @@ export default function CrmShell() {
             </div>
           )}
           <div className="ml-auto flex items-center gap-1">
-            <NotificationsBell />
             <button onClick={() => setDark(v => !v)} className="grid h-8 w-8 place-items-center rounded-full bg-white/10 text-white hover:bg-white/15" title="Toggle theme">
               {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
@@ -101,7 +99,7 @@ export default function CrmShell() {
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] text-ink dark:bg-accent-900 dark:text-white">
-      <aside className={`fixed inset-y-0 left-0 z-[1001] hidden border-r border-accent-200 bg-white shadow-sm transition-all dark:border-accent-800 dark:bg-accent-900 lg:block ${collapsed ? 'w-[72px]' : 'w-[280px]'}`}>
+      <aside className={`fixed inset-y-0 left-0 z-[1001] hidden border-r border-accent-200 bg-white shadow-sm transition-all dark:border-accent-800 dark:bg-accent-900 lg:block ${collapsed ? 'w-20' : 'w-72'}`}>
         {SidebarInner}
         <button onClick={() => setCollapsed(v => !v)} className="absolute -right-3 top-24 grid h-7 w-7 place-items-center rounded-full border border-accent-200 bg-surface text-xs shadow-md hover:bg-accent-50 dark:border-accent-700 dark:bg-accent-800">{collapsed ? '›' : '‹'}</button>
       </aside>
@@ -110,7 +108,6 @@ export default function CrmShell() {
         <button onClick={() => setMobileOpen(true)} className="grid h-9 w-9 place-items-center rounded-full bg-white/10"><Menu className="h-5 w-5" /></button>
         <span className="font-display font-bold tracking-tight">Ellicott City <span className="text-gold-300">Airport Taxi</span></span>
         <div className="ml-auto flex items-center gap-1">
-          <NotificationsBell />
           <span className="text-xs text-white/70">CRM</span>
         </div>
       </div>
@@ -123,7 +120,7 @@ export default function CrmShell() {
         </motion.div>
       )}
 
-      <main id="main" className={`${collapsed ? 'lg:pl-[72px]' : 'lg:pl-[280px]'} transition-all`}>
+      <main id="main" className={`${collapsed ? 'lg:pl-20' : 'lg:pl-72'} transition-all`}>
         <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 rounded-full bg-white px-3 py-1 text-xs font-semibold text-ink shadow">Skip to content</a>
         <div className="mx-auto max-w-[1600px] p-4 sm:p-6 lg:p-8">
           <Outlet />
