@@ -10,7 +10,7 @@ dotenv.config();
 const users = [
   {
     name: 'Admin',
-    email: 'admin@ridetaxi.com',
+    email: 'admin@ellicot.com',
     phone: '+1 555 010 0000',
     password: 'admin123',
     role: 'admin',
@@ -18,7 +18,7 @@ const users = [
   },
   {
     name: 'John Passenger',
-    email: 'passenger@ridetaxi.com',
+    email: 'passenger@ellicot.com',
     phone: '+1 555 010 1000',
     password: 'pass123',
     role: 'passenger',
@@ -26,7 +26,7 @@ const users = [
   },
   {
     name: 'Driver Alex',
-    email: 'alex@ridetaxi.com',
+    email: 'alex@ellicot.com',
     phone: '+1 555 010 2001',
     password: 'driver123',
     role: 'driver',
@@ -40,7 +40,7 @@ const users = [
   },
   {
     name: 'Driver Sam',
-    email: 'sam@ridetaxi.com',
+    email: 'sam@ellicot.com',
     phone: '+1 555 010 2002',
     password: 'driver123',
     role: 'driver',

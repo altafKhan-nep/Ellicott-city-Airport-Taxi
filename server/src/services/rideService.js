@@ -127,8 +127,7 @@ export const findNearbyDrivers = async ({ lat, lng, radius = RADIUS_M, vehicleTy
   });
 
   // Progressive radius expansion: 10km → 25km → 50km → show distance
-  // This handles service-area edge (Nepal 12,347km away correctly returns 0) but also ensures
-  // passenger near Ellicott City (8km) always finds drivers
+  // Ensures passenger near Ellicott City (8km) always finds drivers within service area
   const radii = [radius, 25000, 50000];
   for (const r of radii) {
     const match = makeMatch(r);

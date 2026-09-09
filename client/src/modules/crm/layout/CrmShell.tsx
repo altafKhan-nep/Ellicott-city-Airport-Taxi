@@ -89,7 +89,7 @@ export default function CrmShell() {
       <div className="border-t border-accent-200 bg-white px-3 py-3 dark:border-accent-800 dark:bg-accent-900">
         <div className="flex items-center gap-3">
           {user?.avatar ? <img src={user.avatar} alt="" className="h-9 w-9 rounded-full object-cover ring-2 ring-brand-100" /> : <div className="grid h-9 w-9 place-items-center rounded-full bg-brand-50 text-xs font-bold text-brand-700 ring-1 ring-brand-200">{user?.name?.[0]}</div>}
-          {!collapsed && <div className="min-w-0 flex-1"><p className="truncate font-display text-sm font-semibold">{user?.name}</p><p className="truncate text-xs capitalize text-muted">{user?.role} • Howard County</p></div>}
+          {!collapsed && <div className="min-w-0 flex-1"><p className="truncate font-display text-sm font-semibold">{user?.name}</p><p className="truncate text-xs capitalize text-muted">{user?.role}</p></div>}
           <button onClick={logout} title="Sign out" className="grid h-8 w-8 place-items-center rounded-full bg-accent-50 hover:bg-accent-100 dark:bg-white/5 dark:hover:bg-white/10"><LogOut className="h-4 w-4" /></button>
         </div>
         {!collapsed && <Link to="/" className="mt-3 block text-center text-xs text-muted hover:text-ink">← Back to website</Link>}

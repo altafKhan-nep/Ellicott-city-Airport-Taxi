@@ -201,12 +201,12 @@ export default function Reservations() {
             <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
               <p className="text-sm font-medium text-amber-800">
                 {pickup && (pickup.lat < 38 || pickup.lat > 40 || pickup.lng < -77.5 || pickup.lng > -76)
-                  ? `No drivers in ${pickup.address?.slice(0,40)} — 12,347km from Maryland. Service area is MD/DC/VA. Try pickup near Ellicott City (e.g., 9019 Early April Way) or tap "Use my location" when in Maryland.`
+                  ? `No drivers in ${pickup.address?.slice(0,40)} — Service area is Maryland, DC, VA. Tap "Use my location" when in MD/DL/VA.`
                   : pickup
                     ? 'No drivers within 50km. They may be offline — use "Use my location" near Ellicott City or try Executive Sedan / Premium SUV.'
                     : 'Choose a pickup near Ellicott City, MD to find drivers. Service area: Maryland, DC, Virginia.'}
               </p>
-              <p className="mt-1 text-xs text-amber-700">For testing: the 2 seeded drivers are at 39.207,-76.857 (Howard County). Pickups in Nepal will not notify them without fallback.</p>
+              <p className="mt-1 text-xs text-amber-700">Service area: Maryland, DC, Virginia.</p>
             </div>
           ) : (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

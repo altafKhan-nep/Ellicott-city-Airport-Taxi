@@ -116,7 +116,7 @@ export function BookingMap({ center, pickup, dropoff, route, drivers = [], userP
   return (
     <div className="relative h-full w-full overflow-hidden rounded-xl">
       <MapContainer
-        center={center || [39.203, -76.857]}
+        center={center || [39.207, -76.857]}
         zoom={13}
         className="h-full w-full"
         scrollWheelZoom

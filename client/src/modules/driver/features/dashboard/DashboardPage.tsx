@@ -41,7 +41,7 @@ export default function DashboardPage() {
           <div>
             <p className="text-xs font-semibold uppercase tracking-widest text-white/70">Good Morning</p>
             <h1 className="font-display mt-1 text-3xl dark:text-white font-bold tracking-tight">Hello, {driver?.name || 'Driver'} <span className="text-gold-300">—</span></h1>
-            <p className="mt-1 max-w-xl text-sm text-white/75">Premium airport dispatch • Howard County • {new Date().toLocaleDateString()} • <span className="inline-flex items-center gap-1"><Sun className="h-3 w-3 text-gold-300" /> 18°C <Cloud className="h-3 w-3" /> Traffic normal</span></p>
+            <p className="mt-1 max-w-xl text-sm text-white/75">Premium airport dispatch • {new Date().toLocaleDateString()} • <span className="inline-flex items-center gap-1"><Sun className="h-3 w-3 text-gold-300" /> 18°C <Cloud className="h-3 w-3" /> Traffic normal</span></p>
           </div>
           <div className="flex gap-2">
             <Link to="/driver/requests" className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-brand-800 shadow-lg hover:bg-brand-50">View Requests</Link>

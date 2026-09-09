@@ -51,11 +51,11 @@ export default function Login() {
   const quick = [
     {
       label: "Passenger",
-      email: "passenger@ellicott.com",
+      email: "passenger@ellicot.com",
       password: "pass123",
     },
-    { label: "Driver", email: "alex@ellicott.com", password: "driver123" },
-    { label: "Admin", email: "admin@ellicott.com", password: "admin123" },
+    { label: "Driver", email: "alex@ellicot.com", password: "driver123" },
+    { label: "Admin", email: "admin@ellicot.com", password: "admin123" },
   ];
 
   const quickFill = (q) => {
