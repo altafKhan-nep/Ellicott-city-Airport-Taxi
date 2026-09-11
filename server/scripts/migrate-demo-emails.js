@@ -5,10 +5,10 @@
 // (dotenv never overrides an explicit env var, so the prod URI wins over server/.env)
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import User from '../models/User.js';
-import Location from '../models/Location.js';
-import AppSetting from '../models/AppSetting.js';
-import { connectDB } from '../config/db.js';
+import User from '../src/models/User.js';
+import Location from '../src/models/Location.js';
+import AppSetting from '../src/models/AppSetting.js';
+import { connectDB } from '../src/config/db.js';
 
 dotenv.config();
 
