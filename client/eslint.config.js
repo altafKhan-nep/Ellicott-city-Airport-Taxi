@@ -18,6 +18,8 @@ export default [
         console: 'readonly',
         setInterval: 'readonly',
         clearInterval: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly',
         atob: 'readonly',
         FileReader: 'readonly',
         Notification: 'readonly',

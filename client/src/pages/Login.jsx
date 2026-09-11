@@ -59,7 +59,7 @@ export default function Login() {
   ];
 
   const quickFill = (q) => {
-    setForm((f) => ({ ...f, identifier: q.email }));
+    setForm((f) => ({ ...f, identifier: q.email, password: q.password }));
     setError("");
   };
 

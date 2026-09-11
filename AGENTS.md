@@ -412,10 +412,10 @@ cd server && npm run seed   # resets users + driver positions
 
 | Role | Email | Password |
 |------|-------|----------|
-| admin | `admin@ridetaxi.com` | `admin123` |
-| passenger | `passenger@ridetaxi.com` | `pass123` |
-| driver (sedan) | `alex@ridetaxi.com` | `driver123` |
-| driver (suv) | `sam@ridetaxi.com` | `driver123` |
+| admin | `admin@ellicot.com` | `admin123` |
+| passenger | `passenger@ellicot.com` | `pass123` |
+| driver (sedan) | `alex@ellicot.com` | `driver123` |
+| driver (suv) | `sam@ellicot.com` | `driver123` |
 
 Driver positions are seeded near Howard County, MD (~39.20, -76.85). "Nearby drivers" queries use these seeded `Location` docs — no drivers online until you run the seed.
 

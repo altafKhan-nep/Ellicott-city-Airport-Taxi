@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { NavLink, Outlet, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Radio, Navigation, CalendarDays, History, Wallet, Car, FileText, Star, TrendingUp, LifeBuoy, Settings, LogOut, Menu, X, Phone, MapPin } from 'lucide-react';
+import { LayoutDashboard, Radio, Navigation, CalendarDays, History, Wallet, Car, FileText, Star, TrendingUp, Bell, LifeBuoy, Settings, LogOut, Menu, X, Phone, MapPin } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext.jsx';
 import { useDriverProfile, useToggleAvailability } from '../hooks/useDriverQuery';
 import { Switch } from '../../../components/ui/Switch.jsx';
@@ -21,7 +21,7 @@ const MORE_NAV = [
   { to: '/driver/documents', label: 'Documents', icon: FileText },
   { to: '/driver/ratings', label: 'Ratings', icon: Star },
   { to: '/driver/performance', label: 'Performance', icon: TrendingUp },
-  { to: '/driver/notifications', label: 'Notifications' },
+  { to: '/driver/notifications', label: 'Notifications', icon: Bell },
   { to: '/driver/support', label: 'Support', icon: LifeBuoy },
   { to: '/driver/settings', label: 'Settings', icon: Settings },
 ];
@@ -64,7 +64,7 @@ export default function DriverShell() {
       <nav className="flex-1 overflow-y-auto bg-white px-2 py-3 dark:bg-accent-900" aria-label="Driver navigation">
         {PRIMARY_NAV.map(({ to, label, icon: Icon, end }) => (
           <NavLink key={to} to={to} end={end as any} className={({ isActive }) => `mb-0.5 flex min-h-11 items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-brand-500 ${isActive ? 'bg-brand-50 text-brand-700 ring-1 ring-brand-100 dark:bg-brand-950 dark:text-gold-300' : 'text-muted hover:bg-accent-50 hover:text-ink dark:hover:bg-white/5'}`}>
-            <Icon className="h-[18px] w-[18px] shrink-0" /> {!collapsed && label}
+            {Icon ? <Icon className="h-[18px] w-[18px] shrink-0" /> : null} {!collapsed && label}
           </NavLink>
         ))}
         {!collapsed && (
@@ -73,7 +73,7 @@ export default function DriverShell() {
             <div className="mt-1 space-y-0.5">
               {MORE_NAV.map(({ to, label, icon: Icon }) => (
                 <NavLink key={to} to={to} className={({ isActive }) => `flex min-h-11 items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium focus-visible:ring-2 focus-visible:ring-brand-500 ${isActive ? 'bg-brand-50 text-brand-700 dark:bg-brand-950 dark:text-gold-300' : 'text-muted hover:bg-accent-50 hover:text-ink dark:hover:bg-white/5'}`}>
-                  <Icon className="h-[18px] w-[18px] shrink-0" /> {label}
+                  {Icon ? <Icon className="h-[18px] w-[18px] shrink-0" /> : null} {label}
                 </NavLink>
               ))}
             </div>

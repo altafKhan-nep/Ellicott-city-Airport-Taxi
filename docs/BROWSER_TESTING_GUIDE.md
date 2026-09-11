@@ -35,13 +35,13 @@ Open **http://localhost:5173** — you should see the red/black/gold landing pag
 
 | Role | Email | Password | Notes |
 |------|-------|----------|-------|
-| Passenger | `passenger@ridetaxi.com` | `pass123` | Books rides, pays, tracks |
-| Driver (Executive Sedan) | `alex@ridetaxi.com` | `driver123` | Receives + accepts rides |
-| Driver (Premium SUV) | `sam@ridetaxi.com` | `driver123` | Used to test vehicle matching |
-| Admin | `admin@ridetaxi.com` | `admin123` | Dispatch, users, payments, settings |
+| Passenger | `passenger@ellicot.com` | `pass123` | Books rides, pays, tracks |
+| Driver (Executive Sedan) | `alex@ellicot.com` | `driver123` | Receives + accepts rides |
+| Driver (Premium SUV) | `sam@ellicot.com` | `driver123` | Used to test vehicle matching |
+| Admin | `admin@ellicot.com` | `admin123` | Dispatch, users, payments, settings |
 
 The login page has **quick-fill buttons** (`Passenger` / `Driver` / `Admin`) that fill the
-email for you — you still type the password.
+email + password for you.
 
 ### 1.4 Multi-role testing — each role can use its own tab
 Tokens are stored **per role** (`rt_admin_*`, `rt_driver_*`, `rt_passenger_*`) and each tab

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { NavLink, Outlet, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Radio, Map, CalendarDays, Users, Car, Wallet, BarChart3, LifeBuoy, ShieldCheck, Settings, Moon, Sun, Menu, X, LogOut, Phone } from 'lucide-react';
+import { LayoutDashboard, Radio, Map, CalendarDays, Users, Car, Wallet, BarChart3, LifeBuoy, Bell, ShieldCheck, Settings, Moon, Sun, Menu, X, LogOut, Phone } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext.jsx';
 
 const NAV = [
@@ -15,7 +15,7 @@ const NAV = [
   { to: '/admin/finance', label: 'Finance', icon: Wallet },
   { to: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
   { to: '/admin/support', label: 'Support', icon: LifeBuoy },
-  { to: '/admin/notifications', label: 'Notifications' },
+  { to: '/admin/notifications', label: 'Notifications', icon: Bell },
   { to: '/admin/audit', label: 'Audit Log', icon: ShieldCheck },
   { to: '/admin/settings', label: 'Settings', icon: Settings },
 ];
@@ -81,7 +81,7 @@ export default function CrmShell() {
             end={end as any}
             className={({ isActive }) => `mb-0.5 flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition-colors ${isActive ? 'bg-brand-50 text-brand-700 shadow-sm ring-1 ring-brand-100 dark:bg-brand-950 dark:text-gold-300 dark:ring-white/10' : 'text-muted hover:bg-accent-50 hover:text-ink dark:hover:bg-white/5'}`}
           >
-            <Icon className="h-[18px] w-[18px] shrink-0" /> {!collapsed && label}
+            {Icon ? <Icon className="h-[18px] w-[18px] shrink-0" /> : null} {!collapsed && label}
           </NavLink>
         ))}
       </nav>

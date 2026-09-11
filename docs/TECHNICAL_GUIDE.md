@@ -77,10 +77,10 @@ cd server && npm run dev     # http://localhost:5001 (nodemon)
 
 | Role | Email | Password |
 |---|---|---|
-| admin | `admin@ridetaxi.com` | `admin123` |
-| passenger | `passenger@ridetaxi.com` | `pass123` |
-| driver (Executive Sedan) | `alex@ridetaxi.com` | `driver123` |
-| driver (Premium SUV) | `sam@ridetaxi.com` | `driver123` |
+| admin | `admin@ellicot.com` | `admin123` |
+| passenger | `passenger@ellicot.com` | `pass123` |
+| driver (Executive Sedan) | `alex@ellicot.com` | `driver123` |
+| driver (Premium SUV) | `sam@ellicot.com` | `driver123` |
 
 Driver `Location` docs are seeded near Howard County, MD (~39.20, -76.85). The `nearby
 drivers` queries only return results once the seed (or driver location broadcasts) populate
