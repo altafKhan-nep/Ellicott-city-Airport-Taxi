@@ -7,8 +7,10 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import useGeolocation from '../../../../hooks/useGeolocation.js';
 import { UBER_SEDAN } from '../../../../components/maps/pinIcons.js';
+import { useContent } from '../../../../context/ContentContext.jsx';
 
 export default function DashboardPage() {
+  const { content } = useContent();
   const { data: statsData, isLoading: sLoading } = useDriverStats() as any;
   const { data: ridesData } = useDriverRides() as any;
   const { data: profile } = useDriverProfile() as any;
@@ -53,7 +55,7 @@ export default function DashboardPage() {
             { k:'Hours Online', v:'6.2h' },
             { k:'Airport Alerts', v:'BWI normal' },
             { k:'Next pickup', v: upcoming[0]?.pickup?.address?.slice(0,22) || '—' },
-            { k:'Support', v:'(410) 365-5556' },
+            { k:'Support', v:'{content.contactPhone}' },
           ].map(i=> <div key={i.k}><p className="text-xs uppercase tracking-widest text-white/60">{i.k}</p><p className="font-display text-sm font-bold text-gold-300">{i.v}</p></div>)}
         </div>
       </div>

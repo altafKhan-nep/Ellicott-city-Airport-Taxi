@@ -5,8 +5,10 @@ import { Badge } from '../../components/ui/badge';
 import { motion } from 'framer-motion';
 import { TrendingUp, Car, Users, DollarSign, Activity, Phone, ArrowRight, ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useContent } from '../../../../context/ContentContext.jsx';
 
 export default function OverviewPage() {
+  const { content } = useContent();
   const { data: a, isLoading: l1 } = useCrmAnalytics();
   const { data: ts } = useCrmTimeseries(14);
   const analytics = a as any;
@@ -37,7 +39,7 @@ export default function OverviewPage() {
           </div>
           <div className="flex flex-wrap gap-2">
             <Link to="/admin/dispatch" className="inline-flex items-center gap-2 rounded-full bg-surface px-5 py-2.5 text-sm font-semibold text-brand-800 shadow-lg hover:bg-brand-50">Open Dispatch <ArrowRight className="h-4 w-4" /></Link>
-            <a href="tel:4103655556" className="inline-flex items-center gap-2 rounded-full border border-white/20 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10"><Phone className="h-4 w-4" />(410) 365-5556</a>
+            <a href={`tel:${content.contactPhoneHref}`} className="inline-flex items-center gap-2 rounded-full border border-white/20 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10"><Phone className="h-4 w-4" />{content.contactPhone}</a>
           </div>
         </div>
         <div className="relative mt-8 grid grid-cols-2 gap-6 border-t border-white/10 pt-6 sm:grid-cols-4">

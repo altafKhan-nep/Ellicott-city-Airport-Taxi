@@ -3,6 +3,7 @@ import { NavLink, Outlet, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { LayoutDashboard, Radio, Map, CalendarDays, Users, Car, Wallet, BarChart3, LifeBuoy, Bell, ShieldCheck, Settings, FileText, Moon, Sun, Menu, X, LogOut, Phone } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext.jsx';
+import { useContent } from '../../../context/ContentContext.jsx';
 
 const NAV = [
   { to: '/admin', label: 'Overview', icon: LayoutDashboard, end: true },
@@ -26,6 +27,7 @@ export default function CrmShell() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dark, setDark] = useState(false); // default light like http://localhost:5173/ white; user toggles to dark explicitly
   const { user, logout } = useAuth();
+  const { content } = useContent();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -69,7 +71,7 @@ export default function CrmShell() {
           <div className="relative mt-4 flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-2 backdrop-blur">
             <span className="h-2 w-2 animate-pulse rounded-full bg-gold-400" />
             <span className="text-xs font-medium text-white/85">24/7 Live Operations</span>
-            <a href="tel:4103655556" className="ml-auto hidden items-center gap-1 text-xs font-semibold text-gold-300 sm:flex"><Phone className="h-3 w-3" /> (410) 365-5556</a>
+            <a href={`tel:${content.contactPhoneHref}`} className="ml-auto hidden items-center gap-1 text-xs font-semibold text-gold-300 sm:flex"><Phone className="h-3 w-3" /> {content.contactPhone}</a>
           </div>
         )}
       </div>

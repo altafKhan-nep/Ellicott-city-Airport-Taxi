@@ -3,6 +3,7 @@ import { NavLink, Outlet, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { LayoutDashboard, Radio, Navigation, CalendarDays, History, Wallet, Car, FileText, Star, TrendingUp, Bell, LifeBuoy, Settings, LogOut, Menu, X, Phone, MapPin } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext.jsx';
+import { useContent } from '../../../context/ContentContext.jsx';
 import { useDriverProfile, useToggleAvailability } from '../hooks/useDriverQuery';
 import { Switch } from '../../../components/ui/Switch.jsx';
 import NotificationsBell from '../../../components/layout/NotificationsBell.jsx';
@@ -28,6 +29,7 @@ const MORE_NAV = [
 
 export default function DriverShell() {
   const { user, logout } = useAuth();
+  const { content } = useContent();
   const { data: profile } = useDriverProfile() as any;
   const driver = profile?.user || user;
   const online = !!driver?.driverDetails?.isAvailable;
@@ -87,7 +89,7 @@ export default function DriverShell() {
           {!collapsed && <div className="min-w-0 flex-1"><p className="truncate font-display text-sm font-semibold">{driver?.name}</p><p className="truncate text-xs text-muted">{driver?.driverDetails?.vehicleType || 'Driver'} • {driver?.driverDetails?.plateNumber || '—'}</p></div>}
           <button onClick={logout} className="grid h-8 w-8 place-items-center rounded-full bg-accent-50 hover:bg-accent-100 dark:bg-white/5"><LogOut className="h-4 w-4" /></button>
         </div>
-        {!collapsed && <div className="mt-3 flex items-center justify-between text-xs"><a href="tel:4103655556" className="inline-flex items-center gap-1 font-semibold text-brand-700"><Phone className="h-3 w-3" />(410) 365-5556</a><Link to="/" className="text-muted hover:text-ink">← Website</Link></div>}
+        {!collapsed && <div className="mt-3 flex items-center justify-between text-xs"><a href={`tel:${content.contactPhoneHref}`} className="inline-flex items-center gap-1 font-semibold text-brand-700"><Phone className="h-3 w-3" />{content.contactPhone}</a><Link to="/" className="text-muted hover:text-ink">← Website</Link></div>}
       </div>
     </div>
   );
