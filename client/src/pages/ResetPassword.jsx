@@ -48,9 +48,8 @@ export default function ResetPassword() {
 
   return (
     <AuthLayout
-      eyebrow="Account recovery"
       title="Choose a new"
-      highlight="password"
+      highlight="password."
       subtitle="Pick something at least 6 characters long. Resetting signs out every other device."
       footer={
         <Link to="/login" className="font-semibold text-brand-700 hover:underline">

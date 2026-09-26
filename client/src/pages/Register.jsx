@@ -98,9 +98,8 @@ export default function Register() {
   if (done) {
     return (
       <AuthLayout
-        eyebrow="Almost there"
-        title="Check your"
-        highlight="inbox"
+        title="You're"
+        highlight="almost set."
         subtitle="We sent a verification link to confirm your email address."
       >
         <div className="text-center">
@@ -140,9 +139,8 @@ export default function Register() {
 
   return (
     <AuthLayout
-      eyebrow="Get started"
-      title="One account for"
-      highlight="every kind of trip"
+      title="Every trip,"
+      highlight="one account."
       subtitle="Airport transfers, corporate billing, events and live tracking — create an account in under a minute."
       footer={
         <>

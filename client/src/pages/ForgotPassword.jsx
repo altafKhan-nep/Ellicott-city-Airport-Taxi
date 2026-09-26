@@ -34,9 +34,8 @@ export default function ForgotPassword() {
 
   return (
     <AuthLayout
-      eyebrow="Account recovery"
-      title="Reset your"
-      highlight="password"
+      title="Locked"
+      highlight="out?"
       subtitle="Enter the email on your account and we'll send a secure reset link. It expires in one hour."
       footer={<Link to="/login" className="font-semibold text-brand-700 hover:underline">Back to sign in</Link>}
     >
