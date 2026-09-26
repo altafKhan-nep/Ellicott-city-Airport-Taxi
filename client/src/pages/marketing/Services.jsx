@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext.jsx';
 import { Button } from '../../components/ui/Button.jsx';
 import { Reveal } from '../../components/ui/Reveal.jsx';
 import { Timer, Handshake, Sparkles, ShieldCheck, Phone, ArrowRight } from 'lucide-react';
-import { SERVICES } from '../../data/services.js';
+import { useCatalog } from '../../context/CatalogContext.jsx';
 import { useContent } from '../../context/ContentContext.jsx';
 
 const PROMISES = [
@@ -14,6 +14,7 @@ const PROMISES = [
 ];
 
 export default function Services() {
+  const { services } = useCatalog();
   const { user } = useAuth();
   const { content } = useContent();
   const bookUrl = user ? '/reservations' : '/login';
@@ -72,7 +73,7 @@ export default function Services() {
         </div>
 
         <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {SERVICES.map((s, i) => (
+          {services.map((s, i) => (
             <Reveal key={s.slug} delay={(i % 3) * 90} className="h-full">
               <Link
                 to={`/services/${s.slug}`}

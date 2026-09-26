@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { listRides } from '../../services/rideService.js';
-import { vehicleLabel } from '../../data/vehicles.js';
+import { useCatalog } from '../../context/CatalogContext.jsx';
 import { Spinner } from '../../components/ui/Spinner.jsx';
 import PaymentModal from '../../components/rides/PaymentModal.jsx';
 import EditRideModal from '../../components/rides/EditRideModal.jsx';
@@ -10,6 +10,7 @@ import { requestRefund, listPayments } from '../../services/paymentService.js';
 import { rideTone, payTone } from '../../lib/statusTone.js';
 
 export default function RideHistory() {
+  const { vehicleLabel } = useCatalog();
   const [rides, setRides] = useState(null);
   const [error, setError] = useState('');
   const [paying, setPaying] = useState(null);

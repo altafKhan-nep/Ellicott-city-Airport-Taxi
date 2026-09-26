@@ -2,6 +2,7 @@ import Ride from '../models/Ride.js';
 import Location from '../models/Location.js';
 import User from '../models/User.js';
 import { getSettings } from './settingsService.js';
+import { assertVehicleKey, assertServiceSlug, FALLBACK_FARE } from './catalogService.js';
 
 const RADIUS_M = 5000;
 
@@ -95,21 +96,13 @@ export const getRoute = async (from, to) => {
   return result;
 };
 
-// Simple fare: base + per-km (vehicle-specific, overridable from Admin Settings).
-const estimateFare = (distanceKm, durationMin, vehicleType, overrides = {}) => {
-  const rates = {
-    'executive-sedan': { base: 6, perKm: 1.9, perMin: 0.4 },
-    'economy-sedan': { base: 3, perKm: 1.4, perMin: 0.3 },
-    'economy-suv': { base: 5, perKm: 1.8, perMin: 0.4 },
-    'premium-suv': { base: 7, perKm: 2.2, perMin: 0.45 },
-    'luxury-suv': { base: 10, perKm: 2.6, perMin: 0.5 },
-    van: { base: 8, perKm: 2.0, perMin: 0.42 },
-    'mini-coach': { base: 35, perKm: 3.5, perMin: 0.8 },
-    'school-bus': { base: 45, perKm: 4.0, perMin: 0.9 },
-    motorcoach: { base: 70, perKm: 5.0, perMin: 1.2 },
-  };
-  const rate = rates[vehicleType] || rates['economy-sedan'];
-  // Global overrides (Admin Settings) take precedence when set.
+// Simple fare: base + per-km + per-min, using the per-class rates an admin
+// manages in the fleet catalog. Global Admin Settings overrides (baseFare /
+// perKm / perMin) still take precedence when set — clear them to use the
+// per-class rates. A class that was deleted after a ride was booked falls back
+// to the economy rate so a fare is never NaN.
+const estimateFare = (distanceKm, durationMin, vehicleType, overrides = {}, classFare = null) => {
+  const rate = classFare || FALLBACK_FARE;
   const base = overrides.baseFare ?? rate.base;
   const perKm = overrides.perKm ?? rate.perKm;
   const perMin = overrides.perMin ?? rate.perMin;
@@ -125,19 +118,31 @@ export const createRide = async (passengerId, input) => {
     throw fail('Pickup and drop-off must be different locations', 400);
   }
 
+  // The catalog is the source of truth for what can be booked. A request that
+  // omits the class keeps the historic economy-sedan default; anything supplied
+  // must exist and be active.
+  const vehicle = await assertVehicleKey(input.vehicleType || 'economy-sedan');
+  const service = await assertServiceSlug(input.serviceType);
+
   const route = await getRoute(pickup, dropoff);
   if (!route.distanceKm) {
     throw fail('Could not find a drivable route between those locations', 400);
   }
   const settings = await getSettings();
-  const estimated = estimateFare(route.distanceKm, route.durationMin, input.vehicleType, settings);
+  const estimated = estimateFare(
+    route.distanceKm,
+    route.durationMin,
+    vehicle.key,
+    settings,
+    vehicle.fare
+  );
 
   const ride = await Ride.create({
     passenger: passengerId,
     pickup,
     dropoff,
-    vehicleType: input.vehicleType || 'economy-sedan',
-    serviceType: input.serviceType || '',
+    vehicleType: vehicle.key,
+    serviceType: service?.slug || '',
     passengerCount: input.passengerCount || 1,
     bags: input.bags || 0,
     fare: {
@@ -351,13 +356,17 @@ export const editRide = async (rideId, passengerId, input) => {
   }
 
   const settings = await getSettings();
-  const vehicleType = input.vehicleType || ride.vehicleType;
-  const estimated = estimateFare(distanceKm, durationMin, vehicleType, settings);
+  const vehicle = await assertVehicleKey(input.vehicleType || ride.vehicleType);
+  const service =
+    input.serviceType === undefined
+      ? null
+      : await assertServiceSlug(input.serviceType);
+  const estimated = estimateFare(distanceKm, durationMin, vehicle.key, settings, vehicle.fare);
 
   ride.pickup = pickup;
   ride.dropoff = dropoff;
-  ride.vehicleType = vehicleType;
-  ride.serviceType = input.serviceType ?? ride.serviceType;
+  ride.vehicleType = vehicle.key;
+  if (service) ride.serviceType = service.slug;
   ride.passengerCount = input.passengerCount ?? ride.passengerCount;
   ride.bags = input.bags ?? ride.bags;
   ride.route = route;

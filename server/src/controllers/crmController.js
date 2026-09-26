@@ -2,6 +2,7 @@ import { asyncHandler } from '../middleware/error.js';
 import Ride from '../models/Ride.js';
 import User from '../models/User.js';
 import Vehicle from '../models/Vehicle.js';
+import { assertVehicleKey } from '../services/catalogService.js';
 import Ticket from '../models/Ticket.js';
 import AuditLog from '../models/AuditLog.js';
 import Location from '../models/Location.js';
@@ -39,10 +40,16 @@ export const listVehicles = asyncHandler(async (req, res) => {
   res.json({ vehicles });
 });
 export const createVehicle = asyncHandler(async (req, res) => {
-  const v = await Vehicle.create(req.body);
+  // `type` must be a class an admin has added to the fleet catalog.
+  const cls = await assertVehicleKey(req.body?.type || 'economy-sedan');
+  const v = await Vehicle.create({ ...req.body, type: cls.key });
   res.status(201).json({ vehicle: v });
 });
 export const updateVehicle = asyncHandler(async (req, res) => {
+  if (req.body?.type) {
+    const cls = await assertVehicleKey(req.body.type);
+    req.body = { ...req.body, type: cls.key };
+  }
   const v = await Vehicle.findByIdAndUpdate(req.params.id, req.body, { new: true });
   if (!v) return res.status(404).json({ message: 'Vehicle not found' });
   res.json({ vehicle: v });

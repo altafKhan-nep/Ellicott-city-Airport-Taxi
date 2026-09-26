@@ -7,7 +7,7 @@ import { Button } from '../../components/ui/Button.jsx';
 import { Reveal } from '../../components/ui/Reveal.jsx';
 import { useMediaQuery } from '../../hooks/useMediaQuery.js';
 import { useWebGLSupport } from '../../components/three/useWebGLSupport.js';
-import { SERVICES, FEATURED_SERVICES } from '../../data/services.js';
+import { useCatalog } from '../../context/CatalogContext.jsx';
 
 // Lazy-loaded so the WebGL/three bundle only downloads when the taxi actually renders.
 const HeroTaxiScene = lazy(() => import('../../components/three/HeroTaxiScene.jsx'));
@@ -36,7 +36,7 @@ export default function Home() {
   const webgl = useWebGLSupport();
   const showTaxi = !isMobile && webgl;
 
-  const featured = FEATURED_SERVICES.map((slug) => SERVICES.find((s) => s.slug === slug));
+  const { featuredServices: featured } = useCatalog();
 
   return (
     <div>

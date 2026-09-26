@@ -4,11 +4,13 @@ import L from 'leaflet';
 import { Card, CardTitle } from '../../components/ui/card';
 import { SkeletonCard } from '../../components/ui/skeleton';
 import { MapPin, AlertCircle } from 'lucide-react';
+import { useCatalog } from '../../../../context/CatalogContext.jsx';
 import { useMemo } from 'react';
 const driverIcon = L.divIcon({ className:'', html:'<div class="map-pin-driver"><span>●</span></div>', iconSize:[30,30], iconAnchor:[15,28] });
 const pickupIcon = L.divIcon({ className:'', html:'<div class="map-pin-start"><span>●</span></div>', iconSize:[22,22] });
 export default function LiveMapPage() {
   const { data, isLoading, isError, refetch } = useCrmLiveOps() as any;
+  const { vehicleLabel } = useCatalog();
   if(isLoading) return <div className="h-[70vh] animate-pulse rounded-3xl bg-accent-100 dark:bg-white/5" />;
   if(isError) return <Card className="text-center py-12"><AlertCircle className="h-10 w-10 mx-auto text-gold-500" /><p className="mt-2 font-medium">Could not load live map</p><button onClick={()=>refetch()} className="mt-3 rounded-full btn-brand-gradient px-5 py-2 text-sm text-white">Retry</button></Card>;
   const center: [number,number] = [39.20, -76.85];
@@ -22,7 +24,7 @@ export default function LiveMapPage() {
           {drivers.map((d:any)=> {
             const lat = d.coordinates?.coordinates?.[1]; const lng = d.coordinates?.coordinates?.[0];
             if (lat==null||lng==null) return null;
-            return <Marker key={d._id} position={[lat,lng]} icon={driverIcon}><Popup><b>{d.driver?.name}</b><br/>{d.driver?.driverDetails?.vehicleType}</Popup></Marker>;
+            return <Marker key={d._id} position={[lat,lng]} icon={driverIcon}><Popup><b>{d.driver?.name}</b><br/>{vehicleLabel(d.driver?.driverDetails?.vehicleType)}</Popup></Marker>;
           })}
           {rides.map((r:any)=> (<div key={r._id}><Marker position={[r.pickup.lat,r.pickup.lng]} icon={pickupIcon}><Popup>Pickup: {r.pickup.address}</Popup></Marker><Polyline positions={[[r.pickup.lat,r.pickup.lng],[r.dropoff.lat,r.dropoff.lng]] as any} pathOptions={{ color:'#c62828', weight:4 }} /></div>))}
         </MapContainer>

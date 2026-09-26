@@ -3,11 +3,12 @@ import { editRide } from '../../services/rideService.js';
 import { searchPlaces } from '../../services/rideService.js';
 import { Input } from '../../components/ui/Input.jsx';
 import { Button } from '../../components/ui/Button.jsx';
-import { VEHICLES } from '../../data/vehicles.js';
+import { useCatalog } from '../../context/CatalogContext.jsx';
 
 // Edit a pending ride: change pickup/dropoff, vehicle or party size. The server
 // re-geocodes changed locations and recomputes the fare + route.
 export default function EditRideModal({ ride, onClose, onSaved }) {
+  const { fleet } = useCatalog();
   const [form, setForm] = useState({
     pickup: ride.pickup.address,
     dropoff: ride.dropoff.address,
@@ -114,8 +115,8 @@ export default function EditRideModal({ ride, onClose, onSaved }) {
                 value={form.vehicleType}
                 onChange={(e) => setForm({ ...form, vehicleType: e.target.value })}
               >
-                {VEHICLES.map((v) => (
-                  <option key={v.id} value={v.id}>{v.label}</option>
+                {fleet.map((v) => (
+                  <option key={v.key} value={v.key}>{v.label}</option>
                 ))}
               </select>
             </label>

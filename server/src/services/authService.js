@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import { assertVehicleKey } from './catalogService.js';
 import RefreshToken from '../models/RefreshToken.js';
 import OtpCode from '../models/OtpCode.js';
 import { generateToken, hashToken } from '../utils/tokens.js';
@@ -132,7 +133,12 @@ export const register = async ({ name, email, phone, password, role, driverDetai
   // RBAC: public registration may only create passenger|driver — admin roles are seed/CRM-only
   const ALLOWED_PUBLIC_ROLES = ['passenger', 'driver'];
   const safeRole = ALLOWED_PUBLIC_ROLES.includes(role) ? role : 'passenger';
-  const safeDriverDetails = safeRole === 'driver' ? driverDetails : undefined;
+  let safeDriverDetails = safeRole === 'driver' ? driverDetails : undefined;
+  if (safeDriverDetails?.vehicleType) {
+    // Reject a vehicle class that is not in the admin-managed fleet.
+    const cls = await assertVehicleKey(safeDriverDetails.vehicleType);
+    safeDriverDetails = { ...safeDriverDetails, vehicleType: cls.key };
+  }
   const user = await User.create({
     name: name.trim(),
     email: email.toLowerCase(),

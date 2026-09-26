@@ -1,79 +1,17 @@
 import { Link } from 'react-router-dom';
-import { Phone, Check } from 'lucide-react';
+import { Phone, Check, Car } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { Button } from '../../components/ui/Button.jsx';
 import { Reveal } from '../../components/ui/Reveal.jsx';
 import { useContent } from '../../context/ContentContext.jsx';
-
-const FLEET = [
-  {
-    img: '/images/ececutive-sedan.png',
-    name: 'Executive Sedan',
-    capacity: '1–4 passengers',
-    tagline: 'Late-model, "all black" sedan',
-    features: ['Seats up to 4 comfortably', 'Leather interior', 'AM/FM & Sirius radio', 'Complimentary water', 'Air conditioning', 'Professional chauffeur in uniform'],
-  },
-  {
-    img: '/images/economy-sedan.png',
-    name: 'Economy Sedan',
-    capacity: '1–4 passengers',
-    tagline: 'Late-model, "all black" sedan',
-    features: ['Seats up to 4 comfortably', 'Leather interior', 'AM/FM & Sirius radio', 'Complimentary water', 'Air conditioning', 'Professional chauffeur in uniform'],
-  },
-  {
-    img: '/images/economy-suv.png',
-    name: 'Economy SUV',
-    capacity: '4–6 passengers',
-    tagline: 'Late-model, "all black" SUV',
-    features: ['Seats up to 6 comfortably', 'Leather interior', 'AM/FM & Sirius radio', 'Complimentary water', 'Air conditioning', 'Professional chauffeur in uniform'],
-  },
-  {
-    img: '/images/premium-suv.png',
-    name: 'Premium SUV',
-    capacity: '4–6 passengers',
-    tagline: 'Late-model, "all black" SUV',
-    features: ['Seats up to 6 comfortably', 'Leather interior', 'AM/FM & Sirius radio', 'Complimentary water', 'Air conditioning', 'Professional chauffeur in uniform'],
-  },
-  {
-    img: '/images/luxury-suv.png',
-    name: 'Luxury SUV',
-    capacity: '4–6 passengers',
-    tagline: 'Late-model, "all black" SUV',
-    features: ['Seats up to 6 comfortably', 'Leather interior', 'AM/FM & Sirius radio', 'Complimentary water', 'Air conditioning', 'Professional chauffeur in uniform'],
-  },
-  {
-    img: '/images/Van.png',
-    name: 'Van',
-    capacity: '10–14 passengers',
-    tagline: 'Space for groups & luggage',
-    features: ['Seats up to 14 without luggage', 'Seats 9 with luggage', 'Bench seating', 'Air conditioning', 'Professional chauffeur in uniform'],
-  },
-  {
-    img: '/images/mini-coach.png',
-    name: 'Mini-Coach',
-    capacity: '25–32 passengers',
-    tagline: 'Groups of every size',
-    features: ['Seats up to 32 passengers', 'Additional luggage space', 'Forward seating', 'Air conditioning', 'Professional chauffeur in uniform'],
-  },
-  {
-    img: '/images/School-bus.png',
-    name: 'School Bus',
-    capacity: '42–48 passengers',
-    tagline: 'Safe routes & field trips',
-    features: ['Seats 42 to 48 passengers', 'Bench seating', 'Air conditioning upon request', 'Large, manual-opening windows', 'Professional chauffeur in uniform'],
-  },
-  {
-    img: '/images/Motorcoach.png',
-    name: 'Motorcoach',
-    capacity: '50–56 passengers',
-    tagline: 'Long-haul group travel',
-    features: ['Seats up to 56 passengers', 'Restroom on board', 'DVD & entertainment', 'Overhead luggage bins', 'Large under-vehicle luggage area', 'Air conditioning', 'Professional chauffeur in uniform'],
-  },
-];
+import { useCatalog } from '../../context/CatalogContext.jsx';
 
 export default function Fleet() {
   const { user } = useAuth();
   const { content } = useContent();
+  // Admin-managed from /admin/content → Fleet. Marketing copy, imagery and
+  // capacity lines all come from the catalog, not this file.
+  const { fleet } = useCatalog();
   const bookUrl = user ? '/reservations' : '/login';
 
   return (
@@ -117,27 +55,35 @@ export default function Fleet() {
       {/* ============ FLEET GRID ============ */}
       <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {FLEET.map((v, i) => (
-            <Reveal key={v.name} delay={(i % 3) * 90}>
+          {fleet.map((v, i) => (
+            <Reveal key={v.key} delay={(i % 3) * 90}>
               <div className="card-lift group flex h-full flex-col overflow-hidden panel">
                 <div className="img-zoom relative bg-gradient-to-b from-brand-50 to-white">
-                  <img
-                    src={v.img}
-                    alt={`${v.name} — Ellicott City Airport Taxi`}
-                    className="h-52 w-full object-contain p-4"
-                    loading="lazy"
-                  />
+                  {v.image ? (
+                    <img
+                      src={v.image}
+                      alt={`${v.label} — ${content.brandName}`}
+                      className="h-52 w-full object-contain p-4"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="grid h-52 w-full place-items-center text-brand-300">
+                      <Car className="h-12 w-12" />
+                    </div>
+                  )}
                 </div>
                 <div className="flex flex-1 flex-col p-7">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <h3 className="text-xl font-bold text-ink">{v.name}</h3>
-                    <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700">
-                      {v.capacity}
-                    </span>
+                    <h3 className="text-xl font-bold text-ink">{v.label}</h3>
+                    {v.capacity && (
+                      <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700">
+                        {v.capacity}
+                      </span>
+                    )}
                   </div>
-                  <p className="mt-1 text-sm font-medium text-brand-600">{v.tagline}</p>
+                  {v.tagline && <p className="mt-1 text-sm font-medium text-brand-600">{v.tagline}</p>}
                   <ul className="mt-5 space-y-2">
-                    {v.features.map((f) => (
+                    {(v.features || []).map((f) => (
                       <li key={f} className="flex items-start gap-2.5 text-sm text-muted">
                         <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-600" aria-hidden />
                         {f}
@@ -152,7 +98,7 @@ export default function Fleet() {
                     <a
                       href={`tel:${content.contactPhoneHref}`}
                       className="grid h-11 w-11 place-items-center rounded-full border border-accent-200 text-brand-700 transition-colors hover:border-brand-300 hover:bg-brand-50"
-                      aria-label={`Call about ${v.name}`}
+                      aria-label={`Call about ${v.label}`}
                     >
                       <Phone className="h-4 w-4" />
                     </a>

@@ -118,9 +118,21 @@ ride-booking/
 | `/rides/history` | passenger/RideHistory.jsx | passenger | Payments + pay/edit/track actions |
 | `/rides/track/:id` | passenger/RideTracking.jsx | passenger | Live tracking + ETA + pay/refund/edit |
 | `/driver` | driver/Dashboard.jsx | driver | Accept rides, location broadcast |
-| `/admin` | admin/Dashboard.jsx | admin | Tabs: Overview, Rides, Drivers, Users, Payments, Settings |
+| `/admin` | modules/crm (live) | admin | Overview, Rides, Dispatch, Drivers, Fleet, Payments, Content, Users, Settings |
+| `/admin/content` | modules/crm/features/content | admin | **Content & catalog hub** — Website content \| Fleet \| Services |
 
 \* `/reservations` is viewable by anyone, but the request button prompts login.
+
+**Content & catalog hub** (`modules/crm/features/content/`) — the one screen an owner uses to run the
+business. `ContentPage.tsx` is a 3-tab shell over `ContentEditor.tsx` (site copy), `FleetManager.tsx`
+and `ServicesManager.tsx`, sharing the primitives in `fields.tsx`.
+- Site copy edits a local draft, shows per-section "unsaved" dots, a live hero preview, a sticky save
+  bar (dirty count + discard) and supports `⌘/Ctrl+S`; `beforeunload` guards a tab close.
+- Fleet/Services are immediate-save list managers: reorder arrows, a right slide-over `Drawer` for
+  add/edit, `Confirm` dialogs that explain the delete guard, and a toast for the outcome.
+  Lists carry `usage: { rides, drivers }` so the UI can warn *before* an admin hits a 409.
+- Boot seeding never overwrites: `ensureCatalogDefaults()` only runs on an empty collection, and
+  `restore-defaults` re-adds missing rows only. Deleting a class therefore sticks.
 
 **Reservations flow** (`passenger/Reservations.jsx`):
 1. `LocationSearch` (autocomplete → `GET /api/places/search`) sets pickup/dropoff.
@@ -209,8 +221,13 @@ cd server && npm run seed       # Seed test data
 ```
 Statics: `findByEmail` / `findByPhone` / `findByLogin` (email-or-phone regex autodetect, all `.select('+password')`).
 
-Fleet ids are shared via `client/src/data/vehicles.js` (`VEHICLES` + `vehicleLabel` helper) and must
-match the enum above — same ids are used for driver matching and fares.
+Fleet classes and services are **admin-managed catalog data**, not code. `data/vehicles.js` and
+`data/services.js` are now only the offline fallback behind `CatalogContext`; the live source of
+truth is the `FleetVehicle` / `ServiceOffering` collections (see below). Both are validated against
+the catalog on every write path (ride create/edit, driver registration, CRM vehicle create/update),
+so a key must exist and be active or the request 400s. A vehicle type that is referenced by rides or
+drivers can be renamed in its `label` and deactivated, but **cannot be deleted or have its `key`
+changed** (409) — deactivate it instead, which keeps history intact.
 
 ### Ride
 ```js
@@ -220,8 +237,8 @@ match the enum above — same ids are used for driver matching and fares.
   driver: ref(User) | null,
   pickup: { address, lat, lng },
   dropoff: { address, lat, lng },
-  vehicleType,                    // one of the 9 fleet ids above
-  serviceType,                    // one of the 10 service slugs (data/services.js): airport, corporate, wedding, prom, shuttle, charter, night-out, funeral, school, valet
+  vehicleType,                    // FleetVehicle.key — admin-managed, validated on write
+  serviceType,                    // ServiceOffering.slug, or "" for none — admin-managed, validated on write
   passengerCount, bags,
   status: "pending" | "accepted" | "arriving" | "in_progress" | "completed" | "cancelled",
   fare: { estimated, final, currency, distanceKm, durationMin },
@@ -316,13 +333,44 @@ otherwise ~95% success. Stripe is preferred once configured.
 `user:{id}` (`notification:new`), plus email / SMS / web-push when configured.
 `Notification` is the ONLY persisted record — external channels are fire-and-forget.
 
+### FleetVehicle (admin-managed fleet catalog)
+```js
+{
+  key,                             // unique + immutable once in use: "executive-sedan"
+  label, desc, capacity,           // display copy ("Executive Sedan", "1–4 passengers")
+  seats, bags,                     // numeric, used to pre-fill the booking form
+  image,                           // path in client/public, "" = fall back to the icon
+  tagline, features: [],           // public Fleet page copy
+  icon,                            // a name from client/src/lib/iconMap.js ICONS
+  fare: { base, perKm, perMin },   // class rates; global AppSetting overrides still win
+  active, sortOrder,
+}
+```
+`catalogService.FLEET_DEFAULTS` holds the 9 seeded classes and is inserted on boot **only when the
+collection is empty** — deleting a class is not undone by a restart. `POST /api/admin/fleet/restore-defaults`
+re-adds any *missing* default without touching classes an admin has edited.
+
+### ServiceOffering (admin-managed service catalog)
+```js
+{
+  slug,                            // unique + immutable once in use: "airport"
+  name, short, tagline, summary,
+  features: [],
+  icon,                            // a name from client/src/lib/iconMap.js ICONS
+  featured,                        // shows in the Home featured band
+  active, sortOrder,
+}
+```
+`catalogService.SERVICE_DEFAULTS` holds the 10 seeded services, seeded the same way.
+
 ### AppSetting (admin-editable key/value)
 ```js
 { key: String, unique, value: Mixed }
 ```
 Known keys (defaults in `settingsService.DEFAULTS`): `baseFare`, `perKm`,
-`perMin` (fare overrides, `null` = built-in rates), `paymentsEnabled` (toggle),
-`supportPhone`, `supportEmail`. `GET /api/settings` exposes a public subset.
+`perMin` (optional fare overrides on top of the per-class `FleetVehicle.fare` rates — `null`/0 = use
+the class rates), `paymentsEnabled` (toggle), `supportPhone`, `supportEmail`, and `siteContent` (see
+the Website content section). `GET /api/settings` exposes a public subset.
 
 ## API Endpoints
 
@@ -381,6 +429,11 @@ Known keys (defaults in `settingsService.DEFAULTS`): `baseFare`, `perKm`,
 - `GET /api/drivers/:id/eta?toLat=&toLng=` - Route + ETA from driver's last position (returns `distanceKm`, `durationMin`, `route` polyline, `from`)
 - `PATCH /api/drivers/availability` - Toggle on/off duty
 
+### Catalog (public — the live fleet + services)
+- `GET /api/fleet` - Active vehicle classes, in `sortOrder` (no fares — public pricing stays private)
+- `GET /api/services` - Active service offerings; `featured: true` marks the Home featured band
+- `GET /api/services/:slug` - One service; 404 when unknown **or inactive**
+
 ### Places
 - `GET /api/places/search?q=` - Address autocomplete (Nominatim) for `LocationSearch`
 
@@ -397,6 +450,16 @@ Known keys (defaults in `settingsService.DEFAULTS`): `baseFare`, `perKm`,
 - `DELETE /api/admin/users/:id` - Permanently delete a user + their rides/payments/locations (admins protected)
 - `GET /api/admin/payments?status=&page=&limit=` - Payment reports + status summary
 - `GET /api/admin/settings` / `PATCH /api/admin/settings` - App settings (fares, toggles, support info)
+- `GET /api/admin/content` / `PATCH /api/admin/content` - `siteContent` (all website copy)
+- `GET /api/admin/fleet` - Every class incl. inactive, with `fare` + `usage: { rides, drivers }`
+- `POST /api/admin/fleet` - Create (key auto-validated, must be kebab-case)
+- `PATCH /api/admin/fleet/:id` - Update; `fare` is merged, `key` is immutable once referenced (409)
+- `DELETE /api/admin/fleet/:id` - Delete; **409** when rides or drivers still reference the key
+- `PATCH /api/admin/fleet/reorder` - Body `{ ids: [...] }`, applied in order
+- `POST /api/admin/fleet/restore-defaults` - Re-add *missing* defaults, never overwrite admin edits
+- `GET /api/admin/services`, `POST /api/admin/services`, `PATCH /api/admin/services/:id`,
+  `DELETE /api/admin/services/:id`, `PATCH /api/admin/services/reorder`,
+  `POST /api/admin/services/restore-defaults` - Same shape as the fleet routes (`usage: { rides }`)
 
 ## Socket.io Events
 

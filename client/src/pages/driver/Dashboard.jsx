@@ -23,13 +23,14 @@ import {
 import { Button } from '../../components/ui/Button.jsx';
 import { Switch } from '../../components/ui/Switch.jsx';
 import { Spinner } from '../../components/ui/Spinner.jsx';
-import { vehicleLabel } from '../../data/vehicles.js';
+import { useCatalog } from '../../context/CatalogContext.jsx';
 import { getProfile } from '../../services/userService.js';
 import ActiveRidePanel from '../../components/rides/ActiveRidePanel.jsx';
 
 const ACTIVE = ['accepted', 'arriving', 'in_progress'];
 
 export default function Dashboard() {
+  const { vehicleLabel } = useCatalog();
   const { position } = useGeolocation();
   const [online, setOnline] = useState(false);
   const [toggling, setToggling] = useState(false);

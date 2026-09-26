@@ -39,21 +39,8 @@ const userSchema = new mongoose.Schema(
       default: 'local',
     },
     driverDetails: {
-      vehicleType: {
-        type: String,
-        enum: [
-          'executive-sedan',
-          'economy-sedan',
-          'economy-suv',
-          'premium-suv',
-          'luxury-suv',
-          'van',
-          'mini-coach',
-          'school-bus',
-          'motorcoach',
-        ],
-        default: 'economy-sedan',
-      },
+      // Validated against the FleetVehicle catalog on write (see catalogService).
+      vehicleType: { type: String, trim: true, lowercase: true, default: 'economy-sedan' },
       plateNumber: { type: String, default: '' },
       licenseNo: { type: String, default: '' },
       isAvailable: { type: Boolean, default: false },

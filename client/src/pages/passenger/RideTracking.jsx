@@ -7,7 +7,7 @@ import { getRide, cancelRide, driverEta } from '../../services/rideService.js';
 import { requestRefund, listPayments } from '../../services/paymentService.js';
 import { MapViewSelector, MAP_VIEWS } from '../../components/maps/MapViewSelector.jsx';
 import { UBER_SEDAN } from '../../components/maps/pinIcons.js';
-import { vehicleLabel } from '../../data/vehicles.js';
+import { useCatalog } from '../../context/CatalogContext.jsx';
 import {
   joinRideRoom,
   onDriverFound,
@@ -49,6 +49,7 @@ const STATUS_TEXT = {
 };
 
 export default function RideTracking() {
+  const { vehicleLabel } = useCatalog();
   const { id } = useParams();
   const navigate = useNavigate();
   const [ride, setRide] = useState(null);

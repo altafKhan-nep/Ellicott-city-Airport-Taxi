@@ -16,21 +16,10 @@ const rideSchema = new mongoose.Schema(
       lng: { type: Number, required: true },
     },
 
-    vehicleType: {
-      type: String,
-      enum: [
-        'executive-sedan',
-        'economy-sedan',
-        'economy-suv',
-        'premium-suv',
-        'luxury-suv',
-        'van',
-        'mini-coach',
-        'school-bus',
-        'motorcoach',
-      ],
-      default: 'economy-sedan',
-    },
+    // Free-form on purpose: the fleet classes are admin-managed in
+    // FleetVehicle, so a new class does not need a redeploy. Writes are
+    // validated against the catalog in catalogService.assertVehicleKey.
+    vehicleType: { type: String, trim: true, lowercase: true, default: 'economy-sedan' },
     serviceType: { type: String, default: '' },
     passengerCount: { type: Number, default: 1, min: 1 },
     bags: { type: Number, default: 0 },

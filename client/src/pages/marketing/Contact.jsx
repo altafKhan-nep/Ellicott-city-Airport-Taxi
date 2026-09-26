@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle2, Phone } from 'lucide-react';
-import { SERVICES } from '../../data/services.js';
+import { useCatalog } from '../../context/CatalogContext.jsx';
 import { useContent } from '../../context/ContentContext.jsx';
 
 const inputCls =
   'w-full rounded-xl border border-accent-200 bg-surface px-4 py-3 text-sm text-ink placeholder:text-accent-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200';
 
 export default function Contact() {
+  const { services } = useCatalog();
   const { content } = useContent();
   const [form, setForm] = useState({
     name: '',
@@ -104,7 +105,7 @@ export default function Contact() {
                       <label className="mb-1.5 block text-sm font-medium text-ink" htmlFor="c-service">Service needed</label>
                       <select id="c-service" value={form.service} onChange={set('service')} className={inputCls}>
                         <option value="">Select a service…</option>
-                        {SERVICES.map((s) => (
+                        {services.map((s) => (
                           <option key={s.slug} value={s.name}>{s.name}</option>
                         ))}
                         <option value="Other">Other / not sure</option>

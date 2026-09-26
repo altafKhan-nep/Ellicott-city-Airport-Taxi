@@ -5,6 +5,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import App from './App.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
 import { ContentProvider } from './context/ContentContext.jsx';
+import { CatalogProvider } from './context/CatalogContext.jsx';
 import { queryClient } from './modules/crm/lib/queryClient.ts';
 import './index.css';
 
@@ -13,9 +14,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <ContentProvider>
-          <AuthProvider>
-            <App />
-          </AuthProvider>
+          <CatalogProvider>
+            <AuthProvider>
+              <App />
+            </AuthProvider>
+          </CatalogProvider>
         </ContentProvider>
       </BrowserRouter>
     </QueryClientProvider>

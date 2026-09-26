@@ -20,6 +20,8 @@ import paymentRoutes from "./routes/payments.js";
 import notificationRoutes from "./routes/notifications.js";
 import settingsRoutes from "./routes/settings.js";
 import contentRoutes from "./routes/content.js";
+import catalogRoutes from "./routes/catalog.js";
+import { ensureCatalogDefaults } from "./services/catalogService.js";
 import { initRedis } from "./config/redis.js";
 
 dotenv.config();
@@ -90,6 +92,7 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/settings", settingsRoutes);
 app.use("/api/content", contentRoutes);
+app.use("/api", catalogRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
@@ -105,6 +108,9 @@ initSocket(io);
 const PORT = process.env.PORT || 5001;
 
 connectDB().then(async () => {
+  // Fleet classes + service offerings are admin-managed; seed once into an
+  // empty collection so a fresh install is usable.
+  await ensureCatalogDefaults().catch((e) => console.error('Catalog seed failed:', e.message));
   await initRedis().catch(() => {});
   server.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);

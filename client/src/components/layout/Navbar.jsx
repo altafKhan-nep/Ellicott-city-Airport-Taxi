@@ -3,7 +3,7 @@ import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import { Phone, ArrowRight } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
-import { SERVICES } from '../../data/services.js';
+import { useCatalog } from '../../context/CatalogContext.jsx';
 import NotificationsBell from './NotificationsBell.jsx';
 
 const MAIN_LINKS = [
@@ -19,6 +19,7 @@ const navItem = ({ isActive }) =>
   }`;
 
 export default function Navbar() {
+  const { services } = useCatalog();
   const { user, logout } = useAuth();
   const { content } = useContent();
   const navigate = useNavigate();
@@ -85,7 +86,7 @@ export default function Navbar() {
               <div className="absolute left-1/2 top-full w-[560px] -translate-x-1/2 pt-2">
                 <div className="overflow-hidden rounded-2xl bg-surface p-3 shadow-2xl ring-1 ring-accent-200">
                   <div className="grid grid-cols-2 gap-1">
-                    {SERVICES.map((s) => (
+                    {services.map((s) => (
                       <button
                         key={s.slug}
                         onClick={() => go(`/services/${s.slug}`)}
@@ -210,7 +211,7 @@ export default function Navbar() {
               </button>
               {servicesOpen && (
                 <div className="space-y-0.5 px-2 pb-2">
-                  {SERVICES.map((s) => (
+                  {services.map((s) => (
                     <button
                       key={s.slug}
                       onClick={() => go(`/services/${s.slug}`)}

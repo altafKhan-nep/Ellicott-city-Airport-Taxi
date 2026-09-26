@@ -3,15 +3,16 @@ import { Phone, Check, Star, ArrowRight } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { Button } from '../../components/ui/Button.jsx';
 import { Reveal } from '../../components/ui/Reveal.jsx';
-import { SERVICES, getService } from '../../data/services.js';
+import { useCatalog } from '../../context/CatalogContext.jsx';
 import { useContent } from '../../context/ContentContext.jsx';
 
 export default function ServiceDetail() {
   const { slug } = useParams();
   const { user } = useAuth();
   const { content } = useContent();
+  const { services, serviceBySlug } = useCatalog();
+  const service = serviceBySlug(slug);
   const bookUrl = user ? '/reservations' : '/login';
-  const service = getService(slug);
 
   if (!service) {
     return (
@@ -24,7 +25,7 @@ export default function ServiceDetail() {
     );
   }
 
-  const others = SERVICES.filter((s) => s.slug !== service.slug);
+  const others = services.filter((s) => s.slug !== service.slug);
 
   return (
     <div>

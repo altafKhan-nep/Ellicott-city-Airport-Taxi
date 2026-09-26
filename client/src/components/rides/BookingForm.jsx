@@ -6,11 +6,11 @@ import { Button } from '../ui/Button.jsx';
 import { Input } from '../ui/Input.jsx';
 import LocationSearch from './LocationSearch.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
-import { VEHICLES } from '../../data/vehicles.js';
-import { SERVICES } from '../../data/services.js';
+import { useCatalog } from '../../context/CatalogContext.jsx';
 
 export default function BookingForm({ pickup, dropoff, onPickupChange, onDropoffChange }) {
   const { user } = useAuth();
+  const { fleet, services } = useCatalog();
   const navigate = useNavigate();
   const [when, setWhen] = useState('now');
   const [vehicleType, setVehicleType] = useState('');
@@ -30,6 +30,15 @@ export default function BookingForm({ pickup, dropoff, onPickupChange, onDropoff
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pickup, dropoff]);
+
+  // Picking a bigger class should pre-fill the party size instead of silently
+  // asking a van to carry 1 passenger and 0 bags.
+  useEffect(() => {
+    const v = fleet.find((x) => x.key === vehicleType);
+    if (!v) return;
+    setPassengerCount((n) => (n > (v.seats || 4) ? v.seats : n));
+    setBags((n) => (n > (v.bags ?? 0) ? v.bags : n));
+  }, [vehicleType, fleet]);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -147,9 +156,10 @@ export default function BookingForm({ pickup, dropoff, onPickupChange, onDropoff
           aria-label="Vehicle type"
         >
           <option value="" disabled>Choose vehicle — fare updates instantly</option>
-          {VEHICLES.map((v) => (
-            <option key={v.id} value={v.id}>
-              {v.label} — {v.desc}
+          {fleet.map((v) => (
+            <option key={v.key} value={v.key}>
+              {v.label}
+              {v.capacity ? ` — ${v.capacity}` : v.desc ? ` — ${v.desc}` : ''}
             </option>
           ))}
         </select>
@@ -174,7 +184,7 @@ export default function BookingForm({ pickup, dropoff, onPickupChange, onDropoff
               className={field}
             >
               <option value="" disabled>Select service (optional)</option>
-              {SERVICES.map((s) => (
+              {services.map((s) => (
                 <option key={s.slug} value={s.slug}>
                   {s.name}
                 </option>

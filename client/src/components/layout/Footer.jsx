@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom';
 import { Phone, Mail, MapPin, Clock } from 'lucide-react';
-import { SERVICES } from '../../data/services.js';
+import { useCatalog } from '../../context/CatalogContext.jsx';
 import { useContent } from '../../context/ContentContext.jsx';
 
 export default function Footer() {
+  const { services } = useCatalog();
   const { content } = useContent();
   return (
     <footer className="mt-auto bg-brand-gradient text-white">
@@ -49,7 +50,7 @@ export default function Footer() {
         <div>
           <h4 className="text-sm font-semibold text-white">Services</h4>
           <ul className="mt-3 space-y-2 text-sm text-white/75">
-            {SERVICES.slice(0, 7).map((s) => (
+            {services.slice(0, 7).map((s) => (
               <li key={s.slug}>
                 <Link to={`/services/${s.slug}`} className="transition-colors hover:text-white">
                   {s.name}

@@ -20,11 +20,12 @@ import {
 import { onRideUpdate, offRideUpdate, onRideNew, offRideNew } from '../../services/socketService.js';
 import { Spinner } from '../../components/ui/Spinner.jsx';
 import { Button } from '../../components/ui/Button.jsx';
-import { vehicleLabel } from '../../data/vehicles.js';
+import { useCatalog } from '../../context/CatalogContext.jsx';
 import { rideTone, payTone, payAccent } from '../../lib/statusTone.js';
 import { useContent } from '../../context/ContentContext.jsx';
 
 export default function Dashboard() {
+  const { vehicleLabel } = useCatalog();
   const { refresh: refreshContent } = useContent();
   const [analytics, setAnalytics] = useState(null);
   const [rides, setRides] = useState([]);

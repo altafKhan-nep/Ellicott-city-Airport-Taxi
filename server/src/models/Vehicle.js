@@ -7,11 +7,8 @@ const vehicleSchema = new mongoose.Schema(
     make: String,
     model: String,
     year: Number,
-    type: {
-      type: String,
-      enum: ['executive-sedan','economy-sedan','economy-suv','premium-suv','luxury-suv','van','mini-coach','school-bus','motorcoach'],
-      default: 'economy-sedan',
-    },
+    // Must match a FleetVehicle.key (validated by catalogService.assertVehicleKey).
+    type: { type: String, trim: true, lowercase: true, default: 'economy-sedan' },
     capacity: Number,
     status: { type: String, enum: ['active','maintenance','retired'], default: 'active' },
     assignedDriver: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
