@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Input } from '../components/ui/Input.jsx';
+import { AlertCircle, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { Button } from '../components/ui/Button.jsx';
+import AuthLayout from '../components/auth/AuthLayout.jsx';
+import PasswordField from '../components/auth/PasswordField.jsx';
 import { resetPassword } from '../services/authService.js';
 
 export default function ResetPassword() {
@@ -12,6 +14,11 @@ export default function ResetPassword() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
+
+  const set = (k) => (e) => {
+    setForm((f) => ({ ...f, [k]: e.target.value }));
+    if (error) setError('');
+  };
 
   const submit = async (e) => {
     e.preventDefault();
@@ -40,45 +47,63 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="mx-auto flex max-w-md flex-col px-4 py-12">
-      <div className="card p-8">
-        <h1 className="text-2xl font-bold">Choose a new password</h1>
-        <p className="mt-1 text-sm text-muted">Make sure it's at least 6 characters.</p>
+    <AuthLayout
+      eyebrow="Account recovery"
+      title="Choose a new"
+      highlight="password"
+      subtitle="Pick something at least 6 characters long. Resetting signs out every other device."
+      footer={
+        <Link to="/login" className="font-semibold text-brand-700 hover:underline">
+          Back to sign in
+        </Link>
+      }
+    >
+      <h2 className="font-display text-2xl font-bold tracking-tight">New password</h2>
+      <p className="mt-1.5 text-sm text-muted">Make sure it's at least 6 characters.</p>
 
-        {done ? (
-          <div className="mt-6 space-y-4">
-            <div className="rounded-xl border border-success-200 bg-success-50 px-4 py-3 text-sm text-success-800">
-              Your password has been reset. All other sessions were signed out.
-            </div>
-            <Link to="/login" className="block text-center text-sm font-semibold text-brand-700 hover:underline">
-              Sign in with your new password
-            </Link>
-          </div>
-        ) : (
-          <form onSubmit={submit} className="mt-6 space-y-4">
-            <Input
-              label="New password"
-              type="password"
-              required
-              autoComplete="new-password"
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-            />
-            <Input
-              label="Confirm new password"
-              type="password"
-              required
-              autoComplete="new-password"
-              value={form.confirm}
-              onChange={(e) => setForm({ ...form, confirm: e.target.value })}
-            />
-            {error && <p className="rounded-xl bg-brand-50 px-4 py-2.5 text-sm text-brand-700">{error}</p>}
-            <Button type="submit" size="lg" loading={loading} className="w-full">
-              Reset password
-            </Button>
-          </form>
-        )}
-      </div>
-    </div>
+      {done ? (
+        <div className="mt-7 space-y-5">
+          <p className="flex items-start gap-2 rounded-2xl border border-success-200 bg-success-50 px-4 py-3 text-sm text-success-800">
+            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>Your password has been reset. All other sessions were signed out.</span>
+          </p>
+          <Button onClick={() => window.location.assign('/login')} size="lg" className="w-full">
+            Sign in with your new password
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+        </div>
+      ) : (
+        <form onSubmit={submit} className="mt-7 space-y-4" noValidate>
+          <PasswordField
+            label="New password"
+            required
+            autoComplete="new-password"
+            placeholder="At least 6 characters"
+            value={form.password}
+            onChange={set('password')}
+          />
+          <PasswordField
+            label="Confirm new password"
+            required
+            autoComplete="new-password"
+            value={form.confirm}
+            onChange={set('confirm')}
+          />
+          {error && (
+            <p
+              role="alert"
+              className="flex items-start gap-2 rounded-2xl border border-brand-200 bg-brand-50 px-4 py-3 text-sm text-brand-700"
+            >
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+              {error}
+            </p>
+          )}
+          <Button type="submit" size="lg" loading={loading} className="w-full">
+            {loading ? 'Resetting…' : 'Reset password'}
+            {!loading && <ArrowRight className="h-4 w-4" />}
+          </Button>
+        </form>
+      )}
+    </AuthLayout>
   );
 }

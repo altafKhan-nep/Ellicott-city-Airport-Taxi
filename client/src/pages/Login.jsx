@@ -1,154 +1,167 @@
-import { useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../context/AuthContext.jsx";
-import { Input } from "../components/ui/Input.jsx";
-import { Button } from "../components/ui/Button.jsx";
-import SocialLoginButtons from "../components/auth/SocialLoginButtons.jsx";
+import { useState } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { AlertCircle, ArrowRight, User, Car, UserCog, Mail, Sparkles } from 'lucide-react';
+import { useAuth } from '../context/AuthContext.jsx';
+import { Input } from '../components/ui/Input.jsx';
+import { Button } from '../components/ui/Button.jsx';
+import AuthLayout from '../components/auth/AuthLayout.jsx';
+import PasswordField from '../components/auth/PasswordField.jsx';
+import SocialLoginButtons from '../components/auth/SocialLoginButtons.jsx';
+
+const DEMO_ACCOUNTS = [
+  { label: 'Passenger', email: 'passenger@ellicot.com', password: 'pass123', icon: User },
+  { label: 'Driver', email: 'alex@ellicot.com', password: 'driver123', icon: Car },
+  { label: 'Admin', email: 'admin@ellicot.com', password: 'admin123', icon: UserCog },
+];
 
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from || "/";
+  const from = location.state?.from || '/';
 
   const [form, setForm] = useState({
-    identifier: "",
-    password: "",
-    rememberMe: false,
+    identifier: '',
+    password: '',
+    rememberMe: true,
   });
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const set = (k) => (e) => {
+    const value = k === 'rememberMe' ? e.target.checked : e.target.value;
+    setForm((f) => ({ ...f, [k]: value }));
+    if (error) setError('');
+  };
 
   const submit = async (e) => {
     e.preventDefault();
-    setError("");
-    if (!form.identifier || !form.password) {
-      setError("Enter your email or phone number and password.");
+    setError('');
+    if (!form.identifier.trim() || !form.password) {
+      setError('Enter your email or phone number and password.');
       return;
     }
     setLoading(true);
     try {
       const loggedIn = await login(form);
       navigate(
-        loggedIn.role === "driver"
-          ? "/driver"
-          : loggedIn.role === "admin"
-            ? "/admin"
+        loggedIn.role === 'driver'
+          ? '/driver'
+          : loggedIn.role === 'admin'
+            ? '/admin'
             : from,
-        {
-          replace: true,
-        },
+        { replace: true },
       );
     } catch (err) {
       setError(
-        err.response?.data?.message || "Login failed. Please try again.",
+        err.response?.data?.message || 'Login failed. Please try again.',
       );
     } finally {
       setLoading(false);
     }
   };
 
-  const quick = [
-    {
-      label: "Passenger",
-      email: "passenger@ellicot.com",
-      password: "pass123",
-    },
-    { label: "Driver", email: "alex@ellicot.com", password: "driver123" },
-    { label: "Admin", email: "admin@ellicot.com", password: "admin123" },
-  ];
-
-  const quickFill = (q) => {
-    setForm((f) => ({ ...f, identifier: q.email, password: q.password }));
-    setError("");
+  const quickFill = (acct) => {
+    setForm({ identifier: acct.email, password: acct.password, rememberMe: true });
+    setError('');
   };
 
   return (
-    <div className="mx-auto flex max-w-md flex-col px-4 py-12">
-      <div className="card p-8">
-        <h1 className="text-2xl font-bold">Welcome back</h1>
-        <p className="mt-1 text-sm text-muted">
-          Sign in to book and manage your rides.
-        </p>
+    <AuthLayout
+      eyebrow="Member access"
+      title="Welcome back to"
+      highlight="Ellicott City"
+      subtitle="Sign in to book airport runs, track your driver live and manage every trip in one place."
+      footer={
+        <>
+          New to Ellicott City Airport Taxi?{' '}
+          <Link to="/register" className="font-semibold text-brand-700 hover:underline">
+            Create an account
+          </Link>
+        </>
+      }
+    >
+      <h2 className="font-display text-2xl font-bold tracking-tight">Sign in</h2>
+      <p className="mt-1.5 text-sm text-muted">
+        Use your email address or phone number.
+      </p>
 
-        <form onSubmit={submit} className="mt-6 space-y-4">
-          <Input
-            label="Email or phone number"
-            type="text"
-            required
-            autoComplete="username"
-            placeholder="you@example.com or (410) 365-5556"
-            value={form.identifier}
-            onChange={(e) => setForm({ ...form, identifier: e.target.value })}
-          />
-          <Input
+      <form onSubmit={submit} className="mt-7 space-y-4" noValidate>
+        <Input
+          label="Email or phone number"
+          type="text"
+          required
+          autoComplete="username"
+          icon={<Mail className="h-4 w-4" />}
+          placeholder="you@example.com or (410) 365-5556"
+          value={form.identifier}
+          onChange={set('identifier')}
+        />
+
+        <div>
+          <PasswordField
             label="Password"
-            type="password"
             required
-            autoComplete="current-password"
             value={form.password}
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
+            onChange={set('password')}
           />
-
-          <div className="flex items-center justify-between gap-3">
-            <label className="flex items-center gap-2 text-sm text-ink">
-              <input
-                type="checkbox"
-                checked={form.rememberMe}
-                onChange={(e) =>
-                  setForm({ ...form, rememberMe: e.target.checked })
-                }
-                className="h-4 w-4 rounded border-accent-300 accent-brand-600"
-              />
-              Remember me
-            </label>
+          <div className="-mt-1 text-right">
             <Link
               to="/forgot-password"
-              className="text-sm font-medium text-brand-700 hover:underline"
+              className="text-xs font-medium text-brand-700 hover:underline"
             >
               Forgot password?
             </Link>
           </div>
-
-          {error && (
-            <p className="rounded-xl bg-brand-50 px-4 py-2.5 text-sm text-brand-700">
-              {error}
-            </p>
-          )}
-          <Button type="submit" size="lg" loading={loading} className="w-full">
-            Sign in
-          </Button>
-        </form>
-
-        <SocialLoginButtons />
-
-        <div className="mt-6 border-t border-accent-100 pt-4">
-          <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted">
-            Quick demo accounts
-          </p>
-          <div className="grid grid-cols-3 gap-2">
-            {quick.map((q) => (
-              <button
-                key={q.label}
-                onClick={() => quickFill(q)}
-                className="rounded-lg border border-accent-200 px-2 py-2 text-xs font-medium transition-colors hover:border-brand-400 hover:text-brand-700"
-              >
-                {q.label}
-              </button>
-            ))}
-          </div>
         </div>
 
-        <p className="mt-6 text-center text-sm text-muted">
-          New to Ellicott City Airport Taxi?{" "}
-          <Link
-            to="/register"
-            className="font-semibold text-brand-700 hover:underline"
+        <label className="flex cursor-pointer items-center gap-2.5 text-sm text-ink">
+          <input
+            type="checkbox"
+            checked={form.rememberMe}
+            onChange={set('rememberMe')}
+            className="h-4 w-4 rounded border-accent-300 accent-brand-600"
+          />
+          Keep me signed in for 30 days
+        </label>
+
+        {error && (
+          <p
+            role="alert"
+            className="flex items-start gap-2 rounded-2xl border border-brand-200 bg-brand-50 px-4 py-3 text-sm text-brand-700"
           >
-            Create an account
-          </Link>
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+            {error}
+          </p>
+        )}
+
+        <Button type="submit" size="lg" loading={loading} className="w-full">
+          {loading ? 'Signing in…' : 'Sign in'}
+          {!loading && <ArrowRight className="h-4 w-4" />}
+        </Button>
+      </form>
+
+      <SocialLoginButtons />
+
+      <div className="mt-7 border-t border-accent-200 pt-5">
+        <p className="mb-3 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-muted">
+          <Sparkles className="h-3.5 w-3.5 text-gold-500" />
+          Try a demo account
         </p>
+        <div className="grid grid-cols-3 gap-2">
+          {DEMO_ACCOUNTS.map(({ label, icon: Icon, ...acct }) => (
+            <button
+              key={label}
+              type="button"
+              onClick={() => quickFill(acct)}
+              className="group flex flex-col items-center gap-1.5 rounded-2xl border border-accent-200 bg-surface px-2 py-3 text-xs font-semibold text-ink transition-all hover:-translate-y-0.5 hover:border-brand-300 hover:text-brand-700 hover:shadow-md"
+            >
+              <Icon className="h-4 w-4 text-brand-600" />
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
-    </div>
+    </AuthLayout>
   );
 }

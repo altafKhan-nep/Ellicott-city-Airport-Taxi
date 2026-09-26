@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Input } from '../components/ui/Input.jsx';
 import { Button } from '../components/ui/Button.jsx';
+import { Mail, ArrowRight, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { forgotPassword } from '../services/authService.js';
+import AuthLayout from '../components/auth/AuthLayout.jsx';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
@@ -31,18 +33,24 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="mx-auto flex max-w-md flex-col px-4 py-12">
-      <div className="card p-8">
-        <h1 className="text-2xl font-bold">Forgot your password?</h1>
-        <p className="mt-1 text-sm text-muted">
-          Enter your account email and we'll send you a reset link.
-        </p>
+    <AuthLayout
+      eyebrow="Account recovery"
+      title="Reset your"
+      highlight="password"
+      subtitle="Enter the email on your account and we'll send a secure reset link. It expires in one hour."
+      footer={<Link to="/login" className="font-semibold text-brand-700 hover:underline">Back to sign in</Link>}
+    >
+        <h2 className="font-display text-2xl font-bold tracking-tight">Forgot password?</h2>
+        <p className="mt-1.5 text-sm text-muted">We'll email you a link to choose a new one.</p>
 
         {sent ? (
           <div className="mt-6 space-y-4">
-            <div className="rounded-xl border border-success-200 bg-success-50 px-4 py-3 text-sm text-success-800">
-              If an account exists for <strong>{email}</strong>, a password reset link is on its way.
-              It expires in 1 hour.
+            <div className="flex items-start gap-2 rounded-2xl border border-success-200 bg-success-50 px-4 py-3 text-sm text-success-800">
+              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
+              <span>
+                If an account exists for <strong>{email}</strong>, a password reset link is on its way.
+                It expires in 1 hour.
+              </span>
             </div>
             {devLink && (
               <div className="rounded-xl bg-accent-50 px-4 py-3 text-sm">
@@ -60,31 +68,31 @@ export default function ForgotPassword() {
                 Try again
               </button>
             </p>
-            <Link to="/login" className="block text-center text-sm font-semibold text-brand-700 hover:underline">
-              Back to sign in
-            </Link>
           </div>
         ) : (
-          <form onSubmit={submit} className="mt-6 space-y-4">
+          <form onSubmit={submit} className="mt-7 space-y-4" noValidate>
             <Input
               label="Email"
               type="email"
               required
               autoComplete="email"
+              icon={<Mail className="h-4 w-4" />}
               placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
-            {error && <p className="rounded-xl bg-brand-50 px-4 py-2.5 text-sm text-brand-700">{error}</p>}
+            {error && (
+              <p role="alert" className="flex items-start gap-2 rounded-2xl border border-brand-200 bg-brand-50 px-4 py-3 text-sm text-brand-700">
+                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                {error}
+              </p>
+            )}
             <Button type="submit" size="lg" loading={loading} className="w-full">
-              Send reset link
+              {loading ? 'Sending…' : 'Send reset link'}
+              {!loading && <ArrowRight className="h-4 w-4" />}
             </Button>
-            <Link to="/login" className="block text-center text-sm text-muted hover:text-ink">
-              Remembered your password? <span className="font-semibold text-brand-700">Sign in</span>
-            </Link>
           </form>
         )}
-      </div>
-    </div>
+    </AuthLayout>
   );
 }

@@ -1,4 +1,4 @@
-export function Input({ label, icon, error, className = '', ...props }) {
+export function Input({ label, icon, trailing, error, hint, className = '', ...props }) {
   return (
     <label className={`block ${className}`}>
       {label && (
@@ -13,11 +13,15 @@ export function Input({ label, icon, error, className = '', ...props }) {
         <input
           className={`input-pill w-full border bg-surface px-4 py-3 text-sm outline-none transition-colors placeholder:text-accent-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 ${
             icon ? 'pl-10' : ''
-          } ${error ? 'border-brand-400' : 'border-accent-300'}`}
+          } ${trailing ? 'pr-12' : ''} ${error ? 'border-brand-400' : 'border-accent-300'}`}
           {...props}
         />
+        {trailing && (
+          <span className="absolute right-2 top-1/2 -translate-y-1/2">{trailing}</span>
+        )}
       </div>
       {error && <span className="mt-1 block text-xs text-brand-600">{error}</span>}
+      {!error && hint && <span className="mt-1 block text-xs text-muted">{hint}</span>}
     </label>
   );
 }
