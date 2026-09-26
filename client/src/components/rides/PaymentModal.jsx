@@ -21,6 +21,9 @@ export default function PaymentModal({ ride, onClose, onPaid }) {
   const [result, setResult] = useState(null);
   const [disabled, setDisabled] = useState(false);
   const [supportPhone, setSupportPhone] = useState('');
+  // Server has no Stripe secret (or it is out of sync with the client key)
+  // -> fall back to the sandbox card form instead of rendering an empty panel.
+  const [stripeUnavailable, setStripeUnavailable] = useState(false);
 
   const stripePromise = useMemo(
     () => (STRIPE_PK ? loadStripe(STRIPE_PK) : null),
@@ -38,7 +41,8 @@ export default function PaymentModal({ ride, onClose, onPaid }) {
 
   // Fetch a Stripe PaymentIntent the first time the card tab is shown.
   useEffect(() => {
-    if (disabled || result || method !== 'card' || clientSecret || !STRIPE_PK) return;
+    if (disabled || result || method !== 'card' || clientSecret || !STRIPE_PK || stripeUnavailable)
+      return;
     let cancelled = false;
     (async () => {
       setIntentLoading(true);
@@ -47,7 +51,12 @@ export default function PaymentModal({ ride, onClose, onPaid }) {
         const { data } = await createPaymentIntent(ride._id);
         if (!cancelled) setClientSecret(data.clientSecret);
       } catch (err) {
-        if (!cancelled) setError(err.response?.data?.message || 'Could not start checkout.');
+        if (cancelled) return;
+        if (err.response?.status === 503) {
+          setStripeUnavailable(true);
+        } else {
+          setError(err.response?.data?.message || 'Could not start checkout.');
+        }
       } finally {
         if (!cancelled) setIntentLoading(false);
       }
@@ -55,7 +64,7 @@ export default function PaymentModal({ ride, onClose, onPaid }) {
     return () => {
       cancelled = true;
     };
-  }, [disabled, result, method, clientSecret, ride._id]);
+  }, [disabled, result, method, clientSecret, ride._id, stripeUnavailable]);
 
   const last4 = card.number.replace(/\s/g, '').slice(-4);
 
@@ -209,7 +218,7 @@ export default function PaymentModal({ ride, onClose, onPaid }) {
                   </Button>
                 </div>
               </div>
-            ) : STRIPE_PK ? (
+            ) : STRIPE_PK && !stripeUnavailable ? (
               <div className="mx-auto mt-5 w-full max-w-sm">
                 {intentLoading ? (
                   <div className="flex items-center justify-center py-8">
@@ -267,6 +276,12 @@ export default function PaymentModal({ ride, onClose, onPaid }) {
               </div>
             ) : (
               <form onSubmit={sandboxSubmit} className="mt-5 space-y-4">
+                {stripeUnavailable && (
+                  <p className="rounded-xl border border-gold-200 bg-gold-50 px-4 py-2.5 text-xs text-gold-800">
+                    Online card checkout is being configured. Use the test card simulator below —
+                    a card ending 0002 is declined.
+                  </p>
+                )}
                 <Input
                   label="Card number"
                   inputMode="numeric"

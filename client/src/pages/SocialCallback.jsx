@@ -26,6 +26,7 @@ const roleFromToken = (token) => {
 
 export default function SocialCallback() {
   const [status, setStatus] = useState('loading');
+  const [reason, setReason] = useState('');
 
   useEffect(() => {
     const error = getQuery('error');
@@ -33,6 +34,7 @@ export default function SocialCallback() {
     const refresh = getQuery('refreshToken');
 
     if (error) {
+      setReason(error);
       setStatus('error');
       return;
     }
@@ -66,9 +68,11 @@ export default function SocialCallback() {
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-brand-100 text-2xl text-brand-700">
               !
             </div>
-            <h1 className="text-2xl font-bold">Sign-in failed</h1>
+            <h1 className="font-display text-2xl font-bold">Sign-in failed</h1>
             <p className="mt-2 text-sm text-muted">
-              We couldn't log you in with that account. Please try again or use another method.
+              {reason.endsWith('_unavailable')
+                ? 'Social sign-in is not available right now. Please use your email or phone number and password.'
+                : "We couldn't log you in with that account. Please try again or use another method."}
             </p>
             <Link to="/login" className="mt-6 block">
               <Button size="xl" variant="outline" className="w-full">

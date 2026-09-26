@@ -84,7 +84,9 @@ const providerConfigured = (provider) =>
 // Step 1: kick off the OAuth dance at the provider.
 export const socialRedirect = (provider) => (req, res, next) => {
   if (!providerConfigured(provider)) {
-    return res.status(503).json({ message: 'Social login is not configured.' });
+    // Send the browser back into the SPA so the user gets the designed error
+    // state instead of landing on a raw JSON 503 page.
+    return res.redirect(`${clientUrl()}/auth/social?error=${provider}_unavailable`);
   }
   const opts = { session: false, state: false, scope: ['profile', 'email'] };
   passport.authenticate(provider, opts)(req, res, next);

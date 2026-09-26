@@ -21,12 +21,14 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
+      // Point at a different backend with VITE_PROXY_TARGET when port 5001 is
+      // taken (e.g. by another local project): VITE_PROXY_TARGET=http://localhost:5002
       '/api': {
-        target: 'http://localhost:5001',
+        target: process.env.VITE_PROXY_TARGET || 'http://localhost:5001',
         changeOrigin: true,
       },
       '/socket.io': {
-        target: 'http://localhost:5001',
+        target: process.env.VITE_PROXY_TARGET || 'http://localhost:5001',
         ws: true,
         changeOrigin: true,
       },

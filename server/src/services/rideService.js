@@ -22,16 +22,47 @@ const cacheSet = (cache, key, value, ttlMs = 5 * 60 * 1000) => {
   cache.set(key, { value, expiry: Date.now() + ttlMs });
 };
 
+// HTTP-aware error, matching the inline `Object.assign(new Error(...))` style
+// used across this module.
+const fail = (message, statusCode = 400) =>
+  Object.assign(new Error(message), { statusCode });
+
+// Normalise a pickup/drop-off into { address, lat, lng }.
+// Accepts either client-supplied coordinates or a plain address to geocode.
+const resolveStop = async (stop, label) => {
+  if (!stop || typeof stop !== 'object') {
+    throw fail(`${label} location is required`, 400);
+  }
+  const resolved = Number.isFinite(stop.lat) && Number.isFinite(stop.lng)
+    ? { address: String(stop.address || '').trim(), lat: stop.lat, lng: stop.lng }
+    : await geocode(stop.address);
+
+  if (!Number.isFinite(resolved.lat) || !Number.isFinite(resolved.lng)) {
+    throw fail(`${label} location could not be resolved`, 400);
+  }
+  if (!resolved.address) {
+    throw fail(`${label} address is required`, 400);
+  }
+  return resolved;
+};
+
 // Geocoding via Nominatim (OpenStreetMap) - free, no API key
 // e.g. GET https://nominatim.openstreetmap.org/search?q=...&format=json
 const GEOCODE_URL = 'https://nominatim.openstreetmap.org/search';
 
 export const geocode = async (query) => {
-  const q = String(query).trim().toLowerCase();
+  // Must be a real address string. Callers used to pass the whole stop object,
+  // which stringified to "[object Object]" — Nominatim then resolved it to a
+  // random street and, because the cache key was that same string, poisoned the
+  // cache for every other address for 10 minutes.
+  if (typeof query !== 'string' || !query.trim()) {
+    throw fail('A location address is required', 400);
+  }
+  const q = query.trim().toLowerCase();
   const cached = cacheGet(GEOCODE_CACHE, q);
   if (cached) return cached;
   const url = new URL(GEOCODE_URL);
-  url.searchParams.set('q', query);
+  url.searchParams.set('q', query.trim());
   url.searchParams.set('format', 'json');
   url.searchParams.set('limit', '1');
 
@@ -87,10 +118,17 @@ const estimateFare = (distanceKm, durationMin, vehicleType, overrides = {}) => {
 };
 
 export const createRide = async (passengerId, input) => {
-  const pickup = input.pickup.lat ? input.pickup : await geocode(input.pickup);
-  const dropoff = input.dropoff.lat ? input.dropoff : await geocode(input.dropoff);
+  const pickup = await resolveStop(input.pickup, 'Pickup');
+  const dropoff = await resolveStop(input.dropoff, 'Drop-off');
+
+  if (pickup.lat === dropoff.lat && pickup.lng === dropoff.lng) {
+    throw fail('Pickup and drop-off must be different locations', 400);
+  }
 
   const route = await getRoute(pickup, dropoff);
+  if (!route.distanceKm) {
+    throw fail('Could not find a drivable route between those locations', 400);
+  }
   const settings = await getSettings();
   const estimated = estimateFare(route.distanceKm, route.durationMin, input.vehicleType, settings);
 
@@ -285,10 +323,14 @@ export const editRide = async (rideId, passengerId, input) => {
   let dropoff = ride.dropoff;
 
   if (input.pickup !== undefined) {
-    pickup = input.pickup.lat ? input.pickup : await geocode(input.pickup);
+    pickup = await resolveStop(input.pickup, 'Pickup');
   }
   if (input.dropoff !== undefined) {
-    dropoff = input.dropoff.lat ? input.dropoff : await geocode(input.dropoff);
+    dropoff = await resolveStop(input.dropoff, 'Drop-off');
+  }
+
+  if (pickup.lat === dropoff.lat && pickup.lng === dropoff.lng) {
+    throw fail('Pickup and drop-off must be different locations', 400);
   }
 
   const changedRoute =
