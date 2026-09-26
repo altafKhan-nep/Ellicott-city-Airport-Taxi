@@ -419,17 +419,29 @@ Known keys (defaults in `settingsService.DEFAULTS`): `baseFare`, `perKm`,
 ## Seed Credentials
 
 ```bash
-cd server && npm run seed   # resets users + driver positions
+cd server && npm run seed   # resets users, driver positions and app settings
 ```
+
+Each account exists on **two domains** — the current `@ridetaxi.com` brand domain and the
+legacy `@ellicot.com` domain — with different phone numbers, because sign-in also resolves a
+bare phone number. Either login works.
 
 | Role | Email | Password |
 |------|-------|----------|
-| admin | `admin@ellicot.com` | `admin123` |
-| passenger | `passenger@ellicot.com` | `pass123` |
-| driver (sedan) | `alex@ellicot.com` | `driver123` |
-| driver (suv) | `sam@ellicot.com` | `driver123` |
+| admin | `admin@ridetaxi.com` | `admin123` |
+| passenger | `passenger@ridetaxi.com` | `pass123` |
+| driver (sedan) | `alex@ridetaxi.com` | `driver123` |
+| driver (suv) | `sam@ridetaxi.com` | `driver123` |
+| admin (legacy) | `admin@ellicot.com` | `admin123` |
+| passenger (legacy) | `passenger@ellicot.com` | `pass123` |
+| driver (legacy) | `alex@ellicot.com` / `sam@ellicot.com` | `driver123` |
 
 Driver positions are seeded near Howard County, MD (~39.20, -76.85). "Nearby drivers" queries use these seeded `Location` docs — no drivers online until you run the seed.
+
+> **Database is per-app.** `MONGO_URI` must point at `ellicottaxi`, **not** `ridetaxi`. The
+> `ridetaxi` database on this machine belongs to a different project (`../RLS`). Sharing it let
+> that project's admin accounts authenticate here and granted them Ellicot admin access, and its
+> support-phone/email settings overrode ours. Never point two apps at the same database.
 
 ## Auth Flow
 

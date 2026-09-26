@@ -12,6 +12,7 @@ const users = [
     name: 'Admin',
     email: 'admin@ellicot.com',
     phone: '+1 555 010 0000',
+    brandPhone: '+1 555 019 0000',
     password: 'admin123',
     role: 'admin',
     emailVerified: true,
@@ -20,6 +21,7 @@ const users = [
     name: 'John Passenger',
     email: 'passenger@ellicot.com',
     phone: '+1 555 010 1000',
+    brandPhone: '+1 555 019 1000',
     password: 'pass123',
     role: 'passenger',
     emailVerified: true,
@@ -28,6 +30,7 @@ const users = [
     name: 'Driver Alex',
     email: 'alex@ellicot.com',
     phone: '+1 555 010 2001',
+    brandPhone: '+1 555 019 2001',
     password: 'driver123',
     role: 'driver',
     emailVerified: true,
@@ -42,6 +45,7 @@ const users = [
     name: 'Driver Sam',
     email: 'sam@ellicot.com',
     phone: '+1 555 010 2002',
+    brandPhone: '+1 555 019 2002',
     password: 'driver123',
     role: 'driver',
     emailVerified: true,
@@ -54,6 +58,16 @@ const users = [
   },
 ];
 
+// Each account exists on the legacy @ellicot.com domain and on the current
+// @ridetaxi.com brand domain, so either login works in local dev. Phones differ
+// because sign-in also resolves a bare phone number.
+const BRAND_DOMAIN = 'ridetaxi.com';
+const brandUsers = users.map(({ brandPhone, ...u }) => ({
+  ...u,
+  email: u.email.replace(/@.*$/, `@${BRAND_DOMAIN}`),
+  phone: brandPhone,
+}));
+
 const seedLocations = async (drivers) => {
   // Howard County, Maryland area
   const spots = [
@@ -62,11 +76,14 @@ const seedLocations = async (drivers) => {
     { lat: 39.198, lng: -76.846 },
   ];
   for (let i = 0; i < drivers.length; i++) {
+    // Wrap around so the seed never breaks when the driver count exceeds the
+    // number of hand-placed spots.
+    const spot = spots[i % spots.length];
     await Location.findOneAndUpdate(
       { driver: drivers[i]._id },
       {
         driver: drivers[i]._id,
-        coordinates: { type: 'Point', coordinates: [spots[i].lng, spots[i].lat] },
+        coordinates: { type: 'Point', coordinates: [spot.lng, spot.lat] },
         updatedAt: new Date(),
       },
       { upsert: true }
@@ -81,7 +98,7 @@ const run = async () => {
   await AppSetting.deleteMany({});
 
   const created = [];
-  for (const u of users) {
+  for (const u of [...users, ...brandUsers]) {
     const user = await User.create(u);
     created.push(user);
   }
@@ -96,8 +113,8 @@ const run = async () => {
     { key: 'supportEmail', value: 'chriskbonsu@gmail.com' },
   ]);
 
-  console.log('Seed complete:');
-  users.forEach((u) => console.log(`  ${u.role.padEnd(9)} ${u.email} / ${u.password}`));
+  console.log(`Seed complete (${mongoose.connection.name}):`);
+  [...users, ...brandUsers].forEach((u) => console.log(`  ${u.role.padEnd(9)} ${u.email} / ${u.password}`));
   await mongoose.connection.close();
   process.exit(0);
 };
