@@ -141,9 +141,9 @@ export default function Register() {
   return (
     <AuthLayout
       eyebrow="Get started"
-      title="Create your"
-      highlight="account"
-      subtitle="One account for airport runs, corporate billing, events and live tracking across MD, DC and VA."
+      title="One account for"
+      highlight="every kind of trip"
+      subtitle="Airport transfers, corporate billing, events and live tracking — create an account in under a minute."
       footer={
         <>
           Already have an account?{' '}

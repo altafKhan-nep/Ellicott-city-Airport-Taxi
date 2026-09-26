@@ -69,9 +69,9 @@ export default function Login() {
   return (
     <AuthLayout
       eyebrow="Member access"
-      title="Welcome back to"
-      highlight="Ellicott City"
-      subtitle="Sign in to book airport runs, track your driver live and manage every trip in one place."
+      title="Airport runs and rides across"
+      highlight="Maryland, DC & VA"
+      subtitle="Sign in to book a transfer, track your driver live and manage every trip in one place."
       footer={
         <>
           New to Ellicott City Airport Taxi?{' '}
