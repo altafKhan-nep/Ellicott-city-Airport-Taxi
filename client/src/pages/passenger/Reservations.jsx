@@ -113,15 +113,15 @@ export default function Reservations() {
           with clear arrival time and route, every step of the way.
         </p>
         <div className="mt-5 flex flex-wrap gap-2">
-          <span className="inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-1.5 text-xs font-medium text-brand-800 shadow-sm">
+          <span className="inline-flex items-center gap-2 rounded-full bg-surface px-3.5 py-1.5 text-xs font-medium text-brand-800 shadow-sm">
             <span className="h-2 w-2 rounded-full bg-brand-500" />
             Live driver tracking
           </span>
-          <span className="inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-1.5 text-xs font-medium text-brand-800 shadow-sm">
+          <span className="inline-flex items-center gap-2 rounded-full bg-surface px-3.5 py-1.5 text-xs font-medium text-brand-800 shadow-sm">
             <span className="h-2 w-2 rounded-full bg-brand-500" />
             Upfront fare estimate
           </span>
-          <span className="inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-1.5 text-xs font-medium text-brand-800 shadow-sm">
+          <span className="inline-flex items-center gap-2 rounded-full bg-surface px-3.5 py-1.5 text-xs font-medium text-brand-800 shadow-sm">
             <span className="h-2 w-2 rounded-full bg-brand-500" />
             Sedan · SUV · Van
           </span>
@@ -136,22 +136,22 @@ export default function Reservations() {
           className="inline-flex min-h-11 items-center gap-2 rounded-full bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-700 focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
           aria-label="Use my current location for pickup"
         >
-          <span className="h-2 w-2 animate-pulse rounded-full bg-white" />
+          <span className="h-2 w-2 animate-pulse rounded-full bg-surface" />
           Use my location
         </button>
         <span className="text-xs text-muted">or tap the map — fare estimate works without sign-in</span>
       </div>
       {geoError && (
-        <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
-          <p className="text-sm text-amber-800">We couldn't access your location{geoError ? ` (${geoError})` : ''}.</p>
+        <div className="mb-4 rounded-2xl border border-gold-200 bg-gold-50 px-4 py-3">
+          <p className="text-sm text-gold-800">We couldn't access your location{geoError ? ` (${geoError})` : ''}.</p>
         </div>
       )}
 
       {/* Booking card */}
-      <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+      <section className="overflow-hidden panel">
         <div className="grid lg:grid-cols-5">
           {/* Form */}
-          <div className="border-slate-200 lg:col-span-2 lg:border-r">
+          <div className="border-accent-200 lg:col-span-2 lg:border-r">
             <BookingForm
               pickup={pickup}
               dropoff={dropoff}
@@ -185,7 +185,7 @@ export default function Reservations() {
         </div>
 
         {/* Nearby drivers strip */}
-        <div className="border-t border-slate-200 bg-slate-50/60 px-6 py-5">
+        <div className="border-t border-accent-200 bg-accent-50/60 px-6 py-5">
           <div className="mb-3 flex items-center justify-between">
             <h3 className="text-sm font-semibold text-ink">
               {pickup ? 'Drivers near your pickup' : 'Drivers in the area'}
@@ -198,15 +198,15 @@ export default function Reservations() {
           </div>
 
           {drivers.length === 0 && !loadingDrivers ? (
-            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
-              <p className="text-sm font-medium text-amber-800">
+            <div className="rounded-2xl border border-gold-200 bg-gold-50 p-4">
+              <p className="text-sm font-medium text-gold-800">
                 {pickup && (pickup.lat < 38 || pickup.lat > 40 || pickup.lng < -77.5 || pickup.lng > -76)
                   ? `No drivers in ${pickup.address?.slice(0,40)} — Service area is Maryland, DC, VA. Tap "Use my location" when in MD/DL/VA.`
                   : pickup
                     ? 'No drivers within 50km. They may be offline — use "Use my location" near Ellicott City or try Executive Sedan / Premium SUV.'
                     : 'Choose a pickup near Ellicott City, MD to find drivers. Service area: Maryland, DC, Virginia.'}
               </p>
-              <p className="mt-1 text-xs text-amber-700">Service area: Maryland, DC, Virginia.</p>
+              <p className="mt-1 text-xs text-gold-700">Service area: Maryland, DC, Virginia.</p>
             </div>
           ) : (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -215,7 +215,7 @@ export default function Reservations() {
                   key={d._id}
                   type="button"
                   onClick={() => selectDriver(d)}
-                  className={`card-lift flex items-center gap-3 rounded-2xl border bg-white p-3 text-left transition-all ${
+                  className={`card-lift flex items-center gap-3 rounded-2xl border bg-surface p-3 text-left transition-all ${
                     selectedDriver?._id === d._id
                       ? 'border-brand-500 ring-2 ring-brand-200'
                       : 'border-accent-200 hover:border-brand-300'

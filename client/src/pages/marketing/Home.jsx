@@ -101,7 +101,7 @@ export default function Home() {
 
               <div className="mt-8 flex flex-wrap items-center gap-4">
                 <Link to={bookUrl}>
-                  <Button size="lg" className="bg-white !text-brand-900 shadow-xl hover:bg-brand-50">
+                  <Button size="lg" className="bg-surface !text-brand-900 shadow-xl hover:bg-brand-50">
                     Book your ride online
                   </Button>
                 </Link>
@@ -128,27 +128,27 @@ export default function Home() {
 
             {/* Quick quote card */}
             <div className="relative z-10">
-              <div className="rounded-3xl bg-white p-6 text-ink shadow-2xl sm:p-8">
+              <div className="rounded-3xl bg-surface p-6 text-ink shadow-2xl sm:p-8">
                 <h3 className="text-xl font-bold">Plan your trip</h3>
                 <p className="mt-1 text-sm text-muted">
                   Live fare estimate · real-time availability
                 </p>
 
                 <div className="mt-6 space-y-4">
-                  <div className="flex items-center gap-3 rounded-full border border-slate-200 bg-slate-50 px-4 py-3">
+                  <div className="flex items-center gap-3 rounded-full border border-accent-200 bg-accent-50 px-4 py-3">
                     <MapPin className="h-4 w-4 text-brand-600" />
-                    <span className="text-sm text-slate-500">Pickup — where are you?</span>
+                    <span className="text-sm text-muted">Pickup — where are you?</span>
                   </div>
-                  <div className="flex items-center gap-3 rounded-full border border-slate-200 bg-slate-50 px-4 py-3">
+                  <div className="flex items-center gap-3 rounded-full border border-accent-200 bg-accent-50 px-4 py-3">
                     <Flag className="h-4 w-4 text-brand-600" />
-                    <span className="text-sm text-slate-500">Dropoff — where to?</span>
+                    <span className="text-sm text-muted">Dropoff — where to?</span>
                   </div>
                 </div>
 
                 <div className="mt-4 rounded-2xl bg-brand-gradient-soft px-5 py-4">
                   <div className="flex items-center justify-between text-sm">
                     <span className="font-medium text-brand-800">Live availability</span>
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-semibold text-brand-700 shadow-sm">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-surface px-3 py-1 text-xs font-semibold text-brand-700 shadow-sm">
                       <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand-500" />
                       Drivers online
                     </span>
@@ -243,7 +243,7 @@ export default function Home() {
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link to={bookUrl}>
-                  <Button size="lg" className="bg-white !text-brand-900 shadow-lg hover:bg-brand-50">
+                  <Button size="lg" className="bg-surface !text-brand-900 shadow-lg hover:bg-brand-50">
                     Get a free quote
                   </Button>
                 </Link>
@@ -284,7 +284,7 @@ export default function Home() {
               <Reveal key={s.slug} delay={(i % 3) * 100} className="h-full">
                 <Link
                   to={`/services/${s.slug}`}
-                  className="card-lift group relative flex h-full flex-col rounded-3xl border border-slate-200 bg-white p-7 shadow-sm"
+                  className="card-lift group relative flex h-full flex-col card p-7"
                 >
                   <div className="absolute inset-x-0 top-0 h-1.5 rounded-t-3xl bg-brand-gradient opacity-0 transition-opacity group-hover:opacity-100" />
                   <span className="grid h-14 w-14 place-items-center rounded-2xl bg-brand-gradient-soft">
@@ -329,7 +329,7 @@ export default function Home() {
               </p>
               <Link
                 to="/fleet"
-                className="mt-6 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-brand-900 shadow-lg transition-colors hover:bg-brand-50"
+                className="mt-6 inline-flex items-center gap-2 rounded-full bg-surface px-6 py-3 text-sm font-semibold text-brand-900 shadow-lg transition-colors hover:bg-brand-50"
               >
                 Explore the fleet <ArrowRight className="h-4 w-4" />
               </Link>
@@ -355,7 +355,7 @@ export default function Home() {
           <div className="mt-12 grid gap-6 md:grid-cols-3">
             {STEPS.map((s, i) => (
               <Reveal key={s.n} delay={i * 120} className="h-full">
-                <div className="card-lift h-full rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+                <div className="card-lift h-full card p-8">
                   <div className="text-brand-gradient text-4xl font-extrabold">{s.n}</div>
                   <h3 className="mt-4 text-lg font-bold text-ink">{s.t}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-muted">{s.d}</p>
@@ -426,7 +426,7 @@ export default function Home() {
             {AREAS.map((a) => (
               <span
                 key={a}
-                className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-ink shadow-sm transition-colors hover:border-brand-300"
+                className="rounded-full border border-accent-200 bg-surface px-4 py-2 text-sm font-medium text-ink shadow-sm transition-colors hover:border-brand-300"
               >
                 {a}
               </span>
@@ -453,7 +453,7 @@ export default function Home() {
             </Link>
             <a
               href="tel:4103655556"
-              className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-base font-semibold text-brand-800 shadow-sm transition-colors hover:bg-brand-50"
+              className="inline-flex items-center gap-2 rounded-full bg-surface px-6 py-3 text-base font-semibold text-brand-800 shadow-sm transition-colors hover:bg-brand-50"
             >
               <Phone className="h-4 w-4" />
               (410) 365-5556

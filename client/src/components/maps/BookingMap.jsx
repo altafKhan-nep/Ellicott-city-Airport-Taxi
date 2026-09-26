@@ -87,7 +87,7 @@ function LocateButton({ onLocate, userPosition }) {
           map.flyTo([userPosition.lat, userPosition.lng], map.getZoom() || 13, { animate: true });
         }
       }}
-      className="absolute bottom-20 right-3 z-[1000] grid h-11 w-11 place-items-center rounded-full bg-white text-brand-900 shadow-lg ring-1 ring-slate-200 transition-colors hover:bg-brand-50"
+      className="absolute bottom-20 right-3 z-[1000] grid h-11 w-11 place-items-center rounded-full bg-surface text-brand-900 shadow-lg ring-1 ring-accent-200 transition-colors hover:bg-brand-50"
     >
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-5.5 w-5.5">
         <path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z" fill="currentColor" opacity="0.45" />

@@ -79,7 +79,7 @@ export default function EditRideModal({ ride, onClose, onSaved }) {
         required
       />
       {activeField === field && suggestions && suggestions.length > 0 && (
-        <ul className="absolute z-20 mt-1 max-h-56 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
+        <ul className="absolute z-20 mt-1 max-h-56 w-full overflow-y-auto rounded-xl border border-accent-200 bg-surface py-1 shadow-lg">
           {suggestions.map((s, i) => (
             <li key={i}>
               <button
@@ -98,7 +98,7 @@ export default function EditRideModal({ ride, onClose, onSaved }) {
 
   return (
     <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-brand-950/50 p-4" role="dialog" aria-modal="true">
-      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
+      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-surface p-6 shadow-2xl">
         <h2 className="text-lg font-bold">Edit ride</h2>
         <p className="mt-1 text-sm text-muted">Changes apply while the ride is still pending.</p>
 
@@ -110,7 +110,7 @@ export default function EditRideModal({ ride, onClose, onSaved }) {
             <label className="block">
               <span className="mb-1.5 block text-sm font-medium text-ink">Vehicle</span>
               <select
-                className="input-pill w-full border border-slate-300 bg-white px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200"
+                className="input-pill w-full border border-accent-300 bg-surface px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200"
                 value={form.vehicleType}
                 onChange={(e) => setForm({ ...form, vehicleType: e.target.value })}
               >
@@ -125,7 +125,7 @@ export default function EditRideModal({ ride, onClose, onSaved }) {
                 type="number"
                 min="1"
                 max="16"
-                className="input-pill w-full border border-slate-300 bg-white px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200"
+                className="input-pill w-full border border-accent-300 bg-surface px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200"
                 value={form.passengerCount}
                 onChange={(e) => setForm({ ...form, passengerCount: e.target.value })}
               />
@@ -140,7 +140,7 @@ export default function EditRideModal({ ride, onClose, onSaved }) {
             onChange={(e) => setForm({ ...form, bags: e.target.value })}
           />
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm text-brand-600">{error}</p>}
           <div className="flex gap-2 pt-1">
             <Button type="button" variant="secondary" onClick={onClose}>Cancel</Button>
             <Button type="submit" loading={loading} className="flex-1">Save changes</Button>

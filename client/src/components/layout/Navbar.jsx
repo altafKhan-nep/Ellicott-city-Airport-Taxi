@@ -81,7 +81,7 @@ export default function Navbar() {
 
             {servicesOpen && (
               <div className="absolute left-1/2 top-full w-[560px] -translate-x-1/2 pt-2">
-                <div className="overflow-hidden rounded-2xl bg-white p-3 shadow-2xl ring-1 ring-slate-200">
+                <div className="overflow-hidden rounded-2xl bg-surface p-3 shadow-2xl ring-1 ring-accent-200">
                   <div className="grid grid-cols-2 gap-1">
                     {SERVICES.map((s) => (
                       <button
@@ -99,7 +99,7 @@ export default function Navbar() {
                       </button>
                     ))}
                   </div>
-                  <div className="mt-1 border-t border-slate-100 pt-2">
+                  <div className="mt-1 border-t border-accent-100 pt-2">
                     <button
                       onClick={() => go('/services')}
                       className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold text-brand-700 transition-colors hover:bg-brand-50"
@@ -155,7 +155,7 @@ export default function Navbar() {
                 </Link>
                 <Link
                   to="/register"
-                  className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-brand-700 shadow-sm transition-colors hover:bg-brand-50"
+                  className="rounded-full bg-surface px-4 py-2 text-sm font-semibold text-brand-700 shadow-sm transition-colors hover:bg-brand-50"
                 >
                   Get started
                 </Link>
@@ -176,9 +176,9 @@ export default function Navbar() {
             className="grid h-10 w-10 place-items-center rounded-full text-white transition-colors hover:bg-white/10 lg:hidden"
           >
             <div className="space-y-1.5">
-              <span className={`block h-0.5 w-5 bg-white transition-transform ${open ? 'translate-y-2 rotate-45' : ''}`} />
-              <span className={`block h-0.5 w-5 bg-white transition-opacity ${open ? 'opacity-0' : ''}`} />
-              <span className={`block h-0.5 w-5 bg-white transition-transform ${open ? '-translate-y-2 -rotate-45' : ''}`} />
+              <span className={`block h-0.5 w-5 bg-surface transition-transform ${open ? 'translate-y-2 rotate-45' : ''}`} />
+              <span className={`block h-0.5 w-5 bg-surface transition-opacity ${open ? 'opacity-0' : ''}`} />
+              <span className={`block h-0.5 w-5 bg-surface transition-transform ${open ? '-translate-y-2 -rotate-45' : ''}`} />
             </div>
           </button>
         </div>
@@ -278,7 +278,7 @@ export default function Navbar() {
                   <Link
                     to="/register"
                     onClick={() => setOpen(false)}
-                    className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-brand-700 shadow-sm"
+                    className="rounded-full bg-surface px-4 py-2 text-sm font-semibold text-brand-700 shadow-sm"
                   >
                     Get started
                   </Link>

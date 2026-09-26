@@ -38,7 +38,7 @@ export default function CurrentRidePage() {
       {/* Header — perfectly aligned, like Uber */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="font-display text-2xl font-bold tracking-tight dark:text-white">Current Ride <span className="ml-2 rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold capitalize text-brand-700">{active.status.replace('_',' ')}</span></h1>
-        <span className="rounded-full bg-white px-3 py-1.5 text-xs font-medium text-muted shadow-sm border border-accent-200 dark:bg-accent-900 dark:border-white/10">{active.fare.distanceKm}km • {active.fare.durationMin}min • {active.vehicleType}</span>
+        <span className="rounded-full bg-surface px-3 py-1.5 text-xs font-medium text-muted shadow-sm border border-accent-200 dark:bg-accent-900 dark:border-white/10">{active.fare.distanceKm}km • {active.fare.durationMin}min • {active.vehicleType}</span>
       </div>
 
       {/* Main grid — left: details + actions, right: map + single chat (no repetition) */}
@@ -49,7 +49,7 @@ export default function CurrentRidePage() {
             <CardTitle className="flex items-center gap-2"><span className="grid h-8 w-8 place-items-center rounded-xl bg-brand-50 text-brand-700"><MapPin className="h-4 w-4" /></span>Trip Details</CardTitle>
             <div className="mt-4 space-y-3">
               <div className="flex gap-3">
-                <span className="mt-1 h-2.5 w-2.5 rounded-full bg-green-500 ring-4 ring-green-50 dark:ring-green-900/30" />
+                <span className="mt-1 h-2.5 w-2.5 rounded-full bg-success-500 ring-4 ring-success-50 dark:ring-success-900/30" />
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-semibold uppercase tracking-widest text-muted">Pickup</p>
                   <p className="text-sm font-medium leading-snug dark:text-white">{active.pickup.address}</p>
@@ -70,16 +70,16 @@ export default function CurrentRidePage() {
                 </div>
                 <div className="flex items-center justify-between text-xs mt-1">
                   <span className="text-muted">{active.passenger?.name} • {active.passenger?.phone}</span>
-                  <span className="rounded-full bg-white px-2 py-0.5 font-medium dark:bg-accent-900">{active.payment?.method || 'cash'}</span>
+                  <span className="rounded-full bg-surface px-2 py-0.5 font-medium dark:bg-accent-900">{active.payment?.method || 'cash'}</span>
                 </div>
               </div>
             </div>
 
             <div className="mt-5 grid grid-cols-3 gap-2">
-              <a href={`tel:${active.passenger?.phone}`} className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full border border-accent-200 bg-white px-3 py-2.5 text-sm font-semibold hover:bg-accent-50 dark:border-white/10 dark:bg-transparent dark:text-white">
+              <a href={`tel:${active.passenger?.phone}`} className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full border border-accent-200 bg-surface px-3 py-2.5 text-sm font-semibold hover:bg-accent-50 dark:border-white/10 dark:bg-transparent dark:text-white">
                 <Phone className="h-4 w-4" /> Call
               </a>
-              <button onClick={()=> { setShowChat(v=>!v); setTimeout(()=> chatRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100); }} className={`inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full border px-3 py-2.5 text-sm font-semibold ${showChat ? 'bg-brand-600 border-brand-600 text-white' : 'bg-white border-accent-200 hover:bg-accent-50 dark:border-white/10 dark:bg-transparent dark:text-white'}`}>
+              <button onClick={()=> { setShowChat(v=>!v); setTimeout(()=> chatRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100); }} className={`inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full border px-3 py-2.5 text-sm font-semibold ${showChat ? 'bg-brand-600 border-brand-600 text-white' : 'bg-surface border-accent-200 hover:bg-accent-50 dark:border-white/10 dark:bg-transparent dark:text-white'}`}>
                 <MessageCircle className="h-4 w-4" /> {showChat ? 'Hide Chat' : 'Chat'}
               </button>
               <a href={`https://www.google.com/maps/dir/?api=1&destination=${active.pickup.lat},${active.pickup.lng}`} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full btn-brand-gradient px-3 py-2.5 text-sm font-semibold text-white">
@@ -95,7 +95,7 @@ export default function CurrentRidePage() {
                   { label:'Start Trip', status:'in_progress', done: ['in_progress','completed'].includes(active.status) },
                   { label:'Complete', status:'completed', done: active.status==='completed' },
                 ].map(b=> (
-                  <button key={b.status} onClick={()=>go(b.status)} disabled={!!busy || b.done} className={`min-h-11 rounded-full border py-2.5 text-sm font-semibold transition-all ${b.done ? 'bg-green-50 border-green-200 text-green-700 dark:bg-green-950 dark:border-green-800' : 'bg-white border-accent-200 hover:bg-accent-50 dark:border-white/10 dark:bg-transparent dark:text-white'} disabled:opacity-50`}>
+                  <button key={b.status} onClick={()=>go(b.status)} disabled={!!busy || b.done} className={`min-h-11 rounded-full border py-2.5 text-sm font-semibold transition-all ${b.done ? 'bg-success-50 border-success-200 text-success-700 dark:bg-success-950 dark:border-success-800' : 'bg-surface border-accent-200 hover:bg-accent-50 dark:border-white/10 dark:bg-transparent dark:text-white'} disabled:opacity-50`}>
                     {busy===b.status ? '...' : b.done ? '✓ ' + b.label : b.label}
                   </button>
                 ))}
@@ -113,8 +113,8 @@ export default function CurrentRidePage() {
               <Marker position={[active.dropoff.lat, active.dropoff.lng]} icon={dropoffFlagIcon}><Popup>Dropoff</Popup></Marker>
               <Polyline positions={[[active.pickup.lat,active.pickup.lng],[active.dropoff.lat,active.dropoff.lng]] as any} pathOptions={{color:'#c62828', weight:5, opacity:0.9}} />
             </MapContainer>
-            <div className="flex items-center gap-2 bg-white px-4 py-2.5 text-xs dark:bg-accent-900 border-t border-accent-200 dark:border-white/10">
-              <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-green-500" /> Pickup</span>
+            <div className="flex items-center gap-2 bg-surface px-4 py-2.5 text-xs dark:bg-accent-900 border-t border-accent-200 dark:border-white/10">
+              <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-success-500" /> Pickup</span>
               <span className="flex items-center gap-1.5"><Flag className="h-3 w-3 text-brand-700" /> Dropoff</span>
               <span className="ml-auto font-medium text-brand-700">{active.fare.distanceKm}km • Live tracking</span>
             </div>

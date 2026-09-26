@@ -6,7 +6,7 @@ export default function EarningsPage(){
   const { data: s, isLoading: sl, isError: se, refetch: sr } = useDriverStats() as any;
   const { data: p, isLoading: pl } = useDriverPayments() as any;
   if(sl || pl) return <div className="grid gap-4 sm:grid-cols-4">{Array.from({length:4}).map((_,i)=><SkeletonCard key={i} />)}</div>;
-  if(se) return <Card className="text-center py-12"><AlertCircle className="h-10 w-10 mx-auto text-amber-500" /><p className="mt-2 font-medium">Could not load earnings</p><button onClick={()=>sr()} className="mt-3 rounded-full btn-brand-gradient px-5 py-2 text-sm text-white">Retry</button></Card>;
+  if(se) return <Card className="text-center py-12"><AlertCircle className="h-10 w-10 mx-auto text-gold-500" /><p className="mt-2 font-medium">Could not load earnings</p><button onClick={()=>sr()} className="mt-3 rounded-full btn-brand-gradient px-5 py-2 text-sm text-white">Retry</button></Card>;
   const stats=s?.stats; const payments:any[]=(p?.payments??[]).slice(0,12);
   const cards = [
     { label:"Today's Earnings", value: stats?`${stats.totalEarnings.toFixed(2)}`:'—', icon:DollarSign },

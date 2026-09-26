@@ -65,7 +65,7 @@ export default function Login() {
 
   return (
     <div className="mx-auto flex max-w-md flex-col px-4 py-12">
-      <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+      <div className="card p-8">
         <h1 className="text-2xl font-bold">Welcome back</h1>
         <p className="mt-1 text-sm text-muted">
           Sign in to book and manage your rides.
@@ -98,7 +98,7 @@ export default function Login() {
                 onChange={(e) =>
                   setForm({ ...form, rememberMe: e.target.checked })
                 }
-                className="h-4 w-4 rounded border-slate-300 accent-brand-600"
+                className="h-4 w-4 rounded border-accent-300 accent-brand-600"
               />
               Remember me
             </label>
@@ -111,7 +111,7 @@ export default function Login() {
           </div>
 
           {error && (
-            <p className="rounded-xl bg-red-50 px-4 py-2.5 text-sm text-red-700">
+            <p className="rounded-xl bg-brand-50 px-4 py-2.5 text-sm text-brand-700">
               {error}
             </p>
           )}
@@ -122,7 +122,7 @@ export default function Login() {
 
         <SocialLoginButtons />
 
-        <div className="mt-6 border-t border-slate-100 pt-4">
+        <div className="mt-6 border-t border-accent-100 pt-4">
           <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted">
             Quick demo accounts
           </p>
@@ -131,7 +131,7 @@ export default function Login() {
               <button
                 key={q.label}
                 onClick={() => quickFill(q)}
-                className="rounded-lg border border-slate-200 px-2 py-2 text-xs font-medium transition-colors hover:border-brand-400 hover:text-brand-700"
+                className="rounded-lg border border-accent-200 px-2 py-2 text-xs font-medium transition-colors hover:border-brand-400 hover:text-brand-700"
               >
                 {q.label}
               </button>

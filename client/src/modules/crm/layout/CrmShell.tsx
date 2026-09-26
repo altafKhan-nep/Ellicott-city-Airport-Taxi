@@ -51,7 +51,7 @@ export default function CrmShell() {
         <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/5 blur-2xl" />
         <div className="pointer-events-none absolute -bottom-10 left-6 h-20 w-20 rounded-full bg-gold-500/15 blur-2xl" />
         <div className="relative flex items-center gap-3">
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-white text-sm font-bold text-brand-800 shadow-sm">E</span>
+          <span className="grid h-9 w-9 place-items-center rounded-xl bg-surface text-sm font-bold text-brand-800 shadow-sm">E</span>
           {!collapsed && (
             <div className="min-w-0">
               <p className="font-display text-[15px] font-bold leading-none tracking-tight">Ellicott City <span className="text-gold-300">Airport Taxi</span></p>
@@ -73,7 +73,7 @@ export default function CrmShell() {
         )}
       </div>
 
-      <nav className="flex-1 overflow-y-auto bg-white px-2 py-3 dark:bg-accent-900">
+      <nav className="flex-1 overflow-y-auto bg-surface px-2 py-3 dark:bg-accent-900">
         {NAV.map(({ to, label, icon: Icon, end }) => (
           <NavLink
             key={to}
@@ -86,7 +86,7 @@ export default function CrmShell() {
         ))}
       </nav>
 
-      <div className="border-t border-accent-200 bg-white px-3 py-3 dark:border-accent-800 dark:bg-accent-900">
+      <div className="border-t border-accent-200 bg-surface px-3 py-3 dark:border-accent-800 dark:bg-accent-900">
         <div className="flex items-center gap-3">
           {user?.avatar ? <img src={user.avatar} alt="" className="h-9 w-9 rounded-full object-cover ring-2 ring-brand-100" /> : <div className="grid h-9 w-9 place-items-center rounded-full bg-brand-50 text-xs font-bold text-brand-700 ring-1 ring-brand-200">{user?.name?.[0]}</div>}
           {!collapsed && <div className="min-w-0 flex-1"><p className="truncate font-display text-sm font-semibold">{user?.name}</p><p className="truncate text-xs capitalize text-muted">{user?.role}</p></div>}
@@ -99,7 +99,7 @@ export default function CrmShell() {
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] text-ink dark:bg-accent-900 dark:text-white">
-      <aside className={`fixed inset-y-0 left-0 z-[1001] hidden border-r border-accent-200 bg-white shadow-sm transition-all dark:border-accent-800 dark:bg-accent-900 lg:block ${collapsed ? 'w-20' : 'w-72'}`}>
+      <aside className={`fixed inset-y-0 left-0 z-[1001] hidden border-r border-accent-200 bg-surface shadow-sm transition-all dark:border-accent-800 dark:bg-accent-900 lg:block ${collapsed ? 'w-20' : 'w-72'}`}>
         {SidebarInner}
         <button onClick={() => setCollapsed(v => !v)} className="absolute -right-3 top-24 grid h-7 w-7 place-items-center rounded-full border border-accent-200 bg-surface text-xs shadow-md hover:bg-accent-50 dark:border-accent-700 dark:bg-accent-800">{collapsed ? '›' : '‹'}</button>
       </aside>
@@ -121,14 +121,14 @@ export default function CrmShell() {
       )}
 
       <main id="main" className={`${collapsed ? 'lg:pl-20' : 'lg:pl-72'} transition-all`}>
-        <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 rounded-full bg-white px-3 py-1 text-xs font-semibold text-ink shadow">Skip to content</a>
+        <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 rounded-full bg-surface px-3 py-1 text-xs font-semibold text-ink shadow">Skip to content</a>
         <div className="mx-auto max-w-[1600px] p-4 sm:p-6 lg:p-8">
           <Outlet />
         </div>
       </main>
       {helpOpen && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-ink/40 backdrop-blur-sm p-4" onClick={()=>setHelpOpen(false)}>
-          <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl dark:bg-accent-900" onClick={e=>e.stopPropagation()}>
+          <div className="w-full max-w-md rounded-3xl bg-surface p-6 shadow-2xl dark:bg-accent-900" onClick={e=>e.stopPropagation()}>
             <h3 className="font-display font-bold">Quick help</h3>
             <ul className="mt-3 space-y-1 text-sm text-muted">
               <li><span className="font-semibold text-ink dark:text-white">?</span> Toggle this help</li>

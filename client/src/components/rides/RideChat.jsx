@@ -44,14 +44,14 @@ export default function RideChat({ rideId }) {
   };
 
   return (
-    <div className="flex h-[380px] flex-col overflow-hidden rounded-3xl border border-accent-200 bg-white shadow-sm dark:border-white/10 dark:bg-accent-900">
+    <div className="flex h-[380px] flex-col overflow-hidden panel dark:border-white/10 dark:bg-accent-900">
       <div className="flex items-center gap-2 border-b border-accent-100 px-4 py-3 dark:border-white/5">
         <span className="grid h-8 w-8 place-items-center rounded-xl bg-brand-50 text-brand-700 dark:bg-white/5"><MessageCircle className="h-4 w-4" /></span>
         <div>
           <p className="text-sm font-semibold dark:text-white">Live Chat</p>
           <p className="text-xs text-muted">Messages stay in ride room • 500 chars</p>
         </div>
-        <span className="ml-auto h-2 w-2 animate-pulse rounded-full bg-green-500" />
+        <span className="ml-auto h-2 w-2 animate-pulse rounded-full bg-success-500" />
       </div>
 
       <div ref={listRef} className="flex-1 space-y-2 overflow-y-auto bg-accent-50/30 p-4 dark:bg-black/20">
@@ -64,7 +64,7 @@ export default function RideChat({ rideId }) {
           const mine = String(m.sender) === String(user?._id);
           return (
             <div key={i} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[78%] rounded-2xl px-3 py-2 text-sm ${mine ? 'bg-brand-600 text-white' : 'bg-white dark:bg-white/10 dark:text-white border border-accent-200 dark:border-white/5'}`}>
+              <div className={`max-w-[78%] rounded-2xl px-3 py-2 text-sm ${mine ? 'bg-brand-600 text-white' : 'bg-surface dark:bg-white/10 dark:text-white border border-accent-200 dark:border-white/5'}`}>
                 <p>{m.text}</p>
                 <p className={`mt-1 text-xs ${mine ? 'text-white/70' : 'opacity-60'}`}>{new Date(m.at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})} • {mine ? 'You' : m.senderRole || 'ride'}</p>
               </div>
@@ -73,13 +73,13 @@ export default function RideChat({ rideId }) {
         })}
       </div>
 
-      <form onSubmit={send} className="flex gap-2 border-t border-accent-100 bg-white p-3 dark:border-white/5 dark:bg-accent-900">
+      <form onSubmit={send} className="flex gap-2 border-t border-accent-100 bg-surface p-3 dark:border-white/5 dark:bg-accent-900">
         <input
           value={text}
           onChange={e=>setText(e.target.value)}
           placeholder="Message your driver…"
           maxLength={500}
-          className="input-pill flex-1 border border-accent-200 bg-white px-4 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-200 dark:border-white/10 dark:bg-transparent dark:text-white"
+          className="input-pill flex-1 border border-accent-200 bg-surface px-4 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-200 dark:border-white/10 dark:bg-transparent dark:text-white"
         />
         <button type="submit" disabled={sending || !text.trim()} className="grid h-11 w-11 place-items-center rounded-full bg-brand-600 text-white shadow-md hover:bg-brand-700 disabled:opacity-50">
           <Send className="h-4 w-4" />

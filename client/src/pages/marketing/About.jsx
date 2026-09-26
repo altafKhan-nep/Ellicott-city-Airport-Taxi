@@ -75,7 +75,7 @@ export default function About() {
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
             <Link to={bookUrl}>
-              <Button size="lg" className="bg-white !text-brand-900 shadow-xl hover:bg-brand-50">
+              <Button size="lg" className="bg-surface !text-brand-900 shadow-xl hover:bg-brand-50">
                 Secure your ride
               </Button>
             </Link>
@@ -136,7 +136,7 @@ export default function About() {
               <div className="mt-6 flex flex-wrap gap-3">
                 <a
                   href="tel:4103655556"
-                  className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-base font-semibold text-brand-900 shadow-sm transition-colors hover:bg-brand-50"
+                  className="inline-flex items-center gap-2 rounded-full bg-surface px-6 py-3 text-base font-semibold text-brand-900 shadow-sm transition-colors hover:bg-brand-50"
                 >
                   <Phone className="h-4 w-4" />
                   (410) 365-5556
@@ -167,7 +167,7 @@ export default function About() {
           <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {WHY_US.map((f, i) => (
               <Reveal key={f.title} delay={(i % 4) * 80} className="h-full">
-                <div className="card-lift h-full rounded-3xl border border-slate-200 bg-white p-7 shadow-sm">
+                <div className="card-lift h-full card p-7">
                   <span className="grid h-14 w-14 place-items-center rounded-2xl bg-brand-gradient-soft">
                     <f.icon className="h-7 w-7 text-brand-700" />
                   </span>
@@ -192,7 +192,7 @@ export default function About() {
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
             <Link to={bookUrl}>
-              <Button size="lg" className="bg-white !text-brand-900 shadow-xl hover:bg-brand-50">
+              <Button size="lg" className="bg-surface !text-brand-900 shadow-xl hover:bg-brand-50">
                 Book now
               </Button>
             </Link>

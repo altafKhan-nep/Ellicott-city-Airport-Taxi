@@ -49,7 +49,7 @@ export default function ServiceDetail() {
           <p className="mt-5 max-w-2xl text-lg leading-relaxed text-white/80">{service.summary}</p>
           <div className="mt-8 flex flex-wrap gap-4">
             <Link to={bookUrl}>
-              <Button size="lg" className="bg-white !text-brand-900 shadow-xl hover:bg-brand-50">
+              <Button size="lg" className="bg-surface !text-brand-900 shadow-xl hover:bg-brand-50">
                 Book this service
               </Button>
             </Link>
@@ -96,7 +96,7 @@ export default function ServiceDetail() {
           </div>
 
           <div className="lg:col-span-2">
-            <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+            <div className="card p-8">
               <h3 className="text-base font-bold text-ink">Why riders choose us</h3>
               <ul className="mt-5 space-y-4">
                 {service.features.map((f) => (
@@ -108,7 +108,7 @@ export default function ServiceDetail() {
                   </li>
                 ))}
               </ul>
-              <div className="mt-8 border-t border-slate-100 pt-6">
+              <div className="mt-8 border-t border-accent-100 pt-6">
                 <div className="flex items-center justify-between text-sm">
                   <span className="font-semibold text-ink">5-star rated</span>
                   <span className="flex gap-0.5 text-gold-400" aria-label="Five stars">
@@ -152,7 +152,7 @@ export default function ServiceDetail() {
               <Reveal key={s.slug} delay={(i % 3) * 90} className="h-full">
                 <Link
                   to={`/services/${s.slug}`}
-                  className="card-lift group flex h-full items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+                  className="card-lift group flex h-full items-center gap-4 card"
                 >
                   <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-brand-gradient-soft">
                     <s.icon className="h-6 w-6 text-brand-700" />

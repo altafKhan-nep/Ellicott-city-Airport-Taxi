@@ -44,7 +44,7 @@ export default function DriverShell() {
         <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/5 blur-2xl" />
         <div className="pointer-events-none absolute -bottom-10 left-6 h-20 w-20 rounded-full bg-gold-500/15 blur-2xl" />
         <div className="relative flex items-center gap-3">
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-white text-sm font-bold text-brand-800 shadow-sm">E</span>
+          <span className="grid h-9 w-9 place-items-center rounded-xl bg-surface text-sm font-bold text-brand-800 shadow-sm">E</span>
           {!collapsed && <div className="min-w-0"><p className="font-display text-[15px] font-bold leading-none">Ellicott City <span className="text-gold-300">Airport Taxi</span></p><p className="mt-0.5 inline-flex items-center gap-1.5 text-[11px] font-medium tracking-widest text-white/70 uppercase"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-gold-400" /> Driver • {online ? 'Online' : 'Offline'}</p></div>}
           <div className="ml-auto flex items-center gap-1">
             <span className="h-7 w-7 place-items-center rounded-full bg-white/10 text-white">{dark ? '☀' : '☾'}</span>
@@ -61,7 +61,7 @@ export default function DriverShell() {
         )}
       </div>
 
-      <nav className="flex-1 overflow-y-auto bg-white px-2 py-3 dark:bg-accent-900" aria-label="Driver navigation">
+      <nav className="flex-1 overflow-y-auto bg-surface px-2 py-3 dark:bg-accent-900" aria-label="Driver navigation">
         {PRIMARY_NAV.map(({ to, label, icon: Icon, end }) => (
           <NavLink key={to} to={to} end={end as any} className={({ isActive }) => `mb-0.5 flex min-h-11 items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-brand-500 ${isActive ? 'bg-brand-50 text-brand-700 ring-1 ring-brand-100 dark:bg-brand-950 dark:text-gold-300' : 'text-muted hover:bg-accent-50 hover:text-ink dark:hover:bg-white/5'}`}>
             {Icon ? <Icon className="h-[18px] w-[18px] shrink-0" /> : null} {!collapsed && label}
@@ -81,7 +81,7 @@ export default function DriverShell() {
         )}
       </nav>
 
-      <div className="border-t border-accent-200 bg-white px-3 py-3 dark:border-accent-800 dark:bg-accent-900">
+      <div className="border-t border-accent-200 bg-surface px-3 py-3 dark:border-accent-800 dark:bg-accent-900">
         <div className="flex items-center gap-3">
           {driver?.avatar ? <img src={driver.avatar} alt="" className="h-9 w-9 rounded-full object-cover ring-2 ring-brand-100" /> : <div className="grid h-9 w-9 place-items-center rounded-full bg-brand-50 text-xs font-bold text-brand-700">{driver?.name?.[0]}</div>}
           {!collapsed && <div className="min-w-0 flex-1"><p className="truncate font-display text-sm font-semibold">{driver?.name}</p><p className="truncate text-xs text-muted">{driver?.driverDetails?.vehicleType || 'Driver'} • {driver?.driverDetails?.plateNumber || '—'}</p></div>}
@@ -94,9 +94,9 @@ export default function DriverShell() {
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] text-ink dark:bg-accent-900 dark:text-white">
-      <aside className={`fixed inset-y-0 left-0 z-[1001] hidden border-r border-accent-200 bg-white shadow-sm dark:border-accent-800 dark:bg-accent-900 lg:block ${collapsed ? 'w-20' : 'w-72'}`}>
+      <aside className={`fixed inset-y-0 left-0 z-[1001] hidden border-r border-accent-200 bg-surface shadow-sm dark:border-accent-800 dark:bg-accent-900 lg:block ${collapsed ? 'w-20' : 'w-72'}`}>
         {SidebarInner}
-        <button onClick={() => setCollapsed(v=>!v)} className="absolute -right-3 top-24 grid h-7 w-7 place-items-center rounded-full border border-accent-200 bg-white text-xs shadow-md dark:border-accent-700 dark:bg-accent-800">{collapsed?'›':'‹'}</button>
+        <button onClick={() => setCollapsed(v=>!v)} className="absolute -right-3 top-24 grid h-7 w-7 place-items-center rounded-full border border-accent-200 bg-surface text-xs shadow-md dark:border-accent-700 dark:bg-accent-800">{collapsed?'›':'‹'}</button>
       </aside>
       <div className="sticky top-0 z-[1001] flex h-[56px] items-center gap-3 border-b border-accent-200 bg-brand-gradient px-4 text-white shadow-md lg:hidden">
         <button onClick={() => setMobileOpen(true)} className="grid h-9 w-9 place-items-center rounded-full bg-white/10"><Menu className="h-5 w-5" /></button>
@@ -107,7 +107,7 @@ export default function DriverShell() {
       </div>
       {mobileOpen && (
         <motion.div initial={{opacity:0}} animate={{opacity:1}} className="fixed inset-0 z-40 bg-ink/40 backdrop-blur-sm lg:hidden" onClick={()=>setMobileOpen(false)}>
-          <motion.aside initial={{x:-320}} animate={{x:0}} className="h-full w-[300px] overflow-hidden rounded-r-3xl bg-white shadow-2xl dark:bg-accent-900" onClick={e=>e.stopPropagation()}>
+          <motion.aside initial={{x:-320}} animate={{x:0}} className="h-full w-[300px] overflow-hidden rounded-r-3xl bg-surface shadow-2xl dark:bg-accent-900" onClick={e=>e.stopPropagation()}>
             <div className="flex h-12 items-center justify-between border-b px-4"><span className="font-display font-bold dark:text-white">Menu</span><button onClick={()=>setMobileOpen(false)} className="grid h-8 w-8 place-items-center rounded-full bg-accent-50"><X className="h-4 w-4" /></button></div>
             {SidebarInner}
           </motion.aside>

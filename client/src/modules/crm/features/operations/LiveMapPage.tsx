@@ -10,7 +10,7 @@ const pickupIcon = L.divIcon({ className:'', html:'<div class="map-pin-start"><s
 export default function LiveMapPage() {
   const { data, isLoading, isError, refetch } = useCrmLiveOps() as any;
   if(isLoading) return <div className="h-[70vh] animate-pulse rounded-3xl bg-accent-100 dark:bg-white/5" />;
-  if(isError) return <Card className="text-center py-12"><AlertCircle className="h-10 w-10 mx-auto text-amber-500" /><p className="mt-2 font-medium">Could not load live map</p><button onClick={()=>refetch()} className="mt-3 rounded-full btn-brand-gradient px-5 py-2 text-sm text-white">Retry</button></Card>;
+  if(isError) return <Card className="text-center py-12"><AlertCircle className="h-10 w-10 mx-auto text-gold-500" /><p className="mt-2 font-medium">Could not load live map</p><button onClick={()=>refetch()} className="mt-3 rounded-full btn-brand-gradient px-5 py-2 text-sm text-white">Retry</button></Card>;
   const center: [number,number] = [39.20, -76.85];
   const drivers: any[] = data?.drivers ?? [];
   const rides: any[] = data?.activeRides ?? [];

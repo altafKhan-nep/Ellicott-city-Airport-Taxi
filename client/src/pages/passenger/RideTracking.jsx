@@ -213,7 +213,7 @@ export default function RideTracking() {
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Map */}
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm lg:col-span-2">
+        <div className="overflow-hidden panel lg:col-span-2">
           <div className="relative h-[480px]">
             <MapContainer
               center={driverPos ? [driverPos.lat, driverPos.lng] : [ride.pickup.lat, ride.pickup.lng]}
@@ -269,15 +269,15 @@ export default function RideTracking() {
 
         {/* Details panel */}
         <div className="space-y-4">
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="card p-6">
             <h2 className="text-lg font-bold">Trip details</h2>
 
             <div className="mt-4 space-y-4">
               <div className="flex gap-3">
                 <div className="flex flex-col items-center">
                   <span className="h-2.5 w-2.5 rounded-full bg-brand-600" />
-                  <span className="my-1 w-px flex-1 bg-slate-200" />
-                  <span className="h-2.5 w-2.5 rounded-full bg-red-600" />
+                  <span className="my-1 w-px flex-1 bg-accent-200" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-brand-600" />
                 </div>
                 <div className="space-y-6 text-sm">
                   <div>
@@ -292,7 +292,7 @@ export default function RideTracking() {
               </div>
             </div>
 
-            <dl className="mt-6 space-y-2 border-t border-slate-100 pt-4 text-sm">
+            <dl className="mt-6 space-y-2 border-t border-accent-100 pt-4 text-sm">
               <div className="flex justify-between">
                 <dt className="text-muted">Vehicle</dt>
                 <dd className="font-medium">{vehicleLabel(ride.vehicleType)}</dd>
@@ -305,7 +305,7 @@ export default function RideTracking() {
                 <dt className="text-muted">Est. duration</dt>
                 <dd className="font-medium">{ride.fare.durationMin} min</dd>
               </div>
-              <div className="flex justify-between border-t border-slate-100 pt-2">
+              <div className="flex justify-between border-t border-accent-100 pt-2">
                 <dt className="font-medium">Estimated fare</dt>
                 <dd className="font-bold text-brand-700">
                   ${(ride.fare.estimated || 0).toFixed(2)}
@@ -327,7 +327,7 @@ export default function RideTracking() {
           )}
 
           {status === 'completed' && (
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="card">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted">Trip total</p>
@@ -337,18 +337,18 @@ export default function RideTracking() {
                 </div>
                 {ride.payment?.status === 'paid' && (
                   <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                    ride.payment?.method === 'cash' ? 'bg-gold-100 text-gold-700' : 'bg-green-50 text-green-700'
+                    ride.payment?.method === 'cash' ? 'bg-gold-100 text-gold-700' : 'bg-success-50 text-success-700'
                   }`}>
                     {ride.payment?.method === 'cash' ? 'Cash' : 'Paid'}
                   </span>
                 )}
                 {ride.payment?.status === 'refunded' && (
-                  <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+                  <span className="rounded-full bg-accent-50 px-3 py-1 text-xs font-semibold text-accent-700">
                     Refunded
                   </span>
                 )}
                 {ride.payment?.status === 'pending' && (
-                  <span className="rounded-full bg-yellow-50 px-3 py-1 text-xs font-semibold text-yellow-700">
+                  <span className="rounded-full bg-gold-50 px-3 py-1 text-xs font-semibold text-gold-700">
                     Unpaid
                   </span>
                 )}
@@ -364,10 +364,10 @@ export default function RideTracking() {
                     Request Refund (Admin Approval)
                   </Button>
                   {showRefund && (
-                    <div className="mt-3 rounded-2xl border border-amber-200 bg-amber-50 p-4">
-                      <p className="text-sm font-medium text-amber-800">Report Issue — Request Refund</p>
-                      <textarea value={refundReason} onChange={e=>setRefundReason(e.target.value)} placeholder="Reason for $27.70 refund — e.g., overcharged, driver issue" className="mt-2 w-full rounded-xl border border-amber-300 bg-white p-2 text-sm" rows={3} />
-                      <div className="mt-2 flex gap-2"><button onClick={()=>setShowRefund(false)} className="flex-1 rounded-full border border-accent-200 py-2 text-sm">Cancel</button><button onClick={handleRefund} className="flex-1 rounded-full bg-amber-600 py-2 text-sm font-semibold text-white">Send Request</button></div>
+                    <div className="mt-3 rounded-2xl border border-gold-200 bg-gold-50 p-4">
+                      <p className="text-sm font-medium text-gold-800">Report Issue — Request Refund</p>
+                      <textarea value={refundReason} onChange={e=>setRefundReason(e.target.value)} placeholder="Reason for $27.70 refund — e.g., overcharged, driver issue" className="mt-2 w-full rounded-xl border border-gold-300 bg-surface p-2 text-sm" rows={3} />
+                      <div className="mt-2 flex gap-2"><button onClick={()=>setShowRefund(false)} className="flex-1 rounded-full border border-accent-200 py-2 text-sm">Cancel</button><button onClick={handleRefund} className="flex-1 rounded-full bg-gold-600 py-2 text-sm font-semibold text-white">Send Request</button></div>
                     </div>
                   )}
                 </>

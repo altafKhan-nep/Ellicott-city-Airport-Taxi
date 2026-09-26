@@ -25,7 +25,7 @@ export default function ReservationsPage() {
         <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Search passenger / address…" className="input-pill min-w-[220px] flex-1 border border-accent-200 px-4 py-2 text-sm outline-none dark:border-accent-700 dark:bg-accent-800" />
         <select value={status} onChange={e=>setStatus(e.target.value)} className="input-pill border border-accent-200 px-3 py-2 text-sm dark:border-accent-700 dark:bg-accent-800"><option value="">All statuses (9)</option>{STATUSES.map(s=> <option key={s} value={s}>{s}</option>)}</select>
       </Card>
-      <div className="overflow-hidden rounded-2xl border border-accent-200 bg-surface dark:border-accent-800 dark:bg-accent-900">
+      <div className="panel overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="bg-accent-50 text-xs uppercase tracking-wide text-muted dark:bg-accent-800"><tr><th className="px-4 py-3">Status</th><th className="px-4 py-3">Passenger</th><th className="px-4 py-3">Route</th><th className="px-4 py-3">Fare</th><th className="px-4 py-3">When</th><th className="px-4 py-3 text-right">Actions</th></tr></thead>

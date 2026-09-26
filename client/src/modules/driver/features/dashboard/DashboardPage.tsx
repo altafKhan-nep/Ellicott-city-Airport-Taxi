@@ -44,7 +44,7 @@ export default function DashboardPage() {
             <p className="mt-1 max-w-xl text-sm text-white/75">Premium airport dispatch • {new Date().toLocaleDateString()} • <span className="inline-flex items-center gap-1"><Sun className="h-3 w-3 text-gold-300" /> 18°C <Cloud className="h-3 w-3" /> Traffic normal</span></p>
           </div>
           <div className="flex gap-2">
-            <Link to="/driver/requests" className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-brand-800 shadow-lg hover:bg-brand-50">View Requests</Link>
+            <Link to="/driver/requests" className="rounded-full bg-surface px-5 py-2.5 text-sm font-semibold text-brand-800 shadow-lg hover:bg-brand-50">View Requests</Link>
             <Link to="/driver/current" className="rounded-full border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/15">Current Ride</Link>
           </div>
         </div>
@@ -73,8 +73,8 @@ export default function DashboardPage() {
       {/* Live Location */}
       <Card className="p-0 overflow-hidden">
         <div className="flex items-center justify-between border-b border-accent-200 p-4 dark:border-white/5">
-          <div className="flex items-center gap-2"><LocateFixed className="h-4 w-4 text-brand-600" /><CardTitle>Your Live Location</CardTitle><span className="ml-2 inline-flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-1 text-xs font-medium text-green-700"><span className="h-2 w-2 animate-pulse rounded-full bg-green-500" /> Live sharing</span></div>
-          <button onClick={refreshLocation} className="rounded-full border border-accent-200 bg-white px-3 py-1.5 text-xs font-semibold hover:bg-accent-50 dark:border-white/10 dark:bg-transparent">Refresh</button>
+          <div className="flex items-center gap-2"><LocateFixed className="h-4 w-4 text-brand-600" /><CardTitle>Your Live Location</CardTitle><span className="ml-2 inline-flex items-center gap-1 rounded-full bg-success-50 px-2.5 py-1 text-xs font-medium text-success-700"><span className="h-2 w-2 animate-pulse rounded-full bg-success-500" /> Live sharing</span></div>
+          <button onClick={refreshLocation} className="rounded-full border border-accent-200 bg-surface px-3 py-1.5 text-xs font-semibold hover:bg-accent-50 dark:border-white/10 dark:bg-transparent">Refresh</button>
         </div>
         <div className="h-[280px] w-full">
           {livePos ? (
@@ -101,7 +101,7 @@ export default function DashboardPage() {
               <p className="mt-1 text-sm text-muted"><MapPin className="mr-1 inline h-3 w-3" />{active.pickup.address} → {active.dropoff.address}</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <Link to="/driver/current" className="rounded-full btn-brand-gradient px-4 py-2 text-sm font-semibold text-white">Open Navigation</Link>
-                <a href={`tel:${active.passenger?.phone}`} className="rounded-full border border-accent-200 bg-white px-4 py-2 text-sm font-semibold hover:bg-accent-50 dark:border-white/10 dark:bg-transparent"><Phone className="mr-1 inline h-3 w-3" />Call</a>
+                <a href={`tel:${active.passenger?.phone}`} className="rounded-full border border-accent-200 bg-surface px-4 py-2 text-sm font-semibold hover:bg-accent-50 dark:border-white/10 dark:bg-transparent"><Phone className="mr-1 inline h-3 w-3" />Call</a>
               </div>
             </div>
           ) : (
@@ -148,7 +148,7 @@ export default function DashboardPage() {
 
       <div className="flex flex-wrap gap-2">
         <Link to="/driver/requests" className="rounded-full btn-brand-gradient px-5 py-2.5 text-sm font-semibold text-white">Go Online</Link>
-        <button className="rounded-full border border-accent-200 bg-white px-5 py-2.5 text-sm font-semibold hover:bg-accent-50 dark:border-white/10 dark:bg-transparent">Emergency <ShieldAlert className="ml-1 inline h-4 w-4 text-brand-600" /></button>
+        <button className="rounded-full border border-accent-200 bg-surface px-5 py-2.5 text-sm font-semibold hover:bg-accent-50 dark:border-white/10 dark:bg-transparent">Emergency <ShieldAlert className="ml-1 inline h-4 w-4 text-brand-600" /></button>
         <span className="inline-flex items-center gap-1 rounded-full bg-gold-50 px-3 py-1 text-xs font-medium text-gold-700"><AlertTriangle className="h-3 w-3" /> Airport alerts normal</span>
       </div>
     </div>

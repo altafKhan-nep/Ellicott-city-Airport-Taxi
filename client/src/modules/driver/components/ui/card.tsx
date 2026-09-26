@@ -1,6 +1,6 @@
 import * as React from 'react';
 export function Card({ className='', children, ...p }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={`card-lift group relative overflow-hidden rounded-3xl border border-accent-200 bg-surface p-6 shadow-sm dark:border-accent-800 dark:bg-accent-900 dark:text-white ${className}`} {...p}>
+  return <div className={`card-lift group relative overflow-hidden card p-6 dark:border-accent-800 dark:bg-accent-900 dark:text-white ${className}`} {...p}>
     <div className="pointer-events-none absolute inset-x-0 top-0 h-[3px] bg-brand-gradient opacity-0 transition-opacity group-hover:opacity-100" />
     {children}
   </div>;

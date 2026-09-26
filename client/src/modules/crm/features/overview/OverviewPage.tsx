@@ -36,7 +36,7 @@ export default function OverviewPage() {
             <p className="mt-2 max-w-xl text-sm leading-relaxed text-white/75">Real-time dispatch, revenue and fleet health — the same red-led editorial system as your website, not a generic SaaS dash.</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Link to="/admin/dispatch" className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-brand-800 shadow-lg hover:bg-brand-50">Open Dispatch <ArrowRight className="h-4 w-4" /></Link>
+            <Link to="/admin/dispatch" className="inline-flex items-center gap-2 rounded-full bg-surface px-5 py-2.5 text-sm font-semibold text-brand-800 shadow-lg hover:bg-brand-50">Open Dispatch <ArrowRight className="h-4 w-4" /></Link>
             <a href="tel:4103655556" className="inline-flex items-center gap-2 rounded-full border border-white/20 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10"><Phone className="h-4 w-4" />(410) 365-5556</a>
           </div>
         </div>

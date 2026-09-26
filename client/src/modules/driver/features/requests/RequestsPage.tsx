@@ -46,7 +46,7 @@ export default function RequestsPage() {
     // Also remove from fallback by invalidating (or just hide locally)
   };
 
-  if (activeRide) return <Card><CardTitle>Live Ride Requests</CardTitle><div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950"><p className="font-medium text-amber-800 dark:text-amber-200">You have an active ride — complete it first</p><p className="text-sm text-amber-700 dark:text-amber-300">Go to <a href="/driver/current" className="underline font-semibold">Current Ride</a> to Arrived → Start → Complete. You can’t accept new requests until then.</p></div><p className="mt-3 text-sm text-muted">{list.length} pending in queue will show after you complete.</p></Card>;
+  if (activeRide) return <Card><CardTitle>Live Ride Requests</CardTitle><div className="mt-4 rounded-2xl border border-gold-200 bg-gold-50 p-4 dark:border-gold-800 dark:bg-gold-950"><p className="font-medium text-gold-800 dark:text-gold-200">You have an active ride — complete it first</p><p className="text-sm text-gold-700 dark:text-gold-300">Go to <a href="/driver/current" className="underline font-semibold">Current Ride</a> to Arrived → Start → Complete. You can’t accept new requests until then.</p></div><p className="mt-3 text-sm text-muted">{list.length} pending in queue will show after you complete.</p></Card>;
 
   if (!list.length) return <Card><CardTitle>Live Ride Requests</CardTitle><p className="mt-4 text-sm text-muted">No requests right now — stay online, nearby airport/corporate rides appear here via Socket.IO with 45s countdown.</p><div className="mt-6 h-32 rounded-2xl border border-dashed border-accent-200 bg-accent-50 p-6 text-center dark:border-white/10 dark:bg-white/5"><p className="text-sm text-muted">Waiting for dispatch…</p></div></Card>;
 
@@ -71,10 +71,10 @@ export default function RequestsPage() {
                 <span className="rounded-full bg-accent-50 px-2.5 py-1 dark:bg-white/5"><CreditCard className="mr-1 inline h-3 w-3" />{r.payment?.method || 'card'}</span>
                 <span className="rounded-full bg-accent-50 px-2.5 py-1 dark:bg-white/5"><Car className="mr-1 inline h-3 w-3" />{r.vehicleType}</span>
               </div>
-              {error && <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-xs font-medium text-red-700 dark:bg-red-950 dark:text-red-300">{error}</p>}
+              {error && <p className="mt-3 rounded-xl bg-brand-50 px-3 py-2 text-xs font-medium text-brand-700 dark:bg-brand-950 dark:text-brand-300">{error}</p>}
               <div className="mt-4 flex gap-2">
                 <button onClick={()=>accept(r._id)} disabled={!!activeRide} className="flex-1 rounded-full btn-brand-gradient py-2.5 text-sm font-semibold text-white disabled:opacity-50">Accept Ride</button>
-                <button onClick={()=>decline(r._id)} className="rounded-full border border-accent-200 bg-white px-4 py-2.5 text-sm font-semibold hover:bg-accent-50 dark:border-white/10 dark:bg-transparent">Decline</button>
+                <button onClick={()=>decline(r._id)} className="rounded-full border border-accent-200 bg-surface px-4 py-2.5 text-sm font-semibold hover:bg-accent-50 dark:border-white/10 dark:bg-transparent">Decline</button>
                 <button className="grid h-10 w-10 place-items-center rounded-full border border-accent-200 dark:border-white/10"><Navigation className="h-4 w-4" /></button>
               </div>
               <p className="mt-2 text-xs text-muted">Pickup {r.fare.distanceKm} km away • Airport Terminal {r.flightNumber || '—'} • Notes: {r.notes || '—'}</p>

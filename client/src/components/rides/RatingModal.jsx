@@ -35,7 +35,7 @@ export default function RatingModal({ ride, onClose, onRated }) {
 
   return (
     <div className="fixed inset-0 z-[9999] grid place-items-center bg-ink/50 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-md overflow-hidden rounded-3xl bg-white p-6 shadow-2xl dark:bg-accent-900 max-h-[90vh] overflow-y-auto">
+      <div className="w-full max-w-md overflow-hidden rounded-3xl bg-surface p-6 shadow-2xl dark:bg-accent-900 max-h-[90vh] overflow-y-auto">
         <div className="text-center">
           <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-brand-50 text-brand-700 dark:bg-brand-950">
             <Sparkles className="h-6 w-6" />
@@ -71,7 +71,7 @@ export default function RatingModal({ ride, onClose, onRated }) {
                 <button
                   key={c.id}
                   onClick={()=>toggleCompliment(c.id)}
-                  className={`flex items-center gap-2 rounded-2xl border p-3 text-left transition-all ${selected ? 'bg-brand-50 border-brand-200 shadow-sm dark:bg-brand-950 dark:border-brand-800' : 'bg-white border-accent-200 hover:bg-accent-50 dark:border-white/10 dark:bg-transparent'}`}
+                  className={`flex items-center gap-2 rounded-2xl border p-3 text-left transition-all ${selected ? 'bg-brand-50 border-brand-200 shadow-sm dark:bg-brand-950 dark:border-brand-800' : 'bg-surface border-accent-200 hover:bg-accent-50 dark:border-white/10 dark:bg-transparent'}`}
                 >
                   <span className={`grid h-8 w-8 place-items-center rounded-xl ${selected ? 'bg-brand-600 text-white' : 'bg-accent-100 text-accent-600 dark:bg-white/5'}`}>
                     <Icon className="h-4 w-4" />
@@ -90,14 +90,14 @@ export default function RatingModal({ ride, onClose, onRated }) {
           value={comment}
           onChange={e=>setComment(e.target.value)}
           placeholder="Add a comment (optional) — e.g., driver was very professional and on time"
-          className="mt-4 min-h-20 w-full rounded-2xl border border-accent-200 bg-white p-3 text-sm placeholder:text-accent-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 dark:border-white/10 dark:bg-transparent"
+          className="mt-4 min-h-20 w-full card p-3 text-sm placeholder:text-accent-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 dark:border-white/10 dark:bg-transparent"
           maxLength={500}
         />
 
-        {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+        {error && <p className="mt-2 text-sm text-brand-600">{error}</p>}
 
         <div className="mt-6 flex gap-2">
-          <button onClick={onClose} className="flex-1 rounded-full border border-accent-200 bg-white py-2.5 text-sm font-semibold hover:bg-accent-50 dark:border-white/10 dark:bg-transparent dark:text-white">Skip</button>
+          <button onClick={onClose} className="flex-1 rounded-full border border-accent-200 bg-surface py-2.5 text-sm font-semibold hover:bg-accent-50 dark:border-white/10 dark:bg-transparent dark:text-white">Skip</button>
           <button onClick={submit} disabled={loading || !score} className="flex-1 rounded-full btn-brand-gradient py-2.5 text-sm font-semibold text-white disabled:opacity-50">
             {loading ? 'Submitting…' : 'Submit Rating'}
           </button>

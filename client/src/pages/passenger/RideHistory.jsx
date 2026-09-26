@@ -7,22 +7,7 @@ import PaymentModal from '../../components/rides/PaymentModal.jsx';
 import EditRideModal from '../../components/rides/EditRideModal.jsx';
 import RatingModal from '../../components/rides/RatingModal.jsx';
 import { requestRefund, listPayments } from '../../services/paymentService.js';
-
-const STATUS_STYLE = {
-  pending: 'bg-accent-50 text-accent-700',
-  accepted: 'bg-blue-50 text-blue-700',
-  arriving: 'bg-blue-50 text-blue-700',
-  in_progress: 'bg-brand-50 text-brand-700',
-  completed: 'bg-brand-50 text-brand-700',
-  cancelled: 'bg-slate-100 text-slate-500',
-};
-
-const PAY_STYLE = {
-  paid: 'bg-green-50 text-green-700',
-  cash: 'bg-gold-100 text-gold-700',
-  refunded: 'bg-blue-50 text-blue-700',
-  pending: 'bg-yellow-50 text-yellow-700',
-};
+import { rideTone, payTone } from '../../lib/statusTone.js';
 
 export default function RideHistory() {
   const [rides, setRides] = useState(null);
@@ -62,7 +47,7 @@ export default function RideHistory() {
       </div>
 
       {rides.length === 0 ? (
-        <div className="mt-8 rounded-2xl border border-dashed border-slate-300 bg-white p-12 text-center">
+        <div className="mt-8 rounded-2xl border border-dashed border-accent-300 bg-surface p-12 text-center">
           <p className="text-muted">No rides yet.</p>
           <Link
             to="/"
@@ -76,23 +61,23 @@ export default function RideHistory() {
           {rides.map((r) => (
             <div
               key={r._id}
-              className="card-lift rounded-3xl border border-accent-200 bg-white p-5 shadow-sm dark:bg-accent-900 dark:border-white/10"
+              className="card-lift card dark:bg-accent-900 dark:border-white/10"
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className={`rounded-full px-2.5 py-1 text-xs font-medium capitalize ${STATUS_STYLE[r.status]}`}>
+                    <span className={`rounded-full px-2.5 py-1 text-xs font-medium capitalize ${rideTone(r.status)}`}>
                       {r.status.replace('_', ' ')}
                     </span>
                     {r.status === 'completed' && (
-                      <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${r.payment?.status === 'paid' && r.payment?.method === 'cash' ? PAY_STYLE.cash : PAY_STYLE[r.payment?.status] || PAY_STYLE.pending}`}>
+                      <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${payTone(r.payment?.status === 'paid' ? (r.payment?.method === 'cash' ? 'cash' : 'succeeded') : r.payment?.status)}`}>
                         {r.payment?.status === 'paid' ? r.payment?.method === 'cash' ? 'Cash' : 'Paid' : r.payment?.status === 'refunded' ? 'Refunded' : 'Unpaid'}
                       </span>
                     )}
                     <span className="text-xs text-muted">{new Date(r.createdAt).toLocaleDateString()} • {r.fare.distanceKm}km • {r.fare.durationMin}min</span>
                     {r.driver && <span className="inline-flex items-center gap-1 rounded-full bg-accent-50 px-2.5 py-1 text-xs dark:bg-white/5"><span className="h-6 w-6 rounded-full bg-brand-50 grid place-items-center text-xs font-bold text-brand-700">{r.driver?.name?.[0]}</span>{r.driver?.name}</span>}
                   </div>
-                  <p className="mt-2 flex items-center gap-1 truncate text-sm font-medium dark:text-white"><span className="h-2 w-2 rounded-full bg-green-500" />{r.pickup.address}</p>
+                  <p className="mt-2 flex items-center gap-1 truncate text-sm font-medium dark:text-white"><span className="h-2 w-2 rounded-full bg-success-500" />{r.pickup.address}</p>
                   <p className="truncate text-sm text-muted">→ {r.dropoff.address}</p>
                   {r.status === 'completed' && r.rating?.score && <p className="mt-1 text-xs">Rated ★ {r.rating.score} • {r.rating.comment || 'No comment'} • {r.rating.compliments?.join(' • ')}</p>}
                 </div>
@@ -104,13 +89,13 @@ export default function RideHistory() {
                       <Link to={`/rides/track/${r._id}`} className="rounded-full bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-700">Track • Live Chat</Link>
                     )}
                     {r.status === 'pending' && (
-                      <button onClick={() => setEditing(r)} className="rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-brand-700 ring-1 ring-brand-200 hover:bg-brand-50">Edit</button>
+                      <button onClick={() => setEditing(r)} className="rounded-full bg-surface px-3 py-1.5 text-xs font-semibold text-brand-700 ring-1 ring-brand-200 hover:bg-brand-50">Edit</button>
                     )}
                     {r.status === 'completed' && r.payment?.status === 'pending' && (
                       <button onClick={() => setPaying(r)} className="rounded-full bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white">Pay</button>
                     )}
                     {r.status === 'completed' && r.payment?.status === 'paid' && r.payment?.method !== 'cash' && !r.rating?.score && (
-                      <button onClick={() => { setRefundRide(r); setRefundReason(''); setRefundMsg(''); }} className="rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">Request Refund</button>
+                      <button onClick={() => { setRefundRide(r); setRefundReason(''); setRefundMsg(''); }} className="rounded-full bg-surface px-3 py-1.5 text-xs font-semibold text-gold-700 ring-1 ring-gold-200">Request Refund</button>
                     )}
                     {r.status === 'completed' && !r.rating?.score && (
                       <button onClick={() => setRatingRide(r)} className="rounded-full btn-brand-gradient px-3 py-1.5 text-xs font-semibold text-white">Rate ★</button>
@@ -155,7 +140,7 @@ export default function RideHistory() {
 
       {refundRide && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl">
+          <div className="w-full max-w-md rounded-3xl bg-surface p-6 shadow-2xl">
             <h3 className="font-display text-lg font-bold">Request Refund — ${refundRide.fare.final?.toFixed(2) || refundRide.fare.estimated.toFixed(2)}</h3>
             <p className="mt-1 text-sm text-muted">For ride to {refundRide.dropoff.address.slice(0,40)} • Only admin can approve. You’ll be notified of the decision.</p>
             <textarea

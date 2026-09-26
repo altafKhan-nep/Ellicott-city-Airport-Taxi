@@ -28,6 +28,7 @@ so you change a color value, never a class.
 | `brand-*` | **RED = primary brand**: nav/hero/footer bands, CTAs, live dots, red accent text | `brand-500 #e53935`, `brand-600 #d7332f`, `brand-700 #c62828`, `brand-800 #a11c1c`, `brand-950 #57100f` |
 | `accent-*` | Neutral blacks/grays = contrast + secondary UI (never primary) | `accent-400 #8f8f9a`, `accent-500 #667085`, `accent-900 #0b0d0f` |
 | `gold-*` | Warm gold = premium highlights / ratings / hero accent words on red | `gold-300 #efc964`, `gold-400 #f4b942`, `gold-500 #eaa82b` |
+| `success-*` | Functional green = done / paid / online / confirmed (single green for UI **and** the map pickup pin) | `success-500 #10b981`, `success-600 #059669`, `success-700 #047857` |
 | `ink` / `muted` | Text on off-white paper | `ink #0b0d0f`, `muted #667085`, `paper #f8f9fa` |
 | Fonts | `--font-display` = **Fraunces** (serif, headings — elegant editorial), `--font-sans` = **Inter** (body, highly readable) | Google Fonts, loaded in `client/index.html` |
 
@@ -36,8 +37,19 @@ Usage rules:
 - **Gold accents on red**: hero accent words, live dots, stat numbers and phone numbers on red bands use `text-gold-300` / `bg-gold-400` (not red) so they pop against the red.
 - **Black is a contrast accent only** — body headings (`ink`), dark icons, map pins; never a surface color.
 - Pills everywhere (Uber-style touch targets): `rounded-full` inputs (`input-pill`), buttons, chips.
-- Functional map colors are the ONLY allowed exceptions to the palette: pickup = circular green `map-pin-start` (#10b981), dropoff = red `map-pin-dropoff` (brand-700), driver = pulsing red `map-pin-driver` (brand-600), idle vehicles = `map-pin-vehicle` (white circle + black border). Route polyline is brand red `#c62828` (white casing) hardcoded in `BookingMap.jsx` and `RideTracking.jsx`.
+- Functional map colors are the ONLY allowed exceptions to the palette: pickup = circular green `map-pin-start` (`success-500`), dropoff = red `map-pin-dropoff` (brand-700), driver = pulsing red `map-pin-driver` (brand-600), idle vehicles = `map-pin-vehicle` (white circle + black border). Route polyline is brand red `#c62828` (white casing) hardcoded in `BookingMap.jsx` and `RideTracking.jsx`.
 - Depth comes from layered shadows: `.card-lift` (resting 2-layer shadow, float on hover) — no heavy borders.
+
+**Hard rule — no raw Tailwind palette colors.** Only `brand-*`, `accent-*`, `gold-*`, `success-*`, `ink`, `muted`, `paper`, `surface` may appear in components. Never `slate-*`, `blue-*`, `green-*`, `red-*`, `amber-*`, `yellow-*`, `gray-*`. Semantic mapping used across the app: red → `brand`, green → `success`, yellow/amber → `gold`, blue/slate/gray → `accent`, `bg-white` → `bg-surface` (so dark mode works).
+
+**Shared surfaces & tones (use these, never re-declare):**
+| Utility / module | Use for |
+|------------------|---------|
+| `.card` | Standard padded card (radius 1rem, `accent-200` border, `surface` bg, layered shadow, lifts on hover). Override padding with `card p-6` / `card p-8`. Defined in `@layer components`, so utilities win. |
+| `.panel` | Same surface with **no** padding and no hover lift — tables, dropdowns, map frames (`panel overflow-hidden`). |
+| `.card-lift` | Animation only, for image/media cards that define their own surface. |
+| `lib/statusTone.js` | `rideTone()`, `payTone()`, `payAccent()`, `badgeTone()` — the only place status/payment colors are defined, so every page renders identical pills. Never re-declare a `STATUS_STYLE` map. |
+
 
 ## Tech Stack
 

@@ -2,8 +2,8 @@ import { Card, CardTitle } from '../../components/ui/card';
 import { TrendingUp, Clock, CheckCircle, Award } from 'lucide-react';
 export default function PerformancePage(){
   const stats = [
-    { k:'Acceptance Rate', v:'98.2%', d:'Excellent • Top 10%', icon: CheckCircle, color:'text-green-600' },
-    { k:'Cancellation Rate', v:'1.1%', d:'Low • Keep <2%', icon: TrendingUp, color:'text-amber-600' },
+    { k:'Acceptance Rate', v:'98.2%', d:'Excellent • Top 10%', icon: CheckCircle, color:'text-success-600' },
+    { k:'Cancellation Rate', v:'1.1%', d:'Low • Keep <2%', icon: TrendingUp, color:'text-gold-600' },
     { k:'Response Time', v:'12s', d:'Fast • Avg 18s', icon: Clock, color:'text-brand-600' },
     { k:'On-Time Arrival', v:'99%', d:'Elite • 99.5% target', icon: Award, color:'text-gold-600' },
   ];
