@@ -7,6 +7,15 @@ import { Spinner } from './components/ui/Spinner.jsx';
 import VerifyEmailBanner from './components/auth/VerifyEmailBanner.jsx';
 
 // Code-split all routes — reduces initial JS from 927kB to ~180kB
+const AUTH_PATHS = new Set([
+  '/login',
+  '/register',
+  '/forgot-password',
+  '/reset-password',
+  '/verify-email',
+  '/auth/social',
+]);
+
 const Home = lazy(() => import('./pages/marketing/Home.jsx'));
 const Services = lazy(() => import('./pages/marketing/Services.jsx'));
 const ServiceDetail = lazy(() => import('./pages/marketing/ServiceDetail.jsx'));
@@ -152,6 +161,26 @@ export default function App() {
       </Suspense>
     );
   }
+  // Auth pages own the full screen (red/white split), so they render without
+  // the site navbar, verify-email banner and footer.
+  const isAuthPage = AUTH_PATHS.has(location.pathname);
+
+  if (isAuthPage) {
+    return (
+      <Suspense fallback={<Fallback />}>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/auth/social" element={<SocialCallback />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
+    );
+  }
+
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />

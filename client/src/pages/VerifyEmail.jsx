@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
 import { Button } from '../components/ui/Button.jsx';
+import AuthLayout from '../components/auth/AuthLayout.jsx';
 import { verifyEmail } from '../services/authService.js';
 
 export default function VerifyEmail() {
@@ -31,8 +32,13 @@ export default function VerifyEmail() {
   }, [token]);
 
   return (
-    <div className="mx-auto flex max-w-md flex-col px-4 py-12">
-      <div className="card p-8 text-center shadow-sm">
+    <AuthLayout
+      title={state === 'success' ? 'You are' : 'Almost'}
+      highlight={state === 'success' ? 'verified.' : 'there.'}
+      subtitle="One quick email check keeps your account and your rides secure."
+      footer={<Link to="/login" className="font-semibold text-brand-700 hover:underline">Back to sign in</Link>}
+    >
+      <div className="text-center">
         {state === 'verifying' && (
           <>
             <h1 className="text-2xl font-bold">Verifying your email…</h1>
@@ -72,6 +78,6 @@ export default function VerifyEmail() {
           </>
         )}
       </div>
-    </div>
+    </AuthLayout>
   );
 }

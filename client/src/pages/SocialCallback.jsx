@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { tokenStore } from '../services/api.js';
 import { Spinner } from '../components/ui/Spinner.jsx';
 import { Button } from '../components/ui/Button.jsx';
+import AuthLayout from '../components/auth/AuthLayout.jsx';
 
 // Landing page for the Passport OAuth callback. The server redirects here with
 // fresh tokens in the query string (or ?error=... on failure). We store them
@@ -45,8 +46,13 @@ export default function SocialCallback() {
   }, []);
 
   return (
-    <div className="mx-auto flex max-w-md flex-col px-4 py-24 text-center">
-      <div className="card p-8">
+    <AuthLayout
+      title="One moment,"
+      highlight="we're signing you in."
+      subtitle="Securely connecting your account — this only takes a second."
+      footer={<Link to="/login" className="font-semibold text-brand-700 hover:underline">Back to sign in</Link>}
+    >
+      <div className="text-center">
         {status === 'loading' && (
           <>
             <h1 className="text-2xl font-bold">Finishing sign-in…</h1>
@@ -72,6 +78,6 @@ export default function SocialCallback() {
           </>
         )}
       </div>
-    </div>
+    </AuthLayout>
   );
 }
