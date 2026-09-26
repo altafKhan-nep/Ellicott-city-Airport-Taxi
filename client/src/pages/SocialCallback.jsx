@@ -71,7 +71,7 @@ export default function SocialCallback() {
               We couldn't log you in with that account. Please try again or use another method.
             </p>
             <Link to="/login" className="mt-6 block">
-              <Button size="lg" variant="outline" className="w-full">
+              <Button size="xl" variant="outline" className="w-full">
                 Back to sign in
               </Button>
             </Link>

@@ -66,7 +66,7 @@ export default function ResetPassword() {
             <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
             <span>Your password has been reset. All other sessions were signed out.</span>
           </p>
-          <Button onClick={() => window.location.assign('/login')} size="lg" className="w-full">
+          <Button onClick={() => window.location.assign('/login')} size="xl" className="w-full">
             Sign in with your new password
             <ArrowRight className="h-4 w-4" />
           </Button>
@@ -97,7 +97,7 @@ export default function ResetPassword() {
               {error}
             </p>
           )}
-          <Button type="submit" size="lg" loading={loading} className="w-full">
+          <Button type="submit" size="xl" loading={loading} className="w-full">
             {loading ? 'Resetting…' : 'Reset password'}
             {!loading && <ArrowRight className="h-4 w-4" />}
           </Button>

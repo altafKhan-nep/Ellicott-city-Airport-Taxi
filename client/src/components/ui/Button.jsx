@@ -17,6 +17,8 @@ export function Button({
     sm: 'px-3 py-1.5 text-sm',
     md: 'px-4 py-2.5 text-sm',
     lg: 'px-6 py-3 text-base',
+    // Taller pill for full-width auth submit buttons
+    xl: 'h-13 px-7 text-[15px]',
   };
 
   return (

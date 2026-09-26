@@ -1,14 +1,11 @@
 import { useState } from 'react';
 import { API_ROOT } from '../../services/api.js';
 
-// Real-world style "Continue with" options. Google/Facebook use the Passport
-// OAuth redirect flow — they link to the server when credentials are set, or
-// show a friendly notice so the UI is always visible.
+// "Continue with Google" — uses the Passport OAuth redirect flow, so it links
+// to the server when credentials are set, or shows a friendly notice so the
+// button is always visible. Facebook sign-in is intentionally not offered.
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
-const FACEBOOK_APP_ID = import.meta.env.VITE_FACEBOOK_APP_ID || '';
-
 const googleReady = Boolean(GOOGLE_CLIENT_ID);
-const facebookReady = Boolean(FACEBOOK_APP_ID);
 
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
@@ -19,51 +16,46 @@ const GoogleIcon = () => (
   </svg>
 );
 
-const FacebookIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="#1877f2" aria-hidden="true">
-    <path d="M24 12.07C24 5.4 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.55-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.96.93-1.96 1.89v2.26h3.33l-.53 3.49h-2.8V24C19.61 23.1 24 18.1 24 12.07z" />
-  </svg>
-);
-
-const buttonBase =
-  'flex w-full items-center justify-center gap-2 rounded-full border border-accent-300 bg-surface px-4 py-3 text-sm font-semibold text-ink transition-colors hover:bg-accent-50';
+const buttonClass =
+  'flex h-13 w-full items-center justify-center gap-2.5 rounded-full border border-accent-200 bg-paper px-4 text-sm font-semibold text-ink transition-all duration-200 hover:-translate-y-0.5 hover:border-accent-300 hover:bg-surface hover:shadow-md';
 
 export default function SocialLoginButtons() {
   const [notice, setNotice] = useState('');
 
-  const notReady = (provider) =>
-    setNotice(`${provider} sign-in isn't connected yet. It will work once the app owner adds the OAuth credentials.`);
+  const label = 'Continue with Google';
 
   return (
-    <div className="mt-6">
-      <div className="flex items-center gap-3 text-xs text-muted">
+    <div className="mt-7">
+      <div className="flex items-center gap-3">
         <span className="h-px flex-1 bg-accent-200" />
-        or continue with
+        <span className="text-xs font-medium uppercase tracking-widest text-muted">
+          or continue with
+        </span>
         <span className="h-px flex-1 bg-accent-200" />
       </div>
 
       {notice && (
-        <p className="mt-3 rounded-xl bg-gold-50 px-4 py-2.5 text-xs text-ink">{notice}</p>
+        <p className="mt-3 rounded-2xl border border-gold-200 bg-gold-50 px-4 py-2.5 text-xs text-gold-800">
+          {notice}
+        </p>
       )}
 
-      <div className="mt-4 space-y-3">
+      <div className="mt-5">
         {googleReady ? (
-          <a href={`${API_ROOT}/api/auth/google`} className={buttonBase}>
-            <GoogleIcon /> Continue with Google
+          <a href={`${API_ROOT}/api/auth/google`} className={buttonClass}>
+            <GoogleIcon /> {label}
           </a>
         ) : (
-          <button type="button" onClick={() => notReady('Google')} className={buttonBase}>
-            <GoogleIcon /> Continue with Google
-          </button>
-        )}
-
-        {facebookReady ? (
-          <a href={`${API_ROOT}/api/auth/facebook`} className={buttonBase}>
-            <FacebookIcon /> Continue with Facebook
-          </a>
-        ) : (
-          <button type="button" onClick={() => notReady('Facebook')} className={buttonBase}>
-            <FacebookIcon /> Continue with Facebook
+          <button
+            type="button"
+            onClick={() =>
+              setNotice(
+                'Google sign-in is not connected yet. It will work once the app owner adds the OAuth credentials.',
+              )
+            }
+            className={buttonClass}
+          >
+            <GoogleIcon /> {label}
           </button>
         )}
       </div>

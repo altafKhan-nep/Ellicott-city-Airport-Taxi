@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Check, Phone, Star } from 'lucide-react';
+import { Check, Lock, Phone, Star } from 'lucide-react';
 
 // Full-screen auth shell shared by every auth page (login, register,
 // forgot/reset password, verify email).
@@ -35,7 +35,7 @@ export default function AuthLayout({ title, highlight, subtitle, children, foote
           </p>
         </div>
 
-        <div className="relative my-10 max-w-lg">
+        <div className="relative my-8 max-w-lg sm:my-10">
           <h1 className="font-display text-[34px] font-bold leading-[1.1] tracking-tight sm:text-[42px]">
             {title} {highlight && <span className="text-gold-300">{highlight}</span>}
           </h1>
@@ -90,10 +90,16 @@ export default function AuthLayout({ title, highlight, subtitle, children, foote
           </div>
         </div>
 
-        <p className="mt-10 text-center text-xs text-muted">
-          © {new Date().getFullYear()} Ellicott City Airport Taxi · Maryland · Virginia ·
-          Washington DC · Baltimore
-        </p>
+        <div className="mt-10 space-y-2.5 text-center">
+          <p className="inline-flex items-center gap-1.5 text-xs text-muted">
+            <Lock className="h-3.5 w-3.5 text-success-600" />
+            Secure sign-in · your details stay private
+          </p>
+          <p className="text-xs text-muted">
+            © {new Date().getFullYear()} Ellicott City Airport Taxi · Maryland · Virginia ·
+            Washington DC · Baltimore
+          </p>
+        </div>
       </section>
     </div>
   );

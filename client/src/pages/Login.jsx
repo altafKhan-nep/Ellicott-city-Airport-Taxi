@@ -118,7 +118,7 @@ export default function Login() {
           </p>
         )}
 
-        <Button type="submit" size="lg" loading={loading} className="mt-2 w-full">
+        <Button type="submit" size="xl" loading={loading} className="mt-2 w-full">
           {loading ? 'Signing in…' : 'Sign in'}
         </Button>
       </form>

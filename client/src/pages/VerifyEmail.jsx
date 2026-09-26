@@ -56,7 +56,7 @@ export default function VerifyEmail() {
               Your account is active. You can now book rides with Ellicott City Airport Taxi.
             </p>
             <Link to="/login" className="mt-6 block">
-              <Button size="lg" className="w-full">
+              <Button size="xl" className="w-full">
                 Sign in
               </Button>
             </Link>
@@ -71,7 +71,7 @@ export default function VerifyEmail() {
             <h1 className="text-2xl font-bold">Verification failed</h1>
             <p className="mt-2 text-sm text-muted">{message}</p>
             <Link to="/login" className="mt-6 block">
-              <Button size="lg" variant="outline" className="w-full">
+              <Button size="xl" variant="outline" className="w-full">
                 Back to sign in
               </Button>
             </Link>

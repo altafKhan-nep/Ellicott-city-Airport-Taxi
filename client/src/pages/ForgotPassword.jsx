@@ -86,7 +86,7 @@ export default function ForgotPassword() {
                 {error}
               </p>
             )}
-            <Button type="submit" size="lg" loading={loading} className="w-full">
+            <Button type="submit" size="xl" loading={loading} className="w-full">
               {loading ? 'Sending…' : 'Send reset link'}
               {!loading && <ArrowRight className="h-4 w-4" />}
             </Button>

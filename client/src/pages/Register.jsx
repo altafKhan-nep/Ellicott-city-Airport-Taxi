@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { AlertCircle, ArrowRight, CheckCircle2, User, Car, Mail, Phone, UserRound } from 'lucide-react';
+import { AlertCircle, ArrowRight, CheckCircle2, User, Car } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { Input } from '../components/ui/Input.jsx';
 import { Button } from '../components/ui/Button.jsx';
@@ -128,7 +128,7 @@ export default function Register() {
             </div>
           )}
 
-          <Button onClick={goHome} size="lg" className="mt-7 w-full">
+          <Button onClick={goHome} size="xl" className="mt-7 w-full">
             Continue
             <ArrowRight className="h-4 w-4" />
           </Button>
@@ -159,7 +159,6 @@ export default function Register() {
           label="Full name"
           required
           autoComplete="name"
-          icon={<UserRound className="h-4 w-4" />}
           placeholder="John Passenger"
           value={form.name}
           onChange={set('name')}
@@ -169,7 +168,6 @@ export default function Register() {
           type="email"
           required
           autoComplete="email"
-          icon={<Mail className="h-4 w-4" />}
           placeholder="you@example.com"
           value={form.email}
           onChange={set('email')}
@@ -178,7 +176,6 @@ export default function Register() {
           label="Phone"
           type="tel"
           autoComplete="tel"
-          icon={<Phone className="h-4 w-4" />}
           placeholder="(410) 365-5556"
           hint="Optional — lets you sign in with your phone number."
           value={form.phone}
@@ -265,7 +262,7 @@ export default function Register() {
           </p>
         )}
 
-        <Button type="submit" size="lg" loading={loading} className="w-full">
+        <Button type="submit" size="xl" loading={loading} className="w-full">
           {loading ? 'Creating account…' : 'Create account'}
           {!loading && <ArrowRight className="h-4 w-4" />}
         </Button>
