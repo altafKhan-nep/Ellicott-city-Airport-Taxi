@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Check, Lock, Phone, Star } from 'lucide-react';
+import { useContent } from '../../context/ContentContext.jsx';
 
 // Full-screen auth shell shared by every auth page (login, register,
 // forgot/reset password, verify email).
@@ -7,13 +8,8 @@ import { Check, Lock, Phone, Star } from 'lucide-react';
 // Two halves, split by colour: a brand-red company panel on the left and a
 // clean white form on the right. Rendered without the site Navbar/Footer
 // (see AUTH_PATHS in App.jsx) so the split owns the whole viewport.
-const PROOF = [
-  'Licensed & insured chauffeurs',
-  '24/7 dispatch, upfront flat fares',
-  'Every airport · BWI, IAD, DCA',
-];
-
 export default function AuthLayout({ title, highlight, subtitle, children, footer }) {
+  const { content } = useContent();
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       {/* Brand half — deep red */}
@@ -53,7 +49,7 @@ export default function AuthLayout({ title, highlight, subtitle, children, foote
           </p>
 
           <ul className="space-y-2.5">
-            {PROOF.map((line) => (
+            {content.authProof.map((line) => (
               <li key={line} className="flex items-center gap-3 text-sm text-white/75">
                 <Check className="h-4 w-4 shrink-0 text-gold-300" />
                 {line}
@@ -62,11 +58,11 @@ export default function AuthLayout({ title, highlight, subtitle, children, foote
           </ul>
 
           <a
-            href="tel:4103655556"
+            href={`tel:${content.contactPhoneHref}`}
             className="flex items-center gap-3 pt-2 transition-opacity hover:opacity-90"
           >
             <Phone className="h-5 w-5 text-gold-300" />
-            <span className="font-display text-2xl font-bold tracking-tight">(410) 365-5556</span>
+            <span className="font-display text-2xl font-bold tracking-tight">{content.contactPhone}</span>
           </a>
         </div>
       </aside>

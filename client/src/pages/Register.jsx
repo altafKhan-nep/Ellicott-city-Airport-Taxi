@@ -7,6 +7,7 @@ import { Button } from '../components/ui/Button.jsx';
 import AuthLayout from '../components/auth/AuthLayout.jsx';
 import PasswordField from '../components/auth/PasswordField.jsx';
 import SocialLoginButtons from '../components/auth/SocialLoginButtons.jsx';
+import { useContent } from '../context/ContentContext.jsx';
 
 const ROLES = [
   {
@@ -44,6 +45,7 @@ const STRENGTH_TONE = [
 ];
 
 export default function Register() {
+  const { content } = useContent();
   const { register } = useAuth();
   const navigate = useNavigate();
 
@@ -176,7 +178,7 @@ export default function Register() {
           label="Phone"
           type="tel"
           autoComplete="tel"
-          placeholder="(410) 365-5556"
+          placeholder={content.contactPhone}
           hint="Optional — lets you sign in with your phone number."
           value={form.phone}
           onChange={set('phone')}

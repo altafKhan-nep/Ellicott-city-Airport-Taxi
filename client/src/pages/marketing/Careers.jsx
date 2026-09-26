@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useContent } from '../../context/ContentContext.jsx';
 import { BadgeDollarSign, Clock, Smartphone, Handshake, Trophy, ShieldCheck, Check, FileText, MailCheck } from 'lucide-react';
 
 const PERKS = [
@@ -28,6 +29,7 @@ const FIELDS = [
 ];
 
 export default function Careers() {
+  const { content } = useContent();
   const [form, setForm] = useState({});
   const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
@@ -44,7 +46,7 @@ export default function Careers() {
     const body = encodeURIComponent(
       `Name: ${form.name}\nPhone: ${form.phone}\nEmail: ${form.email}\nSubject: ${form.subject}\n\nMessage:\n${form.message || ''}`
     );
-    window.location.href = `mailto:chriskbonsu@gmail.com?subject=${encodeURIComponent(
+    window.location.href = `mailto:${content.contactEmail}?subject=${encodeURIComponent(
       `${subject} — ${name}`
     )}&body=${body}`;
     setSent(true);
@@ -173,7 +175,7 @@ export default function Careers() {
                 <h3 className="mt-2 text-lg font-bold text-brand-900">Thank you!</h3>
                 <p className="mt-1 text-sm text-brand-700">
                   Your email draft has been opened in your mail app. Send it to{' '}
-                  <span className="font-semibold">chriskbonsu@gmail.com</span> and we will be in
+                  <span className="font-semibold">{content.contactEmail}</span> and we will be in
                   touch shortly.
                 </p>
               </div>
@@ -207,7 +209,7 @@ export default function Careers() {
                   Send application
                 </button>
                 <p className="text-center text-xs text-muted">
-                  Opens your email app addressed to chriskbonsu@gmail.com.
+                  Opens your email app addressed to {content.contactEmail}.
                 </p>
               </form>
             )}

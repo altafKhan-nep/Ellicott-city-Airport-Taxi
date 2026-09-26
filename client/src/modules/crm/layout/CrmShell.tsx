@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { NavLink, Outlet, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Radio, Map, CalendarDays, Users, Car, Wallet, BarChart3, LifeBuoy, Bell, ShieldCheck, Settings, Moon, Sun, Menu, X, LogOut, Phone } from 'lucide-react';
+import { LayoutDashboard, Radio, Map, CalendarDays, Users, Car, Wallet, BarChart3, LifeBuoy, Bell, ShieldCheck, Settings, FileText, Moon, Sun, Menu, X, LogOut, Phone } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext.jsx';
 
 const NAV = [
@@ -18,6 +18,7 @@ const NAV = [
   { to: '/admin/notifications', label: 'Notifications', icon: Bell },
   { to: '/admin/audit', label: 'Audit Log', icon: ShieldCheck },
   { to: '/admin/settings', label: 'Settings', icon: Settings },
+  { to: '/admin/content', label: 'Website Content', icon: FileText },
 ];
 
 export default function CrmShell() {

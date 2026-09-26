@@ -2,6 +2,7 @@ import { Suspense, lazy } from 'react';
 import { Link } from 'react-router-dom';
 import { ShieldCheck, Receipt, Search, Star, Phone, MapPin, Flag, Check, ArrowRight } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
+import { useContent } from '../../context/ContentContext.jsx';
 import { Button } from '../../components/ui/Button.jsx';
 import { Reveal } from '../../components/ui/Reveal.jsx';
 import { useMediaQuery } from '../../hooks/useMediaQuery.js';
@@ -10,13 +11,6 @@ import { SERVICES, FEATURED_SERVICES } from '../../data/services.js';
 
 // Lazy-loaded so the WebGL/three bundle only downloads when the taxi actually renders.
 const HeroTaxiScene = lazy(() => import('../../components/three/HeroTaxiScene.jsx'));
-
-const STATS = [
-  { value: '24/7', label: 'Service, every day' },
-  { value: '18+', label: 'Communities served' },
-  { value: '10,000+', label: 'Rides completed' },
-  { value: '5.0', label: 'Passenger rating' },
-];
 
 const TRUST = [
   { icon: ShieldCheck, label: 'Licensed & insured' },
@@ -31,36 +25,9 @@ const STEPS = [
   { n: '03', t: 'Track & ride', d: 'Follow your driver live on the map, share the trip with loved ones, and rate your ride when it ends.' },
 ];
 
-const TESTIMONIALS = [
-  {
-    quote:
-      'Picked me up at BWI at 4:30am, drove the whole way professionally, and the fare was exactly what I saw on the app. Flawless.',
-    name: 'Danielle R.',
-    detail: 'Ellicott City, MD · Airport transfer',
-  },
-  {
-    quote:
-      'We booked a sedan for our wedding party of six. The drivers were early, immaculate, and so kind. Could not have asked for a smoother day.',
-    name: 'Marcus & Priya',
-    detail: 'Ellicott City, MD · Wedding',
-  },
-  {
-    quote:
-      'I use Ellicott City Airport Taxi every week for the commute to the office. Reliable, clean cars and the same great driver most mornings.',
-    name: 'Jennifer W.',
-    detail: 'Ellicott City, MD · Corporate account',
-  },
-];
-
-const AREAS = [
-  'Columbia', 'Ellicott City', 'Elkridge', 'Fulton', 'Laurel', 'Savage',
-  'Highland', 'Jessup', 'Clarksville', 'Dayton', 'West Friendship', 'Woodstock',
-  'Glenelg', 'Glenwood', 'Mount Airy', 'Sykesville', 'Woodbine', 'Cooksville',
-  'Marriottsville', 'Hanover', 'Simpsonville', 'Lisbon', 'Annapolis Junction',
-];
-
 export default function Home() {
   const { user } = useAuth();
+  const { content } = useContent();
   const bookUrl = user ? '/reservations' : '/login';
 
   // 3D taxi: hidden on mobile and when WebGL is unavailable; tablets get a compact variant.
@@ -85,32 +52,31 @@ export default function Home() {
             <div className="relative z-10">
               <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-medium uppercase tracking-wider text-white/85 backdrop-blur">
                 <span className="h-2 w-2 animate-pulse rounded-full bg-gold-400" />
-                Ellicott City, MD · Available 24/7
+                {content.heroEyebrow}
               </span>
 
               <h1 className="mt-6 text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-                Ellicott City’s premier{' '}
-                <span className="text-gold-300">full-service</span> transportation provider
+                {content.heroTitle}{' '}
+                <span className="text-gold-300">{content.heroHighlight}</span>{' '}
+                {content.heroTitleTail}
               </h1>
 
               <p className="mt-5 max-w-xl text-lg leading-relaxed text-white/80">
-                Professional taxi, sedan and SUV service across Maryland, DC, and Virginia —
-                airport transfers, corporate travel, weddings,
-                events and more. Book online, pay upfront, track your driver live.
+                {content.heroSubtitle}
               </p>
 
               <div className="mt-8 flex flex-wrap items-center gap-4">
                 <Link to={bookUrl}>
                   <Button size="lg" className="bg-surface !text-brand-900 shadow-xl hover:bg-brand-50">
-                    Book your ride online
+                    {content.heroCtaLabel}
                   </Button>
                 </Link>
                 <a
-                  href="tel:4103655556"
+                  href={`tel:${content.contactPhoneHref}`}
                   className="inline-flex items-center gap-2 rounded-full border border-white/30 px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-white/10"
                 >
                   <Phone className="h-4 w-4" />
-                  (410) 365-5556
+                  {content.contactPhone}
                 </a>
               </div>
 
@@ -183,7 +149,7 @@ export default function Home() {
         {/* Stats bar */}
         <div className="relative border-t border-white/10 bg-black/10">
           <div className="mx-auto grid max-w-7xl grid-cols-2 gap-6 px-4 py-8 sm:px-6 md:grid-cols-4">
-            {STATS.map((s) => (
+            {content.stats.map((s) => (
               <div key={s.label} className="text-center">
                 <div className="text-2xl font-extrabold text-gold-300 sm:text-3xl">{s.value}</div>
                 <div className="mt-1 text-sm text-white/70">{s.label}</div>
@@ -232,10 +198,10 @@ export default function Home() {
             <div className="p-8 sm:p-10">
               <h3 className="text-2xl font-bold">Book online or call</h3>
               <a
-                href="tel:4103655556"
+                href={`tel:${content.contactPhoneHref}`}
                 className="mt-2 block text-3xl font-extrabold tracking-tight text-gold-300"
               >
-                (410) 365-5556
+                {content.contactPhone}
               </a>
               <p className="mt-4 text-[15px] leading-relaxed text-white/80">
                 Get a free, no-obligation quote for airport transfers, events, corporate accounts
@@ -383,7 +349,7 @@ export default function Home() {
           </div>
 
           <div className="mt-12 grid gap-6 md:grid-cols-3">
-            {TESTIMONIALS.map((t, i) => (
+            {content.testimonials.map((t, i) => (
               <Reveal key={t.name} delay={(i % 3) * 110} className="h-full">
                 <figure className="card-lift h-full rounded-3xl border border-white/15 bg-white/10 p-7 backdrop-blur">
                   <div className="flex gap-0.5 text-gold-400" aria-hidden>
@@ -423,7 +389,7 @@ export default function Home() {
 
         <Reveal delay={80}>
           <div className="mt-10 flex flex-wrap justify-center gap-2.5">
-            {AREAS.map((a) => (
+            {content.serviceAreas.map((a) => (
               <span
                 key={a}
                 className="rounded-full border border-accent-200 bg-surface px-4 py-2 text-sm font-medium text-ink shadow-sm transition-colors hover:border-brand-300"
@@ -452,11 +418,11 @@ export default function Home() {
               </Button>
             </Link>
             <a
-              href="tel:4103655556"
+              href={`tel:${content.contactPhoneHref}`}
               className="inline-flex items-center gap-2 rounded-full bg-surface px-6 py-3 text-base font-semibold text-brand-800 shadow-sm transition-colors hover:bg-brand-50"
             >
               <Phone className="h-4 w-4" />
-              (410) 365-5556
+              {content.contactPhone}
             </a>
           </div>
         </div>

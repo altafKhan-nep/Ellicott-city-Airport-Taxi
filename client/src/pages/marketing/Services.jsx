@@ -4,6 +4,7 @@ import { Button } from '../../components/ui/Button.jsx';
 import { Reveal } from '../../components/ui/Reveal.jsx';
 import { Timer, Handshake, Sparkles, ShieldCheck, Phone, ArrowRight } from 'lucide-react';
 import { SERVICES } from '../../data/services.js';
+import { useContent } from '../../context/ContentContext.jsx';
 
 const PROMISES = [
   { icon: Timer, title: 'Prompt', desc: 'We value your time. On-time pickup, efficient routing.' },
@@ -14,6 +15,7 @@ const PROMISES = [
 
 export default function Services() {
   const { user } = useAuth();
+  const { content } = useContent();
   const bookUrl = user ? '/reservations' : '/login';
 
   return (
@@ -44,11 +46,11 @@ export default function Services() {
               </Button>
             </Link>
             <a
-              href="tel:4103655556"
+              href={`tel:${content.contactPhoneHref}`}
               className="inline-flex items-center gap-2 rounded-full border border-white/30 px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-white/10"
             >
               <Phone className="h-4 w-4" />
-              (410) 365-5556
+              {content.contactPhone}
             </a>
           </div>
         </div>
@@ -147,11 +149,11 @@ export default function Services() {
               </Button>
             </Link>
             <a
-              href="tel:4103655556"
+              href={`tel:${content.contactPhoneHref}`}
               className="inline-flex items-center gap-2 rounded-full border border-white/30 px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-white/10"
             >
               <Phone className="h-4 w-4" />
-              (410) 365-5556
+              {content.contactPhone}
             </a>
           </div>
         </div>

@@ -7,8 +7,10 @@ import { Button } from '../components/ui/Button.jsx';
 import AuthLayout from '../components/auth/AuthLayout.jsx';
 import PasswordField from '../components/auth/PasswordField.jsx';
 import SocialLoginButtons from '../components/auth/SocialLoginButtons.jsx';
+import { useContent } from '../context/ContentContext.jsx';
 
 export default function Login() {
+  const { content } = useContent();
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -78,7 +80,7 @@ export default function Login() {
           type="text"
           required
           autoComplete="username"
-          placeholder="you@example.com or (410) 365-5556"
+          placeholder={`you@example.com or ${content.contactPhone}`}
           value={form.identifier}
           onChange={set('identifier')}
         />

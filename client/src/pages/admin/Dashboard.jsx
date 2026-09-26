@@ -14,14 +14,18 @@ import {
   adminSettings,
   adminUpdateSettings,
   adminAssignDriver,
+  adminContent,
+  adminUpdateContent,
 } from '../../services/adminService.js';
 import { onRideUpdate, offRideUpdate, onRideNew, offRideNew } from '../../services/socketService.js';
 import { Spinner } from '../../components/ui/Spinner.jsx';
 import { Button } from '../../components/ui/Button.jsx';
 import { vehicleLabel } from '../../data/vehicles.js';
 import { rideTone, payTone, payAccent } from '../../lib/statusTone.js';
+import { useContent } from '../../context/ContentContext.jsx';
 
 export default function Dashboard() {
+  const { refresh: refreshContent } = useContent();
   const [analytics, setAnalytics] = useState(null);
   const [rides, setRides] = useState([]);
   const [drivers, setDrivers] = useState([]);
@@ -30,6 +34,7 @@ export default function Dashboard() {
   const [payments, setPayments] = useState([]);
   const [paySummary, setPaySummary] = useState({});
   const [settings, setSettings] = useState(null);
+  const [content, setContent] = useState(null);
   const [active, setActive] = useState('overview');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState('');
@@ -74,6 +79,36 @@ export default function Dashboard() {
     }
   };
 
+  const loadContent = async () => {
+    try {
+      const { data } = await adminContent();
+      setContent(data.content);
+    } catch {
+      setError('Could not load website content');
+    }
+  };
+
+  const saveContent = async () => {
+    setBusy('content');
+    try {
+      const { data } = await adminUpdateContent(content);
+      setContent(data.content);
+      await refreshContent();
+      setError('');
+    } catch {
+      setError('Could not save website content');
+    } finally {
+      setBusy('');
+    }
+  };
+
+  const setContentField = (key, value) => setContent((c) => ({ ...c, [key]: value }));
+  const setListField = (key, index, field, value) =>
+    setContent((c) => ({
+      ...c,
+      [key]: (c[key] || []).map((row, i) => (i === index ? { ...row, [field]: value } : row)),
+    }));
+
   useEffect(() => {
     load();
   }, []);
@@ -82,6 +117,7 @@ export default function Dashboard() {
     if (active === 'users') loadUsers(userSearch);
     if (active === 'payments') loadPayments();
     if (active === 'settings') loadSettings();
+    if (active === 'content') loadContent();
     if (active === 'rides') load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active]);
@@ -106,6 +142,7 @@ export default function Dashboard() {
     { id: 'users', label: 'Users' },
     { id: 'payments', label: 'Payments' },
     { id: 'settings', label: 'Settings' },
+    { id: 'content', label: 'Website Content' },
   ];
 
   if (error) return <p className="px-4 py-16 text-center text-muted">{error}</p>;
@@ -491,6 +528,250 @@ export default function Dashboard() {
               </tbody>
             </table>
           </div>
+        </div>
+      )}
+
+      {active === 'content' && content && (
+        <div className="mt-6 max-w-3xl space-y-4">
+          <div className={card}>
+            <h2 className="font-bold">Home hero</h2>
+            <p className="mt-1 text-sm text-muted">
+              The first thing every visitor reads. The highlighted part renders in gold.
+            </p>
+            <div className="mt-4 space-y-4">
+              <label className="block">
+                <span className="mb-1.5 block text-sm font-medium text-ink">Eyebrow</span>
+                <input
+                  value={content.heroEyebrow || ''}
+                  onChange={(e) => setContentField('heroEyebrow', e.target.value)}
+                  className="input-pill w-full border border-accent-300 bg-surface px-4 py-2.5 text-sm outline-none focus:border-brand-500"
+                />
+              </label>
+              <div className="grid gap-4 sm:grid-cols-3">
+                <label className="block">
+                  <span className="mb-1.5 block text-sm font-medium text-ink">Title</span>
+                  <input
+                    value={content.heroTitle || ''}
+                    onChange={(e) => setContentField('heroTitle', e.target.value)}
+                    className="input-pill w-full border border-accent-300 bg-surface px-4 py-2.5 text-sm outline-none focus:border-brand-500"
+                  />
+                </label>
+                <label className="block">
+                  <span className="mb-1.5 block text-sm font-medium text-ink">Gold word</span>
+                  <input
+                    value={content.heroHighlight || ''}
+                    onChange={(e) => setContentField('heroHighlight', e.target.value)}
+                    className="input-pill w-full border border-accent-300 bg-surface px-4 py-2.5 text-sm outline-none focus:border-brand-500"
+                  />
+                </label>
+                <label className="block">
+                  <span className="mb-1.5 block text-sm font-medium text-ink">Title tail</span>
+                  <input
+                    value={content.heroTitleTail || ''}
+                    onChange={(e) => setContentField('heroTitleTail', e.target.value)}
+                    className="input-pill w-full border border-accent-300 bg-surface px-4 py-2.5 text-sm outline-none focus:border-brand-500"
+                  />
+                </label>
+              </div>
+              <label className="block">
+                <span className="mb-1.5 block text-sm font-medium text-ink">Subtitle</span>
+                <textarea
+                  rows={3}
+                  value={content.heroSubtitle || ''}
+                  onChange={(e) => setContentField('heroSubtitle', e.target.value)}
+                  className="w-full rounded-2xl border border-accent-300 bg-surface px-4 py-2.5 text-sm outline-none focus:border-brand-500"
+                />
+              </label>
+              <label className="block">
+                <span className="mb-1.5 block text-sm font-medium text-ink">Button label</span>
+                <input
+                  value={content.heroCtaLabel || ''}
+                  onChange={(e) => setContentField('heroCtaLabel', e.target.value)}
+                  className="input-pill w-full border border-accent-300 bg-surface px-4 py-2.5 text-sm outline-none focus:border-brand-500"
+                />
+              </label>
+            </div>
+          </div>
+
+          <div className={card}>
+            <h2 className="font-bold">Contact details</h2>
+            <p className="mt-1 text-sm text-muted">
+              Used site-wide: navbar, footer, contact page and the login/register panel.
+            </p>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <label className="block">
+                <span className="mb-1.5 block text-sm font-medium text-ink">Phone (display)</span>
+                <input
+                  value={content.contactPhone || ''}
+                  onChange={(e) => setContentField('contactPhone', e.target.value)}
+                  className="input-pill w-full border border-accent-300 bg-surface px-4 py-2.5 text-sm outline-none focus:border-brand-500"
+                />
+              </label>
+              <label className="block">
+                <span className="mb-1.5 block text-sm font-medium text-ink">Phone (tel: link)</span>
+                <input
+                  value={content.contactPhoneHref || ''}
+                  onChange={(e) =>
+                    setContentField('contactPhoneHref', e.target.value.replace(/[^0-9+]/g, ''))
+                  }
+                  placeholder="4103655556"
+                  className="input-pill w-full border border-accent-300 bg-surface px-4 py-2.5 text-sm outline-none focus:border-brand-500"
+                />
+              </label>
+              <label className="block">
+                <span className="mb-1.5 block text-sm font-medium text-ink">Email</span>
+                <input
+                  type="email"
+                  value={content.contactEmail || ''}
+                  onChange={(e) => setContentField('contactEmail', e.target.value)}
+                  className="input-pill w-full border border-accent-300 bg-surface px-4 py-2.5 text-sm outline-none focus:border-brand-500"
+                />
+              </label>
+              <label className="block">
+                <span className="mb-1.5 block text-sm font-medium text-ink">Address</span>
+                <input
+                  value={content.contactAddress || ''}
+                  onChange={(e) => setContentField('contactAddress', e.target.value)}
+                  className="input-pill w-full border border-accent-300 bg-surface px-4 py-2.5 text-sm outline-none focus:border-brand-500"
+                />
+              </label>
+              <label className="block sm:col-span-2">
+                <span className="mb-1.5 block text-sm font-medium text-ink">Service area</span>
+                <input
+                  value={content.serviceArea || ''}
+                  onChange={(e) => setContentField('serviceArea', e.target.value)}
+                  className="input-pill w-full border border-accent-300 bg-surface px-4 py-2.5 text-sm outline-none focus:border-brand-500"
+                />
+              </label>
+              <label className="block sm:col-span-2">
+                <span className="mb-1.5 block text-sm font-medium text-ink">Footer blurb</span>
+                <textarea
+                  rows={2}
+                  value={content.tagline || ''}
+                  onChange={(e) => setContentField('tagline', e.target.value)}
+                  className="w-full rounded-2xl border border-accent-300 bg-surface px-4 py-2.5 text-sm outline-none focus:border-brand-500"
+                />
+              </label>
+            </div>
+          </div>
+
+          <div className={card}>
+            <h2 className="font-bold">Home stat band</h2>
+            <div className="mt-4 space-y-3">
+              {(content.stats || []).map((row, i) => (
+                <div key={i} className="grid gap-3 sm:grid-cols-[8rem_1fr]">
+                  <input
+                    value={row.value || ''}
+                    onChange={(e) => setListField('stats', i, 'value', e.target.value)}
+                    placeholder="24/7"
+                    className="input-pill w-full border border-accent-300 bg-surface px-4 py-2 text-sm outline-none focus:border-brand-500"
+                  />
+                  <input
+                    value={row.label || ''}
+                    onChange={(e) => setListField('stats', i, 'label', e.target.value)}
+                    placeholder="Service, every day"
+                    className="input-pill w-full border border-accent-300 bg-surface px-4 py-2 text-sm outline-none focus:border-brand-500"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className={card}>
+            <h2 className="font-bold">Testimonials</h2>
+            <p className="mt-1 text-sm text-muted">Shown in the Home testimonials band, in order.</p>
+            <div className="mt-4 space-y-4">
+              {(content.testimonials || []).map((row, i) => (
+                <div key={i} className="space-y-2 rounded-2xl border border-accent-200 p-3">
+                  <textarea
+                    rows={2}
+                    value={row.quote || ''}
+                    onChange={(e) => setListField('testimonials', i, 'quote', e.target.value)}
+                    className="w-full rounded-xl border border-accent-300 bg-surface px-3 py-2 text-sm outline-none focus:border-brand-500"
+                  />
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    <input
+                      value={row.name || ''}
+                      onChange={(e) => setListField('testimonials', i, 'name', e.target.value)}
+                      placeholder="Name"
+                      className="input-pill w-full border border-accent-300 bg-surface px-3 py-2 text-sm outline-none focus:border-brand-500"
+                    />
+                    <input
+                      value={row.detail || ''}
+                      onChange={(e) => setListField('testimonials', i, 'detail', e.target.value)}
+                      placeholder="City · Service"
+                      className="input-pill w-full border border-accent-300 bg-surface px-3 py-2 text-sm outline-none focus:border-brand-500"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className={card}>
+            <h2 className="font-bold">Service areas</h2>
+            <p className="mt-1 text-sm text-muted">Comma-separated list shown on the Home page.</p>
+            <textarea
+              rows={3}
+              value={(content.serviceAreas || []).join(', ')}
+              onChange={(e) =>
+                setContentField(
+                  'serviceAreas',
+                  e.target.value.split(',').map((v) => v.trim()).filter(Boolean),
+                )
+              }
+              className="mt-4 w-full rounded-2xl border border-accent-300 bg-surface px-4 py-2.5 text-sm outline-none focus:border-brand-500"
+            />
+          </div>
+
+          <div className={card}>
+            <h2 className="font-bold">Login / register panel</h2>
+            <div className="mt-4 space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="block">
+                  <span className="mb-1.5 block text-sm font-medium text-ink">Headline</span>
+                  <input
+                    value={content.authHeadline?.title || ''}
+                    onChange={(e) =>
+                      setContent('authHeadline', { ...content.authHeadline, title: e.target.value })
+                    }
+                    className="input-pill w-full border border-accent-300 bg-surface px-4 py-2.5 text-sm outline-none focus:border-brand-500"
+                  />
+                </label>
+                <label className="block">
+                  <span className="mb-1.5 block text-sm font-medium text-ink">Gold word</span>
+                  <input
+                    value={content.authHeadline?.highlight || ''}
+                    onChange={(e) =>
+                      setContent('authHeadline', {
+                        ...content.authHeadline,
+                        highlight: e.target.value,
+                      })
+                    }
+                    className="input-pill w-full border border-accent-300 bg-surface px-4 py-2.5 text-sm outline-none focus:border-brand-500"
+                  />
+                </label>
+              </div>
+              <label className="block">
+                <span className="mb-1.5 block text-sm font-medium text-ink">Proof points (one per line)</span>
+                <textarea
+                  rows={3}
+                  value={(content.authProof || []).join('\n')}
+                  onChange={(e) =>
+                    setContentField(
+                      'authProof',
+                      e.target.value.split('\n').map((v) => v.trim()).filter(Boolean),
+                    )
+                  }
+                  className="w-full rounded-2xl border border-accent-300 bg-surface px-4 py-2.5 text-sm outline-none focus:border-brand-500"
+                />
+              </label>
+            </div>
+          </div>
+
+          <Button loading={busy === 'content'} onClick={saveContent}>
+            Save website content
+          </Button>
         </div>
       )}
 

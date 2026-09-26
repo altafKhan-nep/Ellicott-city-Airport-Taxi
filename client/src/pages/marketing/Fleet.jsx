@@ -3,6 +3,7 @@ import { Phone, Check } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { Button } from '../../components/ui/Button.jsx';
 import { Reveal } from '../../components/ui/Reveal.jsx';
+import { useContent } from '../../context/ContentContext.jsx';
 
 const FLEET = [
   {
@@ -72,6 +73,7 @@ const FLEET = [
 
 export default function Fleet() {
   const { user } = useAuth();
+  const { content } = useContent();
   const bookUrl = user ? '/reservations' : '/login';
 
   return (
@@ -102,11 +104,11 @@ export default function Fleet() {
               </Button>
             </Link>
             <a
-              href="tel:4103655556"
+              href={`tel:${content.contactPhoneHref}`}
               className="inline-flex items-center gap-2 rounded-full border border-white/30 px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-white/10"
             >
               <Phone className="h-4 w-4" />
-              (410) 365-5556
+              {content.contactPhone}
             </a>
           </div>
         </div>
@@ -148,7 +150,7 @@ export default function Fleet() {
                       <Button className="w-full">Book now</Button>
                     </Link>
                     <a
-                      href="tel:4103655556"
+                      href={`tel:${content.contactPhoneHref}`}
                       className="grid h-11 w-11 place-items-center rounded-full border border-accent-200 text-brand-700 transition-colors hover:border-brand-300 hover:bg-brand-50"
                       aria-label={`Call about ${v.name}`}
                     >
@@ -171,9 +173,9 @@ export default function Fleet() {
                 motorcoaches.
               </p>
             </div>
-            <a href="tel:4103655556">
+            <a href={`tel:${content.contactPhoneHref}`}>
               <Button size="lg" className="bg-surface !text-brand-900 shadow-lg hover:bg-brand-50">
-                Call (410) 365-5556
+                Call {content.contactPhone}
               </Button>
             </a>
           </div>

@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom';
 import { Phone, Mail, MapPin, Clock } from 'lucide-react';
 import { SERVICES } from '../../data/services.js';
+import { useContent } from '../../context/ContentContext.jsx';
 
 export default function Footer() {
+  const { content } = useContent();
   return (
     <footer className="mt-auto bg-brand-gradient text-white">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-4">
@@ -11,19 +13,18 @@ export default function Footer() {
             Ellicott City <span className="text-gold-300">Airport Taxi</span>
           </div>
           <p className="mt-3 text-sm leading-relaxed text-white/75">
-            Reliable, professional airport transfers and luxury black-car service across
-            Maryland, DC, and Virginia. Available 24/7 — book online or call dispatch.
+            {content.tagline} {content.hours}
           </p>
           <div className="mt-4 flex gap-3">
             <a
-              href="tel:4103655556"
+              href={`tel:${content.contactPhoneHref}`}
               aria-label="Call us"
               className="grid h-9 w-9 place-items-center rounded-full bg-white/10 transition-colors hover:bg-white/20"
             >
               <Phone className="h-4 w-4" />
             </a>
             <a
-              href="mailto:chriskbonsu@gmail.com"
+              href={`mailto:${content.contactEmail}`}
               aria-label="Email us"
               className="grid h-9 w-9 place-items-center rounded-full bg-white/10 transition-colors hover:bg-white/20"
             >
@@ -63,15 +64,15 @@ export default function Footer() {
           <ul className="mt-3 space-y-2.5 text-sm text-white/75">
             <li className="flex items-start gap-2">
               <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
-              <span>9019 Early April Way, Ellicott City, MD</span>
+              <span>{content.contactAddress}</span>
             </li>
             <li className="flex items-start gap-2">
               <Phone className="mt-0.5 h-4 w-4 shrink-0" />
-              <a href="tel:4103655556" className="transition-colors hover:text-white">(410) 365-5556</a>
+              <a href={`tel:${content.contactPhoneHref}`} className="transition-colors hover:text-white">{content.contactPhone}</a>
             </li>
             <li className="flex items-start gap-2">
               <Mail className="mt-0.5 h-4 w-4 shrink-0" />
-              <a href="mailto:chriskbonsu@gmail.com" className="break-all transition-colors hover:text-white">chriskbonsu@gmail.com</a>
+              <a href={`mailto:${content.contactEmail}`} className="break-all transition-colors hover:text-white">{content.contactEmail}</a>
             </li>
             <li className="flex items-start gap-2">
               <Clock className="mt-0.5 h-4 w-4 shrink-0" />

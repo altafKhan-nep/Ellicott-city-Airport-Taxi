@@ -17,6 +17,8 @@ router.patch('/users/:id/unsuspend', admin.unsuspendUser);
 router.delete('/users/:id', admin.deleteUser);
 router.get('/payments', admin.payments);
 router.get('/settings', admin.settings);
+router.get('/content', admin.adminContent);
+router.patch('/content', admin.adminUpdateContent);
 router.patch('/settings', admin.updateAppSettings);
 
 export default router;

@@ -1,3 +1,4 @@
+import { useContent } from '../../context/ContentContext.jsx';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import { Phone, ArrowRight } from 'lucide-react';
@@ -19,6 +20,7 @@ const navItem = ({ isActive }) =>
 
 export default function Navbar() {
   const { user, logout } = useAuth();
+  const { content } = useContent();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
@@ -117,11 +119,11 @@ export default function Navbar() {
         <div className="flex items-center gap-2">
           {/* Phone + portal (desktop) */}
           <a
-            href="tel:4103655556"
+            href={`tel:${content.contactPhoneHref}`}
             className="hidden items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold text-white/90 transition-colors hover:bg-white/10 xl:flex"
           >
             <Phone className="h-4 w-4" />
-            (410) 365-5556
+            {content.contactPhone}
           </a>
 
           <div className="hidden items-center gap-2 lg:flex">
@@ -239,11 +241,11 @@ export default function Navbar() {
               Client Portal
             </button>
             <a
-              href="tel:4103655556"
+              href={`tel:${content.contactPhoneHref}`}
               className="flex w-full items-center gap-2.5 rounded-2xl px-4 py-3 text-left text-sm font-semibold text-gold-300"
             >
               <Phone className="h-4 w-4" />
-              (410) 365-5556
+              {content.contactPhone}
             </a>
 
             {user && user.role === 'driver' && (

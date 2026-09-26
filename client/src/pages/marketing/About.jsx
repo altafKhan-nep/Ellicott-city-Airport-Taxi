@@ -3,6 +3,7 @@ import { UserRound, Clock, Sparkles, Receipt, ShieldCheck, Map, Smartphone, Head
 import { useAuth } from '../../context/AuthContext.jsx';
 import { Button } from '../../components/ui/Button.jsx';
 import { Reveal } from '../../components/ui/Reveal.jsx';
+import { useContent } from '../../context/ContentContext.jsx';
 
 const WHY_US = [
   {
@@ -49,6 +50,7 @@ const WHY_US = [
 
 export default function About() {
   const { user } = useAuth();
+  const { content } = useContent();
   const bookUrl = user ? '/reservations' : '/login';
 
   return (
@@ -135,11 +137,11 @@ export default function About() {
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <a
-                  href="tel:4103655556"
+                  href={`tel:${content.contactPhoneHref}`}
                   className="inline-flex items-center gap-2 rounded-full bg-surface px-6 py-3 text-base font-semibold text-brand-900 shadow-sm transition-colors hover:bg-brand-50"
                 >
                   <Phone className="h-4 w-4" />
-                  (410) 365-5556
+                  {content.contactPhone}
                 </a>
               </div>
             </div>

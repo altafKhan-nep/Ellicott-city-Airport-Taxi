@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle2, Phone } from 'lucide-react';
 import { SERVICES } from '../../data/services.js';
+import { useContent } from '../../context/ContentContext.jsx';
 
 const inputCls =
   'w-full rounded-xl border border-accent-200 bg-surface px-4 py-3 text-sm text-ink placeholder:text-accent-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200';
 
 export default function Contact() {
+  const { content } = useContent();
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -25,7 +27,7 @@ export default function Contact() {
     const body = encodeURIComponent(
       `Name: ${form.name}\nEmail: ${form.email}\nPhone: ${form.phone}\nService: ${form.service}\nPreferred date: ${form.date}\n\nMessage:\n${form.message}`
     );
-    window.location.href = `mailto:chriskbonsu@gmail.com?subject=${subject}&body=${body}`;
+    window.location.href = `mailto:${content.contactEmail}?subject=${subject}&body=${body}`;
     setSent(true);
   };
 
@@ -74,11 +76,11 @@ export default function Contact() {
                     touch shortly. Prefer to talk now?
                   </p>
                   <a
-                    href="tel:4103655556"
+                    href={`tel:${content.contactPhoneHref}`}
                     className="mt-4 inline-flex items-center gap-2 rounded-full bg-surface px-6 py-3 text-sm font-semibold text-brand-800 shadow-sm hover:bg-brand-50"
                   >
                     <Phone className="h-4 w-4" />
-                    (410) 365-5556
+                    {content.contactPhone}
                   </a>
                 </div>
               ) : (
@@ -132,11 +134,11 @@ export default function Contact() {
           <div className="space-y-5 lg:col-span-2">
             <div className="card p-8">
               <h3 className="text-base font-bold text-ink">Call or email</h3>
-              <a href="tel:4103655556" className="mt-4 block text-2xl font-extrabold text-brand-900">
-                (410) 365-5556
+              <a href={`tel:${content.contactPhoneHref}`} className="mt-4 block text-2xl font-extrabold text-brand-900">
+                {content.contactPhone}
               </a>
-              <a href="mailto:chriskbonsu@gmail.com" className="mt-1 block text-sm text-brand-700 underline-offset-2 hover:underline">
-                chriskbonsu@gmail.com
+              <a href={`mailto:${content.contactEmail}`} className="mt-1 block text-sm text-brand-700 underline-offset-2 hover:underline">
+                {content.contactEmail}
               </a>
               <p className="mt-4 text-sm text-muted">Available 24 hours a day, 7 days a week.</p>
             </div>

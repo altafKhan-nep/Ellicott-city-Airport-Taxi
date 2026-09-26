@@ -218,3 +218,6 @@ export const settings = asyncHandler(async (req, res) => {
 export const updateAppSettings = asyncHandler(async (req, res) => {
   res.json({ settings: await updateSettings(req.body) });
 });
+
+// ---- Website content (admin-managed marketing copy) ----
+export { adminContent, adminUpdateContent } from './contentController.js';

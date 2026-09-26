@@ -49,6 +49,7 @@ const SupportPage = lazy(() => import('./modules/crm/features/support/SupportPag
 const NotificationsPage = lazy(() => import('./modules/crm/features/notifications/NotificationsPage.tsx'));
 const AuditPage = lazy(() => import('./modules/crm/features/audit/AuditPage.tsx'));
 const SettingsPage = lazy(() => import('./modules/crm/features/settings/SettingsPage.tsx'));
+const ContentPage = lazy(() => import('./modules/crm/features/content/ContentPage.tsx'));
 const DriverShell = lazy(() => import('./modules/driver/layout/DriverShell.tsx'));
 const DriverDashboardPage = lazy(() => import('./modules/driver/features/dashboard/DashboardPage.tsx'));
 const DriverRequestsPage = lazy(() => import('./modules/driver/features/requests/RequestsPage.tsx'));
@@ -117,6 +118,7 @@ export default function App() {
             <Route path="notifications" element={<NotificationsPage />} />
             <Route path="audit" element={<AuditPage />} />
             <Route path="settings" element={<SettingsPage />} />
+            <Route path="content" element={<ContentPage />} />
           </Route>
           <Route path="/crm" element={<Navigate to="/admin" replace />} />
           <Route path="/crm/*" element={<Navigate to="/admin" replace />} />
