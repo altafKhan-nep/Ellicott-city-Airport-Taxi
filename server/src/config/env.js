@@ -95,6 +95,23 @@ export const assertEnv = (env = process.env) => {
  */
 const NATIVE_APP_ORIGINS = ['capacitor://localhost', 'http://localhost', 'https://localhost'];
 
+/**
+ * `localhost` and `127.0.0.1` are different origins to a browser, so a dev
+ * allowlisting only one of them produces silent, confusing CORS failures
+ * depending on how the URL was typed. Outside production, expand each loopback
+ * origin to both spellings. Production is left untouched: the deployed list is
+ * exact-match only.
+ */
+const loopbackTwins = (origin) => {
+  if (origin.startsWith('http://localhost')) {
+    return [origin, origin.replace('http://localhost', 'http://127.0.0.1')];
+  }
+  if (origin.startsWith('http://127.0.0.1')) {
+    return [origin, origin.replace('http://127.0.0.1', 'http://localhost')];
+  }
+  return [origin];
+};
+
 export const corsOrigins = (env = process.env) => {
   const configured = [
     ...String(env.CLIENT_ORIGIN || 'http://localhost:5173').split(','),
@@ -102,5 +119,11 @@ export const corsOrigins = (env = process.env) => {
   ]
     .map((o) => o.trim())
     .filter((o) => o && o !== '*');
-  return [...new Set([...configured, ...NATIVE_APP_ORIGINS])];
+
+  const isProd = String(env.NODE_ENV) === 'production';
+  const expanded = isProd
+    ? configured
+    : configured.flatMap(loopbackTwins);
+
+  return [...new Set([...expanded, ...NATIVE_APP_ORIGINS])];
 };
