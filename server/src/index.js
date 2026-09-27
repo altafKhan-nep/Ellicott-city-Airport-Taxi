@@ -23,7 +23,7 @@ import contentRoutes from "./routes/content.js";
 import catalogRoutes from "./routes/catalog.js";
 import { ensureCatalogDefaults } from "./services/catalogService.js";
 import { initRedis, redisRateLimitStore } from "./config/redis.js";
-import { assertEnv } from "./config/env.js";
+import { assertEnv, corsOrigins } from "./config/env.js";
 
 dotenv.config();
 
@@ -50,9 +50,21 @@ const app = express();
 app.set("trust proxy", process.env.TRUST_PROXY === "true" ? 1 : false);
 
 app.use(helmet());
+
+// The web deploy plus the native (Capacitor) app share this API, so CORS is an
+// allowlist rather than one fixed origin. Returning `false` (instead of an
+// error) omits the CORS headers, which makes the browser block the call without
+// turning a blocked cross-origin read into a 500.
+const allowedOrigins = corsOrigins();
+const corsOriginCheck = (origin, cb) => {
+  if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+  console.warn(`CORS blocked origin: ${origin}`);
+  return cb(null, false);
+};
+
 app.use(
   cors({
-    origin: process.env.CLIENT_ORIGIN || "http://localhost:5173",
+    origin: corsOriginCheck,
     credentials: true,
   }),
 );
@@ -130,7 +142,7 @@ app.use(errorHandler);
 
 const server = createServer(app);
 const io = new Server(server, {
-  cors: { origin: process.env.CLIENT_ORIGIN || "http://localhost:5173" },
+  cors: { origin: corsOriginCheck },
 });
 
 app.set("io", io);

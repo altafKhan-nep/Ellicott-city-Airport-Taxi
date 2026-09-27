@@ -556,6 +556,35 @@ Driver positions are seeded near Howard County, MD (~39.20, -76.85). "Nearby dri
 
 Required in production: `NODE_ENV=production`, `MONGO_URI`, `JWT_ACCESS_SECRET` (32+ chars, random), `CLIENT_ORIGIN`, `TRUST_PROXY=true`, plus `REDIS_URL` and the third-party keys you actually use. **Never** set `EXPOSE_DEV_TOKENS`.
 
+## CORS and the mobile app
+
+This API is shared with the **Capacitor mobile app** (separate repo), so it must serve two kinds of
+origin. `corsOrigins()` in `config/env.js` builds the allowlist; `index.js` applies the same
+predicate to both the REST and the Socket.io server.
+
+| Origin | Sent by |
+|---|---|
+| `CLIENT_ORIGIN` | the web deploy (Vercel) |
+| `CORS_ORIGINS` (comma-separated) | any extra trusted frontend — staging, previews |
+| `capacitor://localhost` | the mobile app on iOS — **always allowed** |
+| `https://localhost` | the mobile app on Android (`androidScheme: "https"`) — **always allowed** |
+
+Rules that keep this safe and correct:
+
+- **`CLIENT_ORIGIN` stays a single origin.** It is also the base URL for verification and
+  password-reset links in outgoing email (`authController.js`, `authService.js`,
+  `notificationService.js`). Turning it into a list would put commas in those links. Extra
+  frontends belong in `CORS_ORIGINS`.
+- A disallowed origin is answered with `cb(null, false)` — no CORS headers, so the browser blocks
+  it. Do not "fix" that by returning an error; it turns a blocked cross-origin read into a 500.
+- Allowing the native origins is not a hole: auth is a Bearer token in `localStorage`, not an
+  ambient cookie, so a hostile page on localhost still has nothing to send. CORS is not an
+  authentication mechanism.
+
+> **Deploy this before shipping the app.** While the deployed server is still on a single-origin
+> allowlist, the mobile app gets no CORS headers and cannot call the API.
+
+
 ## Audit Log
 
 `middleware/audit.js` wraps `res.json` and writes an `AuditLog` row (actor, actorEmail, actorRole, action, targetType, targetId, ip, userAgent, statusCode, durationMs, path) on a fire-and-forget basis. `targetId` prefers `req.params.id`, then any `_id` in the response, then `key`/`slug`.

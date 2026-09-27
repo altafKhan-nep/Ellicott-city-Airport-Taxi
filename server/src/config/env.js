@@ -50,6 +50,10 @@ export const validateEnv = (env = process.env) => {
     problems.push('CLIENT_ORIGIN must be a specific origin, not *');
   }
 
+  if (String(env.CORS_ORIGINS || '').split(',').some((o) => o.trim() === '*')) {
+    problems.push('CORS_ORIGINS must list specific origins, not *');
+  }
+
   // Rate limits that have been raised for local testing must not ship.
   if (isProd) {
     const login = Number(env.RATE_LIMIT_LOGIN);
@@ -72,4 +76,31 @@ export const assertEnv = (env = process.env) => {
     process.exit(1);
   }
   console.warn('(non-production: continuing with warnings)\n');
+};
+
+/**
+ * Origins allowed to call the API over CORS.
+ *
+ * `CLIENT_ORIGIN` stays a SINGLE origin because it is also the base URL for the
+ * verification/reset links in outgoing email — turning it into a list would
+ * produce broken links. `CORS_ORIGINS` is the separate, CORS-only allowlist for
+ * any additional trusted frontends (staging deploys, preview builds).
+ *
+ * The Capacitor origins are always admitted: they are constants of the native
+ * shell (iOS serves from `capacitor://localhost`, Android from
+ * `http://localhost`) and cannot be chosen by an attacker. Allowing them is safe
+ * even though the API is credentialed, because auth is a Bearer token held in
+ * localStorage rather than an ambient cookie — a hostile page on localhost still
+ * has no token to send, and CORS is not an authentication mechanism.
+ */
+const NATIVE_APP_ORIGINS = ['capacitor://localhost', 'http://localhost', 'https://localhost'];
+
+export const corsOrigins = (env = process.env) => {
+  const configured = [
+    ...String(env.CLIENT_ORIGIN || 'http://localhost:5173').split(','),
+    ...String(env.CORS_ORIGINS || '').split(','),
+  ]
+    .map((o) => o.trim())
+    .filter((o) => o && o !== '*');
+  return [...new Set([...configured, ...NATIVE_APP_ORIGINS])];
 };
