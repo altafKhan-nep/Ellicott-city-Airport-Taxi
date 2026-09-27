@@ -110,7 +110,7 @@ export default function LocationSearch({ label, icon, value, onSelect, placehold
         )}
 
         {open && results.length > 0 && (
-          <ul className="absolute left-0 right-0 z-50 mt-2 max-h-72 overflow-y-auto panel py-1 shadow-xl">
+          <ul className="absolute left-0 right-0 z-[1100] mt-2 max-h-72 overflow-y-auto panel py-1 shadow-xl">
             {results.map((r, i) => (
               <li key={r.id}>
                 <button
