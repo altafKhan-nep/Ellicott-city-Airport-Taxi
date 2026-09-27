@@ -201,9 +201,13 @@ const toNearbyDriver = (l, lat, lng) => ({
   distanceKm: Math.round(haversineKm(lat, lng, l.coordinates.coordinates[1], l.coordinates.coordinates[0]) * 10) / 10,
 });
 
-export const findNearbyDrivers = async ({ lat, lng, radius = RADIUS_M, vehicleType }) => {
+export const findNearbyDrivers = async ({ lat, lng, radius, vehicleType }) => {
   // Guard against NaN/Infinity from map clicks or geocoding edge
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) return [];
+  // Callers pass `+req.query.radius`, which is NaN when the param is absent or
+  // non-numeric. A NaN $maxDistance makes Mongo reject the query, so fall back
+  // to the default radius instead of failing the whole request.
+  const baseRadius = Number.isFinite(radius) && radius > 0 ? radius : RADIUS_M;
   const makeMatch = (r) => ({
     coordinates: {
       $near: {
@@ -215,7 +219,7 @@ export const findNearbyDrivers = async ({ lat, lng, radius = RADIUS_M, vehicleTy
 
   // Progressive radius expansion: 10km → 25km → 50km → show distance
   // Ensures passenger near Ellicott City (8km) always finds drivers within service area
-  const radii = [radius, 25000, 50000];
+  const radii = [baseRadius, 25000, 50000];
   for (const r of radii) {
     const match = makeMatch(r);
     // Try exact vehicle match first
