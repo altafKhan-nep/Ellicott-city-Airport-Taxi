@@ -17,8 +17,6 @@ if (vapidConfigured) {
   );
 }
 
-export const isPushConfigured = () => vapidConfigured;
-
 const appUrl = () => process.env.CLIENT_ORIGIN || 'http://localhost:5173';
 
 // Central notifier: writes an in-app Notification row (persisted), and fans out

@@ -27,5 +27,3 @@ export const sendMail = async ({ to, subject, html }) => {
     html,
   });
 };
-
-export const isMailConfigured = () => configured;

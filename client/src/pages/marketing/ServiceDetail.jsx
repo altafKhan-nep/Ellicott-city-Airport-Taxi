@@ -5,6 +5,7 @@ import { Button } from '../../components/ui/Button.jsx';
 import { Reveal } from '../../components/ui/Reveal.jsx';
 import { useCatalog } from '../../context/CatalogContext.jsx';
 import { useContent } from '../../context/ContentContext.jsx';
+import ServiceIcon from '../../components/ui/ServiceIcon.jsx';
 
 export default function ServiceDetail() {
   const { slug } = useParams();
@@ -38,7 +39,7 @@ export default function ServiceDetail() {
         <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-24">
           <div className="flex items-center gap-3">
             <span className="grid h-14 w-14 place-items-center rounded-2xl bg-white/10 backdrop-blur">
-              <service.icon className="h-7 w-7 text-white" />
+<ServiceIcon name={service.icon} className="h-7 w-7 text-white" />
             </span>
             <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-medium uppercase tracking-wider text-white/85 backdrop-blur">
               <span className="h-2 w-2 rounded-full bg-gold-400" />
@@ -158,7 +159,7 @@ export default function ServiceDetail() {
                   className="card-lift group flex h-full items-center gap-4 card"
                 >
                   <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-brand-gradient-soft">
-                    <s.icon className="h-6 w-6 text-brand-700" />
+<ServiceIcon name={s.icon} className="h-6 w-6 text-brand-700" />
                   </span>
                   <span>
                     <span className="block font-bold text-ink">{s.name}</span>

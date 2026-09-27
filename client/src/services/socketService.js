@@ -6,20 +6,24 @@ const SOCKET_URL = import.meta.env.VITE_API_URL || '/';
 
 const socket = io(SOCKET_URL, { autoConnect: false });
 
-export const connectSocket = (userId, role) => {
-  // Send JWT token for secure auth (server verifies and joins correct rooms)
-  // Fallback to userId/role for backward compat during transition
+const readAccessToken = (role) => {
   try {
     const activeRole = role || sessionStorage.getItem('rt_active_role') || 'passenger';
-    const token = localStorage.getItem(`rt_${activeRole}_access`) || localStorage.getItem('rt_passenger_access') || localStorage.getItem('rt_driver_access') || localStorage.getItem('rt_admin_access');
-    if (token) {
-      socket.auth = { token };
-    } else {
-      socket.auth = { userId, role };
-    }
+    return (
+      localStorage.getItem(`rt_${activeRole}_access`) ||
+      localStorage.getItem('rt_passenger_access') ||
+      localStorage.getItem('rt_driver_access') ||
+      localStorage.getItem('rt_admin_access')
+    );
   } catch {
-    socket.auth = { userId, role };
+    return null;
   }
+};
+
+// Identity is asserted by the server from this JWT only — the client never
+// sends a userId/role, because a client-supplied role can be forged.
+export const connectSocket = (role) => {
+  socket.auth = { token: readAccessToken(role) };
   socket.connect();
 };
 

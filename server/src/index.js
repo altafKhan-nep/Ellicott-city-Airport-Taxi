@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
-import rateLimit from "express-rate-limit";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 import dotenv from "dotenv";
 import { createServer } from "http";
 import { Server } from "socket.io";
@@ -22,9 +22,26 @@ import settingsRoutes from "./routes/settings.js";
 import contentRoutes from "./routes/content.js";
 import catalogRoutes from "./routes/catalog.js";
 import { ensureCatalogDefaults } from "./services/catalogService.js";
-import { initRedis } from "./config/redis.js";
+import { initRedis, redisRateLimitStore } from "./config/redis.js";
+import { assertEnv } from "./config/env.js";
 
 dotenv.config();
+
+// Refuse to boot a production process with placeholder secrets or dev tokens on.
+assertEnv();
+
+// Connect Redis before the limiters are built so they can share the store.
+await initRedis();
+
+// Defence in depth: a stray rejection in a socket handler or background job must
+// not take the whole API down.
+process.on("unhandledRejection", (reason) => {
+  console.error("Unhandled promise rejection:", reason);
+});
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught exception:", err);
+  process.exit(1);
+});
 
 const app = express();
 
@@ -41,37 +58,51 @@ app.use(
 );
 app.use(express.json({ limit: "1mb" }));
 
-// Rate limiting — production hardening.
-const apiLimiter = rateLimit({
+// Rate limiting — production hardening. Counters live in Redis when REDIS_URL
+// is configured so the limits hold across multiple instances; otherwise they
+// fall back to per-process memory.
+const sharedStore = redisRateLimitStore();
+if (sharedStore) console.log("Rate limits: shared (Redis)");
+
+const limiter = ({ windowMs, max, message, name }) =>
+  rateLimit({
+    windowMs,
+    max,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { message },
+    ...(sharedStore ? { store: sharedStore } : {}),
+    // ipKeyGenerator normalises IPv6 to a /64 subnet — keying on the raw
+    // address would let a client rotate through its address space for free.
+    ...(name ? { keyGenerator: (req) => `${name}:${ipKeyGenerator(req.ip ?? "")}` } : {}),
+  });
+
+const apiLimiter = limiter({
   windowMs: 15 * 60 * 1000,
   max: Number(process.env.RATE_LIMIT_API || 600),
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { message: "Too many requests. Please try again later." },
+  message: "Too many requests. Please try again later.",
+  name: "api",
 });
-const authLimiter = rateLimit({
+const authLimiter = limiter({
   windowMs: 15 * 60 * 1000,
   max: Number(process.env.RATE_LIMIT_AUTH || 60),
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { message: "Too many attempts. Please try again later." },
+  message: "Too many attempts. Please try again later.",
+  name: "auth",
 });
-const loginLimiter = rateLimit({
+const loginLimiter = limiter({
   windowMs: 15 * 60 * 1000,
   max: Number(
     process.env.RATE_LIMIT_LOGIN ||
       (process.env.NODE_ENV === "production" ? 10 : 100),
   ),
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { message: "Too many login attempts. Please wait a few minutes." },
+  message: "Too many login attempts. Please wait a few minutes.",
+  name: "login",
 });
-const otpLimiter = rateLimit({
+const otpLimiter = limiter({
   windowMs: 10 * 60 * 1000,
   max: Number(process.env.RATE_LIMIT_OTP || 5),
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { message: "Too many SMS requests. Please wait a few minutes." },
+  message: "Too many SMS requests. Please wait a few minutes.",
+  name: "otp",
 });
 
 app.use("/api", apiLimiter);
@@ -111,7 +142,6 @@ connectDB().then(async () => {
   // Fleet classes + service offerings are admin-managed; seed once into an
   // empty collection so a fresh install is usable.
   await ensureCatalogDefaults().catch((e) => console.error('Catalog seed failed:', e.message));
-  await initRedis().catch(() => {});
   server.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
   });

@@ -65,7 +65,7 @@ Usage rules:
 | Email | Nodemailer (SMTP) | Optional — verification + password reset; console fallback in dev |
 | Social | Passport Google/Facebook OAuth2 (redirect flow) | Server-side verification, no app secret needed for token flows |
 | SMS/OTP | Twilio | Optional — phone code sign-in; console/devCode fallback in dev |
-| Hardening | Helmet + express-rate-limit | Security headers + per-IP auth throttling |
+| Hardening | Helmet + express-rate-limit (+ optional Redis store) | Security headers + per-IP throttling that survives multi-instance |
 
 ## Project Structure
 
@@ -128,6 +128,8 @@ business. `ContentPage.tsx` is a 3-tab shell over `ContentEditor.tsx` (site copy
 and `ServicesManager.tsx`, sharing the primitives in `fields.tsx`.
 - Site copy edits a local draft, shows per-section "unsaved" dots, a live hero preview, a sticky save
   bar (dirty count + discard) and supports `⌘/Ctrl+S`; `beforeunload` guards a tab close.
+- Tabs are addressable (`#content` / `#fleet` / `#services`): the shell `pushState`s on click and
+  listens for `hashchange`/`popstate`, so deep links and browser back/forward both switch tabs.
 - Fleet/Services are immediate-save list managers: reorder arrows, a right slide-over `Drawer` for
   add/edit, `Confirm` dialogs that explain the delete guard, and a toast for the outcome.
   Lists carry `usage: { rides, drivers }` so the UI can warn *before* an admin hits a 409.
@@ -151,6 +153,13 @@ and `ServicesManager.tsx`, sharing the primitives in `fields.tsx`.
 | Legal name | Ellicott City Airport Taxi |
 
 Used in `Footer.jsx` (contact column) and the `tel:`/`mailto:` CTAs on marketing pages.
+
+**Navbar** (`components/layout/Navbar.jsx`) — one `NAV_LINKS` array feeds both the desktop bar and the
+mobile drawer, so a page can never appear in one and be missing from the other. Every control shares
+one `h-10` height and one `rounded-full` radius; all text clears WCAG AA against the red band. The
+drawer locks body scroll while open, `Escape` closes either menu and restores focus, and the Services
+menu is a 2-up card that scrolls instead of overflowing. Role-gated links (`Admin` for any CRM role,
+`Driver`) come from `lib/roles.js`, not an inline `role === 'admin'` test.
 
 ## 3D Hero Taxi (Home page)
 
@@ -463,11 +472,14 @@ the Website content section). `GET /api/settings` exposes a public subset.
 
 ## Socket.io Events
 
+**Handshake is JWT-only.** The client sends `{ auth: { token } }` (`socketService.connectSocket(role)`); the server verifies it, loads the `User`, and derives the role from the database. The legacy `{ userId, role }` handshake is **ignored** — trusting it let any socket claim `admin` and read every room. A socket with no token is allowed to connect but joins no rooms and receives no privileged events. `tokenVersion` (logout-all / password reset) and `isSuspended` are both re-checked on connect.
+
 ### Client → Server
 - `authenticate` `{ userId, role }` - Join `user:{id}` room (drivers also join `drivers` room; admins join `admins` room)
 - `ride:join` `{ rideId }` - Join `ride:{rideId}` room. **Authorized only for the ride's passenger, its assigned driver, or admins** (locations flow through these rooms — unauthenticated joins are rejected).
 - `driver:location` `{ lat, lng, heading, speed }` - Driver position. **Server looks up the driver's active ride and forwards to `ride:{id}` room only.** Do NOT broadcast to all drivers/passengers.
 - `passenger:location` `{ lat, lng, heading, speed }` - Passenger position. Mirror of `driver:location` — forwarded to the passenger's active `ride:{id}` room so the assigned driver sees them live.
+- `ride:chat` `{ rideId, text }` - Chat message. Restricted to the ride's passenger, its driver, or admins.
 - `ride:cancel` `{ rideId }` - Cancel ride (server re-validates)
 
 ### Server → Client
@@ -508,24 +520,48 @@ Driver positions are seeded near Howard County, MD (~39.20, -76.85). "Nearby dri
 
 ## Auth Flow
 
-1. Register → user created `emailVerified:false` + `verificationToken` (hashed, 24h) → verification email sent (SMTP, or console + `verificationLink` in dev response). Account is auto-logged-in.
+1. Register → user created `emailVerified:false` + `verificationToken` (hashed, 24h) → verification email sent (SMTP, or console + `verificationLink` **only when `EXPOSE_DEV_TOKENS=true`**). Account is auto-logged-in and the page shows an "Account created" confirmation (it does not auto-redirect).
 2. `POST /verify-email?token=` (`/verify-email` page) verifies the account; `VerifyEmailBanner` (App.jsx) shows "verify your email" with a resend button for any logged-in unverified user.
 3. Login (`POST /api/auth/login`) is handled by **Passport LocalStrategy** (`usernameField: 'identifier'` → email-or-phone). On success the controller issues a 15m access JWT + an opaque refresh token.
 4. Access token embeds `{ id, role, v: tokenVersion }`; `protect` uses the **Passport JWT strategy** and rejects when `v` changes (password reset / logout-all). `TOKEN_EXPIRED` code triggers the client refresh.
-5. Refresh tokens are **opaque, stored hashed** in the `RefreshToken` collection with a TTL index (auto-cleanup). `POST /refresh` **atomically rotates** (`findOneAndUpdate` on `revokedAt: null`) → replaying or racing the same token yields exactly one success. `POST /logout` revokes that device's token. Password reset revokes all + bumps `tokenVersion`.
-6. Social login is the **Passport OAuth2 redirect flow**: `/auth/google` → Google → `/auth/google/callback` → find-or-create/link user → redirect to `/auth/social?accessToken=&refreshToken=` (SPA stores tokens, hard-redirects to `/`). Strategies register only when `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` or `FACEBOOK_APP_ID`/`FACEBOOK_APP_SECRET` are set; buttons render only when `VITE_GOOGLE_CLIENT_ID`/`VITE_FACEBOOK_APP_ID` are set in `client/.env`.
-7. Phone OTP (`/otp/send` + `/otp/verify`) find-or-creates a `phone`-provider user and issues tokens. One-time code (10 min TTL, 5 attempts); without Twilio the code is logged and returned as `devCode`. OTP send is rate-limited per IP. **Currently disabled in the frontend** (no phone button on Login/Register) — backend endpoints remain for later re-enable.
+5. Refresh tokens are **opaque, stored hashed** in the `RefreshToken` collection with a TTL index (auto-cleanup). `POST /refresh` **atomically rotates** (`findOneAndUpdate` on `revokedAt: null`) → replaying or racing the same token yields exactly one success. `POST /logout` revokes that device's token. Password reset revokes all + bumps `tokenVersion`. There is no `JWT_REFRESH_SECRET` — refresh tokens are not JWTs.
+6. Social login is the **Passport OAuth2 redirect flow**: `/auth/google` → Google → `/auth/google/callback` → find-or-create/link user → redirect to `/auth/social?accessToken=&refreshToken=` (SPA stores tokens, hard-redirects to `/`). Strategies register only when `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` or `FACEBOOK_APP_ID`/`FACEBOOK_APP_SECRET` are set; buttons render only when `VITE_GOOGLE_CLIENT_ID`/`VITE_FACEBOOK_APP_ID` are set in `client/.env`. A suspended user is rejected on the callback too, so OAuth cannot be used to bypass a suspension.
+7. Phone OTP (`/otp/send` + `/otp/verify`) find-or-creates a `phone`-provider user and issues tokens. One-time code (10 min TTL, 5 attempts); without Twilio the code is logged and returned as `devCode` **only when `EXPOSE_DEV_TOKENS=true`**. Both endpoints coerce `phone` to a string and only accept a 6-digit `code`, so NoSQL operator payloads are rejected rather than executed. OTP send is rate-limited per IP. **Currently disabled in the frontend** (no phone button on Login/Register) — backend endpoints remain for later re-enable.
 8. On 401, `api.js` queued-refresh pattern calls `/refresh`, stores the rotated token, retries; on failure clears storage + redirects to `/login`. A `403 Insufficient permissions` also clears + redirects.
 9. **Per-role client sessions**: `api.js` stores tokens under per-role keys (`rt_<role>_access` / `rt_<role>_refresh`) with a per-tab active-role marker in `sessionStorage`, so admin/driver/passenger can stay signed in simultaneously in different tabs without overwriting each other. `tokenStore.setActiveRole()` is set on login/register/social and after `getMe`.
+10. **The socket handshake never trusts the client's identity**: `socketService.connectSocket(role)` reads the access token and sends only `{ auth: { token } }`. The server re-derives the user and role from the database — see Socket.io Events.
 
 > **Stateless & scalable**: every Passport strategy runs `session:false` — no session store, no sticky sessions, any instance serves any request. Rate limits are per-IP and in-memory per instance (use Redis or a shared store for multi-instance).
 
 ## Production Hardening (index.js)
 
 - `helmet()` security headers; `express.json({ limit: '1mb' })`.
-- `express-rate-limit`: global API limiter (default 600/15min), auth limiter (60/15min), login limiter (10/15min) — all configurable via `RATE_LIMIT_*` env vars. 429 when exceeded.
+- `express-rate-limit`: global API limiter (default 600/15min), auth limiter (60/15min), login limiter (10/15min), OTP limiter (5/10min) — all configurable via `RATE_LIMIT_*` env vars. 429 when exceeded. All four are built by one `limiter()` factory so they cannot drift apart.
+- **IPv6**: keys go through `ipKeyGenerator(req.ip)`. Do not use `req.ip` directly in a `keyGenerator` — the library throws in `validate.xForwardedForHeader`, and a naive key also lets a single IPv6 host rotate through `/64`s to bypass the cap.
+- **Redis** (`config/redis.js`) is optional. Without `REDIS_URL` the limiters use the in-memory store (per instance); with it they use a `rate-limit-redis` store. `initRedis()` runs before any limiter is constructed — the store cannot be swapped afterwards.
+- **Boot-time env validation** (`config/env.js`): `assertEnv()` runs at startup and **throws** in production on a missing/short `<32`-char `JWT_ACCESS_SECRET`, a placeholder-looking secret, `EXPOSE_DEV_TOKENS=true`, a login limit above 20, or a localhost `MONGO_URI`. A misconfigured deploy fails immediately instead of running insecurely.
+- **Dev-token gate**: registration/OTP/forgot-password only return `verificationLink` / `resetLink` / `devCode` in the response when `EXPOSE_DEV_TOKENS=true`. This is an explicit opt-in, **not** `NODE_ENV` — the app is frequently run in production mode locally, which used to leak live reset links.
 - `TRUST_PROXY=true` when behind nginx/Render/Vercel so `req.ip` and rate limits see the real client IP.
 - Strict CORS to `CLIENT_ORIGIN` only.
+- `process.on('unhandledRejection')` logs; `uncaughtException` logs and exits 1.
+- Socket handlers are all wrapped so a bad `ObjectId` or a failed query can never take the process down.
+
+## Deployment
+
+| Target | What to do |
+|--------|------------|
+| **Vercel** (client) | `client/vercel.json` already rewrites all paths to `/index.html` for the SPA. Point the project at `client/`, or set the root directory accordingly. Set `VITE_*` build vars. |
+| **Render** (server) | No Render config is committed. Use `npm start` from `server/` (or `render.yaml` if one is added) and set every env var from `server/.env.example` as a **secret**. `PORT` is supplied by Render — do not hardcode it. |
+| **MongoDB Atlas** | Atlas is **not** deployed from this repo. Create the cluster, add the IP allowlist for Render, and set `MONGO_URI` as a Render secret. The database name must stay `ellicottaxi`. |
+
+Required in production: `NODE_ENV=production`, `MONGO_URI`, `JWT_ACCESS_SECRET` (32+ chars, random), `CLIENT_ORIGIN`, `TRUST_PROXY=true`, plus `REDIS_URL` and the third-party keys you actually use. **Never** set `EXPOSE_DEV_TOKENS`.
+
+## Audit Log
+
+`middleware/audit.js` wraps `res.json` and writes an `AuditLog` row (actor, actorEmail, actorRole, action, targetType, targetId, ip, userAgent, statusCode, durationMs, path) on a fire-and-forget basis. `targetId` prefers `req.params.id`, then any `_id` in the response, then `key`/`slug`.
+
+**Every mutating admin route must be wrapped in `audit(...)`** — `routes/admin.js` (assign driver, driver toggle, suspend/unsuspend/delete user, content, settings, all fleet + service catalog writes) and `routes/crm.js` (dispatch, no-show, vehicle create/update, ticket create/update). The Audit Log tab is only as trustworthy as that coverage; a new `POST`/`PATCH`/`DELETE` route that mutates state without `audit()` is a gap.
+
 
 ## External API Dependencies (no keys, but need network)
 
@@ -589,3 +625,7 @@ io.to(`ride:${rideId}`).emit('ride:update', { ride, status });
 8. **Payment idempotency**: the client sends a fresh `idempotencyKey` per attempt; a failed attempt's key is burned (409 on replay). `Payment.transactionId`/`idempotencyKey` are `sparse` unique — do not revert to non-sparse (duplicate-key crashes on pending/failed rows).
 9. **`paymentsEnabled=false`**: `paymentService` rejects with 403; the UI surfaces the disable notice (PaymentModal fetches `GET /api/settings`). Re-enable via admin Settings tab.
 10. **Suspension**: login (`passport.js`), every protected route (`middleware/auth.js`), and refresh rotation all reject `isSuspended` users; admin suspend also revokes their refresh tokens.
+11. **Lowercase JSX tags are DOM, not components**: `<icon />` where `icon` is a prop holding a component renders a literal `<icon>` element and logs "unrecognized tag". Always alias it — `const Icon = icon;` then `<Icon />`. Same class of bug for catalog strings: render them through `ui/ServiceIcon.jsx` (`<s.icon />` silently produced `<s>` with an unknown attribute).
+12. **One role vocabulary**: import `ADMIN_ROLES` / `hasRole` from `client/src/lib/roles.js` for guards *and* nav. An earlier guard allowed 6 CRM roles while the navbar only linked `role === 'admin'`, so a dispatcher could reach the CRM by URL but had no way to navigate there.
+13. **Hash tabs must listen to the URL**: `ContentPage` seeds its tab from `location.hash` on mount, `pushState`s on click, and subscribes to `hashchange`/`popstate`. Without those listeners a deep link opened on an already-mounted page kept the old tab and browser back did nothing.
+14. **Catalog writes are audited**: adding an admin `POST`/`PATCH`/`DELETE` without `audit(...)` silently shrinks the Audit Log. See the Audit Log section.

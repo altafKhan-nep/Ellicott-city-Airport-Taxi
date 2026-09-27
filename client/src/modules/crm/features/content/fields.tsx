@@ -234,7 +234,15 @@ export function Repeater<T>({
   const list = items || [];
   const atMax = list.length >= max;
   const update = (i: number, patch: Partial<T>) =>
-    onChange(list.map((it, n) => (n === i ? { ...it, ...patch } : it)));
+    onChange(
+      list.map((it, n) => {
+        if (n !== i) return it;
+        // A row is either an object (stats, testimonials — patch merges) or a
+        // plain string (feature bullets, service areas — the value replaces).
+        // Spreading a string would turn it into a char-indexed object.
+        return it !== null && typeof it === 'object' ? { ...it, ...patch } : patch;
+      })
+    );
   const move = (i: number, dir: -1 | 1) => {
     const j = i + dir;
     if (j < 0 || j >= list.length) return;
@@ -258,6 +266,7 @@ export function Repeater<T>({
             <button
               type="button"
               title="Move up"
+              aria-label={`Move item ${i + 1} up`}
               onClick={() => move(i, -1)}
               className="rounded-lg p-1 text-muted transition hover:bg-accent-100 hover:text-ink dark:hover:bg-accent-800"
             >
@@ -299,7 +308,7 @@ export function Repeater<T>({
 
 export function IconPicker({ value, onChange, label = 'Icon' }: { value: string; onChange: (v: string) => void; label?: string }) {
   return (
-    <div>
+    <div role="group" aria-label={label}>
       <span className={labelCls}>{label}</span>
       <div className="mt-1 grid max-h-40 grid-cols-8 gap-1 overflow-y-auto rounded-2xl border border-accent-300 p-2 dark:border-accent-700">
         {ICON_NAMES.map((name) => {

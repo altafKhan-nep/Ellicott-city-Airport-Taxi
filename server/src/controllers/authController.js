@@ -98,6 +98,9 @@ export const socialCallback = (provider) => (req, res, next) => {
   passport.authenticate(provider, { session: false, failureRedirect: failRedirect }, async (err, user) => {
     if (err || !user) return res.redirect(failRedirect);
     try {
+      // A suspended account must not be able to re-mint a session via OAuth,
+      // which would otherwise bypass the login and refresh checks.
+      if (user.isSuspended) throw new Error('Account suspended');
       const tokens = await authService.issueTokens(user, {
         rememberMe: true,
         ...{ userAgent: req.headers['user-agent'] || '', ip: req.ip || '' },

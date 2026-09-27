@@ -351,6 +351,7 @@ function VehicleForm({ value, onChange, keyLocked }: { value: any; onChange: (v:
             {value.image ? <img src={value.image} alt="" className="h-full w-full object-cover" /> : <Car className="h-5 w-5" />}
           </div>
           <input
+            aria-label="Image"
             value={value.image || ''}
             onChange={(e) => set({ image: e.target.value })}
             placeholder="/images/fleet/executive.jpg"

@@ -59,10 +59,12 @@ export function CatalogProvider({ children }) {
         api.get('/fleet', { timeout: 8000 }),
         api.get('/services', { timeout: 8000 }),
       ]);
-      // Only replace the fallback when the server actually returned rows, so a
-      // legitimately empty catalog does not silently show stale copy.
-      if (Array.isArray(f.data?.vehicles) && f.data.vehicles.length) setFleet(f.data.vehicles);
-      if (Array.isArray(s.data?.services) && s.data.services.length) setServices(s.data.services);
+      // The bundled copy is a safety net for a failed request only. A successful
+      // response always wins — including an empty array, which is an admin's
+      // deliberate "nothing is active". Keeping the fallback there would publish
+      // classes and services the owner deactivated or deleted.
+      if (Array.isArray(f.data?.vehicles)) setFleet(f.data.vehicles);
+      if (Array.isArray(s.data?.services)) setServices(s.data.services);
     } catch {
       // Keep the fallback copy.
     } finally {

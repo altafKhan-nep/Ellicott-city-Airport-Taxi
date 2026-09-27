@@ -8,6 +8,7 @@ import { Reveal } from '../../components/ui/Reveal.jsx';
 import { useMediaQuery } from '../../hooks/useMediaQuery.js';
 import { useWebGLSupport } from '../../components/three/useWebGLSupport.js';
 import { useCatalog } from '../../context/CatalogContext.jsx';
+import ServiceIcon from '../../components/ui/ServiceIcon.jsx';
 
 // Lazy-loaded so the WebGL/three bundle only downloads when the taxi actually renders.
 const HeroTaxiScene = lazy(() => import('../../components/three/HeroTaxiScene.jsx'));
@@ -254,7 +255,7 @@ export default function Home() {
                 >
                   <div className="absolute inset-x-0 top-0 h-1.5 rounded-t-3xl bg-brand-gradient opacity-0 transition-opacity group-hover:opacity-100" />
                   <span className="grid h-14 w-14 place-items-center rounded-2xl bg-brand-gradient-soft">
-                    <s.icon className="h-7 w-7 text-brand-700" />
+<ServiceIcon name={s.icon} className="h-7 w-7 text-brand-700" />
                   </span>
                   <h3 className="mt-5 text-lg font-bold text-ink">{s.name}</h3>
                   <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-brand-600">

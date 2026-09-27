@@ -5,6 +5,10 @@ import { Spinner } from '../ui/Spinner.jsx';
 /* global setTimeout, clearTimeout */
 
 export default function LocationSearch({ label, icon, value, onSelect, placeholder }) {
+  // `icon` is a component (MapPin, Flag, ...). React only treats a JSX tag as
+  // a component when it is capitalised — rendering <icon /> emitted a literal
+  // <icon> DOM element and logged an "unrecognized tag" warning.
+  const Icon = icon;
   const [query, setQuery] = useState(value?.address || '');
   const [results, setResults] = useState([]);
   const [open, setOpen] = useState(false);
@@ -76,9 +80,9 @@ export default function LocationSearch({ label, icon, value, onSelect, placehold
     <label className="block">
       {label && <span className="mb-1.5 block text-sm font-medium text-ink">{label}</span>}
       <div className="relative" ref={boxRef}>
-        {icon && (
+        {Icon && (
           <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-accent-400">
-            <icon className="h-4 w-4" />
+            <Icon className="h-4 w-4" />
           </span>
         )}
         <input
@@ -111,9 +115,9 @@ export default function LocationSearch({ label, icon, value, onSelect, placehold
                     i === active ? 'bg-brand-50 text-brand-900' : 'text-ink'
                   }`}
                 >
-                  {icon && (
+                  {Icon && (
                     <span className="mt-0.5 shrink-0 text-accent-400">
-                      <icon className="h-4 w-4" />
+                      <Icon className="h-4 w-4" />
                     </span>
                   )}
                   <span className="leading-snug">{r.address}</span>

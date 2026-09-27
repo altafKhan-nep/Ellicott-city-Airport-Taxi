@@ -8,8 +8,6 @@ const auditSchema = new mongoose.Schema(
     action: { type: String, required: true, index: true }, // e.g. rides.assignDriver, users.suspend
     targetType: String, // Ride, User, Vehicle, Settings...
     targetId: String,
-    before: mongoose.Schema.Types.Mixed,
-    after: mongoose.Schema.Types.Mixed,
     ip: String,
     userAgent: String,
     meta: mongoose.Schema.Types.Mixed,

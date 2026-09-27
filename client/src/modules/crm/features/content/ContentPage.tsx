@@ -15,16 +15,32 @@ const TABS = [
   { id: 'services', label: 'Services', icon: Sparkles, hint: 'Service offerings, features and the booking picker', Component: ServicesManager },
 ];
 
-export default function ContentPage() {
-  const [tab, setTab] = React.useState(() => {
-    const hash = window.location.hash.replace('#', '');
-    return TABS.some((t) => t.id === hash) ? hash : 'content';
-  });
+const readTabFromHash = () => {
+  const hash = window.location.hash.replace('#', '');
+  return TABS.some((t) => t.id === hash) ? hash : 'content';
+};
 
-  // Keep ?tab= / #tab links shareable and survive a refresh.
+export default function ContentPage() {
+  const [tab, setTab] = React.useState(readTabFromHash);
+
+  // Reflect the active tab into the URL so links stay shareable. pushState
+  // (not replaceState) so browser back/forward moves between tabs.
   React.useEffect(() => {
-    window.history.replaceState(null, '', `#${tab}`);
+    if (readTabFromHash() === tab) return;
+    window.history.pushState(null, '', `#${tab}`);
   }, [tab]);
+
+  // Follow the URL. Without this, a hash deep-link opened on an already-mounted
+  // page (or a back/forward step) left the previous tab on screen.
+  React.useEffect(() => {
+    const sync = () => setTab(readTabFromHash());
+    window.addEventListener('hashchange', sync);
+    window.addEventListener('popstate', sync);
+    return () => {
+      window.removeEventListener('hashchange', sync);
+      window.removeEventListener('popstate', sync);
+    };
+  }, []);
 
   const { data } = useQuery({
     queryKey: ['admin', 'catalog-counts'],

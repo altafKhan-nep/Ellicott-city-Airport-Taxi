@@ -5,6 +5,7 @@ import { Reveal } from '../../components/ui/Reveal.jsx';
 import { Timer, Handshake, Sparkles, ShieldCheck, Phone, ArrowRight } from 'lucide-react';
 import { useCatalog } from '../../context/CatalogContext.jsx';
 import { useContent } from '../../context/ContentContext.jsx';
+import ServiceIcon from '../../components/ui/ServiceIcon.jsx';
 
 const PROMISES = [
   { icon: Timer, title: 'Prompt', desc: 'We value your time. On-time pickup, efficient routing.' },
@@ -82,7 +83,7 @@ export default function Services() {
                 <div className="absolute inset-x-0 top-0 h-1.5 bg-brand-gradient opacity-0 transition-opacity group-hover:opacity-100" />
                 <div className="flex items-start justify-between">
                   <span className="grid h-14 w-14 place-items-center rounded-2xl bg-brand-gradient-soft">
-                    <s.icon className="h-7 w-7 text-brand-700" />
+<ServiceIcon name={s.icon} className="h-7 w-7 text-brand-700" />
                   </span>
                   <span className="rounded-full bg-accent-50 px-3 py-1 text-xs font-semibold text-accent-700">
                     {s.tagline}

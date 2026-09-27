@@ -9,6 +9,18 @@ const RADIUS_M = 5000;
 // Radius used to notify nearby drivers about a new reservation (10 km).
 export const NOTIFY_RADIUS_M = 10000;
 
+// Nominatim's usage policy allows at most 1 request/second and bans IPs that
+// exceed it. Without this serialiser a burst of bookings gets the whole server
+// IP blocked, taking geocoding and routing offline.
+const GEOCODE_MIN_INTERVAL_MS = 1100;
+let geocodeChain = Promise.resolve();
+const throttleGeocode = (fn) => {
+  const run = geocodeChain.then(fn, fn);
+  // Keep the chain alive even when a lookup rejects.
+  geocodeChain = run.then(() => new Promise((r) => setTimeout(r, GEOCODE_MIN_INTERVAL_MS)), () => {});
+  return run;
+};
+
 // Simple in-memory cache for external APIs (Nominatim 1 req/s, OSRM)
 const GEOCODE_CACHE = new Map(); // key: query -> {value, expiry}
 const ROUTE_CACHE = new Map(); // key: from-to -> {value, expiry}
@@ -51,7 +63,7 @@ const resolveStop = async (stop, label) => {
 // e.g. GET https://nominatim.openstreetmap.org/search?q=...&format=json
 const GEOCODE_URL = 'https://nominatim.openstreetmap.org/search';
 
-export const geocode = async (query) => {
+const geocode = async (query) => {
   // Must be a real address string. Callers used to pass the whole stop object,
   // which stringified to "[object Object]" — Nominatim then resolved it to a
   // random street and, because the cache key was that same string, poisoned the
@@ -67,9 +79,14 @@ export const geocode = async (query) => {
   url.searchParams.set('format', 'json');
   url.searchParams.set('limit', '1');
 
-  const res = await fetch(url, { headers: { 'User-Agent': 'RideTaxi/1.0' } });
-  if (!res.ok) throw Object.assign(new Error('Geocoding failed'), { statusCode: 502 });
-  const data = await res.json();
+  const data = await throttleGeocode(async () => {
+    const res = await fetch(url, {
+      headers: { 'User-Agent': 'RideTaxi/1.0' },
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!res.ok) throw Object.assign(new Error('Geocoding failed'), { statusCode: 502 });
+    return res.json();
+  });
   if (!data.length) throw Object.assign(new Error('Location not found'), { statusCode: 404 });
   const result = { address: data[0].display_name, lat: +data[0].lat, lng: +data[0].lon };
   cacheSet(GEOCODE_CACHE, q, result, 10 * 60 * 1000);
@@ -157,6 +174,33 @@ export const createRide = async (passengerId, input) => {
   return populated;
 };
 
+const haversineKm = (lat1, lng1, lat2, lng2) => {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lng2 - lng1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.asin(Math.sqrt(a));
+};
+
+// Projects a populated Location into the public "nearby driver" shape the
+// booking page consumes. Lives here because the exact-match and fallback
+// searches both need it.
+const toNearbyDriver = (l, lat, lng) => ({
+  _id: l.driver._id,
+  name: l.driver.name,
+  phone: l.driver.phone,
+  avatar: l.driver.avatar,
+  vehicleType: l.driver.driverDetails?.vehicleType,
+  plateNumber: l.driver.driverDetails?.plateNumber,
+  lat: l.coordinates.coordinates[1],
+  lng: l.coordinates.coordinates[0],
+  heading: l.heading ?? 0,
+  speed: l.speed ?? 0,
+  distanceKm: Math.round(haversineKm(lat, lng, l.coordinates.coordinates[1], l.coordinates.coordinates[0]) * 10) / 10,
+});
+
 export const findNearbyDrivers = async ({ lat, lng, radius = RADIUS_M, vehicleType }) => {
   // Guard against NaN/Infinity from map clicks or geocoding edge
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) return [];
@@ -182,23 +226,7 @@ export const findNearbyDrivers = async ({ lat, lng, radius = RADIUS_M, vehicleTy
       });
       const filtered = exact.filter((l) => l.driver);
       if (filtered.length > 0) {
-        return filtered.map((l) => ({
-          _id: l.driver._id,
-          name: l.driver.name,
-          phone: l.driver.phone,
-          avatar: l.driver.avatar,
-          vehicleType: l.driver.driverDetails?.vehicleType,
-          plateNumber: l.driver.driverDetails?.plateNumber,
-          lat: l.coordinates.coordinates[1],
-          lng: l.coordinates.coordinates[0],
-          heading: l.heading ?? 0,
-          speed: l.speed ?? 0,
-          distanceKm: Math.round((() => {
-            const R=6371, dLat=(l.coordinates.coordinates[1]-lat)*Math.PI/180, dLon=(l.coordinates.coordinates[0]-lng)*Math.PI/180;
-            const a=Math.sin(dLat/2)**2 + Math.cos(lat*Math.PI/180)*Math.cos(l.coordinates.coordinates[1]*Math.PI/180)*Math.sin(dLon/2)**2;
-            return  R*2*Math.asin(Math.sqrt(a));
-          })()*10)/10,
-        }));
+        return filtered.map((l) => toNearbyDriver(l, lat, lng));
       }
     }
     const fallback = await Location.find(match).populate({
@@ -207,23 +235,7 @@ export const findNearbyDrivers = async ({ lat, lng, radius = RADIUS_M, vehicleTy
     });
     const filtered = fallback.filter((l) => l.driver);
     if (filtered.length > 0) {
-      return filtered.map((l) => ({
-        _id: l.driver._id,
-        name: l.driver.name,
-        phone: l.driver.phone,
-        avatar: l.driver.avatar,
-        vehicleType: l.driver.driverDetails?.vehicleType,
-        plateNumber: l.driver.driverDetails?.plateNumber,
-        lat: l.coordinates.coordinates[1],
-        lng: l.coordinates.coordinates[0],
-        heading: l.heading ?? 0,
-        speed: l.speed ?? 0,
-        distanceKm: Math.round((() => {
-          const R=6371, dLat=(l.coordinates.coordinates[1]-lat)*Math.PI/180, dLon=(l.coordinates.coordinates[0]-lng)*Math.PI/180;
-          const a=Math.sin(dLat/2)**2 + Math.cos(lat*Math.PI/180)*Math.cos(l.coordinates.coordinates[1]*Math.PI/180)*Math.sin(dLon/2)**2;
-          return  R*2*Math.asin(Math.sqrt(a));
-        })()*10)/10,
-      }));
+      return filtered.map((l) => toNearbyDriver(l, lat, lng));
     }
   }
 
@@ -447,7 +459,11 @@ export const listRides = async (user, filters = {}) => {
   if (user.role === 'passenger') query.passenger = user._id;
   if (user.role === 'driver') query.driver = user._id;
   if (user.role === 'admin') {
-    if (filters.status) query.status = filters.status;
+    // Only a plain string may reach the query — an object would be executed
+    // by Mongo as an operator (?status[$ne]=x).
+    if (typeof filters.status === 'string' && filters.status.trim()) {
+      query.status = filters.status.trim();
+    }
   }
 
   const rides = await Ride.find(query)
@@ -455,10 +471,6 @@ export const listRides = async (user, filters = {}) => {
     .limit(50)
     .populate('passenger driver', 'name phone avatar');
   return rides;
-};
-
-export const listDrivers = async () => {
-  return User.find({ role: 'driver' }).select('-password');
 };
 
 export const listAvailableRides = async (driverId) => {

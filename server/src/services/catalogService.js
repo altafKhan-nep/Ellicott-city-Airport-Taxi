@@ -177,11 +177,6 @@ export const listFleet = async ({ includeInactive = false, withFare = false } = 
 
 export const getFleetClass = async (key) => FleetVehicle.findOne({ key: String(key || '').toLowerCase() }).lean();
 
-export const getFareRates = async (key) => {
-  const doc = await getFleetClass(key);
-  return doc?.fare || null;
-};
-
 // Keeps estimates working for a class that was deleted or renamed after a ride
 // was booked — falls back to the economy rate so a fare is never NaN.
 export const FALLBACK_FARE = { base: 3, perKm: 1.4, perMin: 0.3 };

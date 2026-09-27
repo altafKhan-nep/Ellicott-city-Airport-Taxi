@@ -6,6 +6,21 @@ import { assertVehicleKey } from '../services/catalogService.js';
 import Ticket from '../models/Ticket.js';
 import AuditLog from '../models/AuditLog.js';
 import Location from '../models/Location.js';
+import { pick, cleanStrings, safeRegex, safeInt } from '../utils/sanitize.js';
+
+// Only these fields may be written from a request body. Anything else (notably
+// assignedDriver) is managed by dispatch/assignment flows, not by the client.
+const VEHICLE_FIELDS = [
+  'plateNumber', 'vin', 'make', 'model', 'year', 'type', 'capacity',
+  'status', 'insuranceExpiry', 'inspectionExpiry', 'registrationExpiry',
+  'mileage', 'fuelType', 'images', 'notes',
+];
+const TICKET_CREATE_FIELDS = ['passenger', 'ride', 'subject', 'description', 'category', 'priority'];
+const TICKET_UPDATE_FIELDS = ['subject', 'description', 'category', 'status', 'priority', 'assignee'];
+
+// Push subscriptions and token material are never exposed over CRM.
+const PASSENGER_FIELDS =
+  'name email phone avatar role emailVerified isSuspended createdAt driverDetails stats';
 
 export const timeseries = asyncHandler(async (req, res) => {
   const days = Math.min(90, Math.max(1, Number(req.query.days) || 14));
@@ -40,17 +55,20 @@ export const listVehicles = asyncHandler(async (req, res) => {
   res.json({ vehicles });
 });
 export const createVehicle = asyncHandler(async (req, res) => {
+  const data = cleanStrings(pick(req.body, VEHICLE_FIELDS));
   // `type` must be a class an admin has added to the fleet catalog.
-  const cls = await assertVehicleKey(req.body?.type || 'economy-sedan');
-  const v = await Vehicle.create({ ...req.body, type: cls.key });
+  const cls = await assertVehicleKey(data.type || 'economy-sedan');
+  const v = await Vehicle.create({ ...data, type: cls.key });
   res.status(201).json({ vehicle: v });
 });
 export const updateVehicle = asyncHandler(async (req, res) => {
-  if (req.body?.type) {
-    const cls = await assertVehicleKey(req.body.type);
-    req.body = { ...req.body, type: cls.key };
+  const data = cleanStrings(pick(req.body, VEHICLE_FIELDS));
+  if (!Object.keys(data).length) return res.status(400).json({ message: 'No editable fields supplied' });
+  if (data.type) {
+    const cls = await assertVehicleKey(data.type);
+    data.type = cls.key;
   }
-  const v = await Vehicle.findByIdAndUpdate(req.params.id, req.body, { new: true });
+  const v = await Vehicle.findByIdAndUpdate(req.params.id, data, { new: true, runValidators: true });
   if (!v) return res.status(404).json({ message: 'Vehicle not found' });
   res.json({ vehicle: v });
 });
@@ -58,13 +76,20 @@ export const updateVehicle = asyncHandler(async (req, res) => {
 export const listPassengers = asyncHandler(async (req, res) => {
   const { search = '', page = 1, limit = 20 } = req.query;
   const q = { role: 'passenger' };
-  if (search) q.$or = [{ name: new RegExp(search, 'i') }, { email: new RegExp(search, 'i') }, { phone: new RegExp(search, 'i') }];
-  const passengers = await User.find(q).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(Number(limit)).lean();
+  if (typeof search === 'string' && search.trim()) {
+    const rx = safeRegex(search.trim());
+    q.$or = [{ name: rx }, { email: rx }, { phone: rx }];
+  }
+  const perPage = safeInt(limit, 20, { min: 1, max: 100 });
+  const current = safeInt(page, 1, { min: 1, max: 100000 });
+  const passengers = await User.find(q).select(PASSENGER_FIELDS).sort({ createdAt: -1 }).skip((current - 1) * perPage).limit(perPage).lean();
   const total = await User.countDocuments(q);
   res.json({ passengers, total });
 });
 export const getPassenger = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.params.id).lean();
+  // Scoped to passengers so this endpoint cannot be used to read an admin's
+  // record (phone, push subscriptions, pending reset tokens).
+  const user = await User.findOne({ _id: req.params.id, role: 'passenger' }).select(PASSENGER_FIELDS).lean();
   if (!user) return res.status(404).json({ message: 'Passenger not found' });
   const rides = await Ride.find({ passenger: user._id }).sort({ createdAt: -1 }).limit(20).lean();
   res.json({ user, rides, ltv: rides.filter((r) => r.status === 'completed').reduce((s, r) => s + (r.fare.final || 0), 0) });
@@ -81,11 +106,15 @@ export const listTickets = asyncHandler(async (req, res) => {
   res.json({ tickets });
 });
 export const createTicket = asyncHandler(async (req, res) => {
-  const t = await Ticket.create({ ...req.body, assignee: req.user._id });
+  const t = await Ticket.create({ ...cleanStrings(pick(req.body, TICKET_CREATE_FIELDS)), assignee: req.user._id });
   res.status(201).json({ ticket: t });
 });
 export const updateTicket = asyncHandler(async (req, res) => {
-  const t = await Ticket.findByIdAndUpdate(req.params.id, req.body, { new: true });
+  const t = await Ticket.findByIdAndUpdate(
+    req.params.id,
+    cleanStrings(pick(req.body, TICKET_UPDATE_FIELDS)),
+    { new: true, runValidators: true },
+  );
   if (!t) return res.status(404).json({ message: 'Ticket not found' });
   res.json({ ticket: t });
 });

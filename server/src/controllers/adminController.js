@@ -7,6 +7,7 @@ import RefreshToken from '../models/RefreshToken.js';
 import { getSettings, updateSettings } from '../services/settingsService.js';
 import * as rideService from '../services/rideService.js';
 import { notify } from '../services/notificationService.js';
+import { safeRegex, safeInt, safeFilterValue } from '../utils/sanitize.js';
 
 const ioOf = (req) => req.app.get('io');
 
@@ -37,17 +38,21 @@ export const analytics = asyncHandler(async (req, res) => {
 
 // GET /api/admin/rides?status=&page=&limit=
 export const rides = asyncHandler(async (req, res) => {
-  const { status, page = 1, limit = 20 } = req.query;
+  // `status` is coerced to a primitive: ?status[$ne]=x would otherwise be
+  // executed by Mongo as an operator and defeat the filter.
+  const status = safeFilterValue(req.query.status);
+  const page = safeInt(req.query.page, 1, { min: 1, max: 100000 });
+  const limit = safeInt(req.query.limit, 20, { min: 1, max: 100 });
   const query = status ? { status } : {};
   const [rides, total] = await Promise.all([
     Ride.find(query)
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
-      .limit(+limit)
+      .limit(limit)
       .populate('passenger driver', 'name phone avatar'),
     Ride.countDocuments(query),
   ]);
-  res.json({ rides, total, page: +page, limit: +limit });
+  res.json({ rides, total, page, limit });
 });
 
 // GET /api/admin/drivers
@@ -120,11 +125,14 @@ export const toggleDriver = asyncHandler(async (req, res) => {
 
 // GET /api/admin/users?search=&role=&page=&limit=
 export const users = asyncHandler(async (req, res) => {
-  const { search = '', role = '', page = 1, limit = 20 } = req.query;
+  const search = typeof req.query.search === 'string' ? req.query.search.trim() : '';
+  const role = safeFilterValue(req.query.role) || '';
+  const page = safeInt(req.query.page, 1, { min: 1, max: 100000 });
+  const limit = safeInt(req.query.limit, 20, { min: 1, max: 100 });
   const query = {};
   if (role) query.role = role;
   if (search) {
-    const rx = new RegExp(search, 'i');
+    const rx = safeRegex(search);
     query.$or = [{ name: rx }, { email: rx }, { phone: rx }];
   }
   const [users, total] = await Promise.all([
@@ -132,10 +140,10 @@ export const users = asyncHandler(async (req, res) => {
       .select('-password')
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
-      .limit(+limit),
+      .limit(limit),
     User.countDocuments(query),
   ]);
-  res.json({ users, total, page: +page, limit: +limit });
+  res.json({ users, total, page, limit });
 });
 
 // PATCH /api/admin/users/:id/suspend
@@ -166,7 +174,12 @@ export const unsuspendUser = asyncHandler(async (req, res) => {
 export const deleteUser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id);
   if (!user) return res.status(404).json({ message: 'User not found' });
-  if (user.role === 'admin') return res.status(400).json({ message: 'Cannot delete an admin account' });
+  if (['admin', 'super_admin'].includes(user.role)) {
+    return res.status(400).json({ message: 'Cannot delete an admin account' });
+  }
+  if (String(user._id) === String(req.user._id)) {
+    return res.status(400).json({ message: 'You cannot delete your own account' });
+  }
 
   await Promise.all([
     User.deleteOne({ _id: user._id }),
@@ -180,13 +193,15 @@ export const deleteUser = asyncHandler(async (req, res) => {
 
 // GET /api/admin/payments?status=&page=&limit=
 export const payments = asyncHandler(async (req, res) => {
-  const { status = '', page = 1, limit = 20 } = req.query;
+  const status = safeFilterValue(req.query.status) || '';
+  const page = safeInt(req.query.page, 1, { min: 1, max: 100000 });
+  const limit = safeInt(req.query.limit, 20, { min: 1, max: 100 });
   const query = status ? { status } : {};
   const [payments, total, summary] = await Promise.all([
     Payment.find(query)
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
-      .limit(+limit)
+      .limit(limit)
       .populate('user', 'name email')
       .populate('ride', 'pickup dropoff'),
     Payment.countDocuments(query),
@@ -203,7 +218,7 @@ export const payments = asyncHandler(async (req, res) => {
   res.json({
     payments,
     total,
-    page: +page,
+    page,
     limit: +limit,
     summary: Object.fromEntries(summary.map((s) => [s._id, s])),
   });

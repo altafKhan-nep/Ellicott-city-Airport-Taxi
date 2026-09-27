@@ -1,22 +1,38 @@
-import { useContent } from '../../context/ContentContext.jsx';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
-import { Phone, ArrowRight } from 'lucide-react';
+import { Phone, ArrowRight, ChevronDown, CarFront, LogOut, UserRound } from 'lucide-react';
+import { useContent } from '../../context/ContentContext.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useCatalog } from '../../context/CatalogContext.jsx';
+import { isStaff, isDriver } from '../../lib/roles.js';
 import NotificationsBell from './NotificationsBell.jsx';
+import ServiceIcon from '../ui/ServiceIcon.jsx';
 
-const MAIN_LINKS = [
+// Single source of truth: desktop and mobile both render from this list, so a
+// page can never appear in one and be missing from the other.
+const NAV_LINKS = [
   { to: '/about', label: 'About' },
-  { to: '/services', label: 'Services' },
+  { to: '/services', label: 'Services', hasMenu: true },
   { to: '/fleet', label: 'Fleet' },
   { to: '/contact', label: 'Contact' },
 ];
 
+// One height for every interactive control in the bar, so the row reads as a
+// single line instead of a collection of mismatched pills.
+const CONTROL = 'h-10 shrink-0 rounded-full';
+
 const navItem = ({ isActive }) =>
-  `rounded-full px-3.5 py-2 text-sm font-medium transition-colors ${
-    isActive ? 'bg-white/15 text-white' : 'text-white/80 hover:bg-white/10 hover:text-white'
+  `relative flex ${CONTROL} items-center px-4 text-sm font-medium transition-colors ${
+    isActive ? 'bg-white/15 text-white' : 'text-white/75 hover:bg-white/10 hover:text-white'
   }`;
+
+// Chevron rotates to signal the menu state without a second icon.
+const chevron = (open) => (
+  <ChevronDown
+    className={`h-4 w-4 shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+    aria-hidden="true"
+  />
+);
 
 export default function Navbar() {
   const { services } = useCatalog();
@@ -26,22 +42,27 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const servicesButtonRef = useRef(null);
+
+  const closeAll = () => {
+    setOpen(false);
+    setServicesOpen(false);
+  };
 
   const handleLogout = () => {
-    setOpen(false);
+    closeAll();
     logout();
     navigate('/login');
   };
 
   const go = (to) => {
-    setOpen(false);
-    setServicesOpen(false);
+    closeAll();
     navigate(to);
   };
 
-  // Close the services dropdown on outside click
+  // Close the services menu on outside click.
   useEffect(() => {
-    if (!servicesOpen) return;
+    if (!servicesOpen) return undefined;
     const onDown = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setServicesOpen(false);
     };
@@ -49,243 +70,331 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', onDown);
   }, [servicesOpen]);
 
+  // Escape closes whichever menu is open and returns focus to the trigger.
+  useEffect(() => {
+    if (!open && !servicesOpen) return undefined;
+    const onKey = (e) => {
+      if (e.key !== 'Escape') return;
+      setOpen(false);
+      setServicesOpen(false);
+      servicesButtonRef.current?.focus();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [open, servicesOpen]);
+
+  // Stop the page scrolling behind the full-height mobile drawer.
+  useEffect(() => {
+    if (!open) return undefined;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
+
+  // Any route change (including a browser back/forward) collapses the menus.
+  // Keyed on the pathname because `navigate` is referentially stable and would
+  // never re-fire the effect.
+  const { pathname } = useLocation();
+  useEffect(() => {
+    setOpen(false);
+    setServicesOpen(false);
+  }, [pathname]);
+
+  const accountLinks = [
+    ...(isDriver(user) ? [{ to: '/driver', label: 'Driver' }] : []),
+    ...(isStaff(user) ? [{ to: '/admin', label: 'Admin' }] : []),
+    ...(user ? [{ to: '/profile', label: 'Profile' }] : []),
+  ];
+
   return (
-    <header className="bg-brand-gradient sticky top-0 z-[1001] shadow-md">
-      <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
-        <Link to="/" onClick={() => setOpen(false)} className="flex items-center gap-2">
-          <span className="text-lg font-bold tracking-tight text-white sm:text-xl">
-            Ellicott City <span className="text-gold-300">Airport Taxi</span>
+    <header className="bg-brand-gradient sticky top-0 z-[1001] shadow-lg shadow-brand-950/20">
+      <nav className="mx-auto flex h-[72px] max-w-7xl items-center gap-3 px-4 sm:px-6">
+        {/* Brand */}
+        <Link to="/" onClick={closeAll} className="group flex shrink-0 items-center gap-2.5" aria-label="Ellicott City Airport Taxi — home">
+          <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white/10 ring-1 ring-white/15 transition-colors group-hover:bg-white/15">
+            <CarFront className="h-5 w-5 text-gold-300" aria-hidden="true" />
+          </span>
+          <span className="flex flex-col leading-none">
+            <span className="font-display text-[15px] font-semibold tracking-tight text-white sm:text-base">
+              Ellicott City
+            </span>
+            <span className="mt-0.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-gold-300">
+              Airport Taxi
+            </span>
           </span>
         </Link>
 
         {/* Desktop nav */}
-        <div className="hidden items-center gap-1 lg:flex">
-          {MAIN_LINKS.filter((l) => l.to !== '/services').map((l) => (
-            <NavLink key={l.to} to={l.to} className={navItem}>
-              {l.label}
-            </NavLink>
-          ))}
+        <div className="ml-2 hidden items-center gap-0.5 lg:flex">
+          {NAV_LINKS.map((link) =>
+            link.hasMenu ? (
+              <div key={link.to} ref={dropdownRef} className="relative">
+                <button
+                  ref={servicesButtonRef}
+                  type="button"
+                  aria-expanded={servicesOpen}
+                  aria-haspopup="true"
+                  onClick={() => setServicesOpen((v) => !v)}
+                  className={`flex ${CONTROL} items-center gap-1.5 px-4 text-sm font-medium transition-colors ${
+                    servicesOpen
+                      ? 'bg-white/15 text-white'
+                      : 'text-white/75 hover:bg-white/10 hover:text-white'
+                  }`}
+                >
+                  {link.label}
+                  {chevron(servicesOpen)}
+                </button>
 
-          {/* Services dropdown */}
-          <div ref={dropdownRef} className="relative">
-            <button
-              type="button"
-              aria-expanded={servicesOpen}
-              onClick={() => setServicesOpen((v) => !v)}
-              className={`flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-medium transition-colors ${
-                servicesOpen ? 'bg-white/15 text-white' : 'text-white/80 hover:bg-white/10 hover:text-white'
-              }`}
-            >
-              Services
-              <svg viewBox="0 0 20 20" fill="currentColor" className={`h-4 w-4 transition-transform ${servicesOpen ? 'rotate-180' : ''}`} aria-hidden="true">
-                <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z" clipRule="evenodd" />
-              </svg>
-            </button>
-
-            {servicesOpen && (
-              <div className="absolute left-1/2 top-full w-[560px] -translate-x-1/2 pt-2">
-                <div className="overflow-hidden rounded-2xl bg-surface p-3 shadow-2xl ring-1 ring-accent-200">
-                  <div className="grid grid-cols-2 gap-1">
-                    {services.map((s) => (
-                      <button
-                        key={s.slug}
-                        onClick={() => go(`/services/${s.slug}`)}
-                        className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-brand-50"
-                      >
-                        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-brand-gradient-soft">
-                          <s.icon className="h-5 w-5 text-brand-700" />
-                        </span>
-                        <span>
-                          <span className="block text-sm font-semibold text-ink">{s.name}</span>
-                          <span className="block text-xs text-muted">{s.tagline}</span>
-                        </span>
-                      </button>
-                    ))}
+                {servicesOpen && (
+                  <div className="absolute left-1/2 top-full w-[min(38rem,90vw)] -translate-x-1/2 pt-2">
+                    <div className="card overflow-hidden p-3 shadow-2xl">
+                      <div className="grid max-h-[26rem] grid-cols-2 gap-1 overflow-y-auto">
+                        {services.map((s) => (
+                          <button
+                            key={s.slug}
+                            onClick={() => go(`/services/${s.slug}`)}
+                            className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-brand-50"
+                          >
+                            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-brand-gradient-soft">
+                              <ServiceIcon name={s.icon} className="h-5 w-5 text-brand-700" />
+                            </span>
+                            <span className="min-w-0">
+                              <span className="block truncate text-sm font-semibold text-ink">{s.name}</span>
+                              <span className="block truncate text-xs text-muted">{s.tagline}</span>
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                      <div className="mt-1 border-t border-accent-100 pt-2">
+                        <Link
+                          to="/services"
+                          onClick={closeAll}
+                          className="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold text-brand-700 transition-colors hover:bg-brand-50"
+                        >
+                          View all services
+                          <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                        </Link>
+                      </div>
+                    </div>
                   </div>
-                  <div className="mt-1 border-t border-accent-100 pt-2">
-                    <button
-                      onClick={() => go('/services')}
-                      className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold text-brand-700 transition-colors hover:bg-brand-50"
-                    >
-                      View all services
-                      <ArrowRight className="h-4 w-4" aria-hidden />
-                    </button>
-                  </div>
-                </div>
+                )}
               </div>
-            )}
-          </div>
+            ) : (
+              <NavLink key={link.to} to={link.to} className={navItem}>
+                {link.label}
+              </NavLink>
+            )
+          )}
         </div>
 
-        <div className="flex items-center gap-2">
-          {/* Phone + portal (desktop) */}
+        {/* Right cluster */}
+        <div className="ml-auto flex items-center gap-2">
           <a
             href={`tel:${content.contactPhoneHref}`}
-            className="hidden items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold text-white/90 transition-colors hover:bg-white/10 xl:flex"
+            className={`hidden ${CONTROL} items-center gap-2 px-4 text-sm font-semibold text-gold-300 transition-colors hover:bg-white/10 xl:flex`}
           >
-            <Phone className="h-4 w-4" />
+            <Phone className="h-4 w-4" aria-hidden="true" />
             {content.contactPhone}
           </a>
 
-          <div className="hidden items-center gap-2 lg:flex">
-            <Link
-              to="/reservations"
-              className="rounded-full border border-white/30 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/10"
-            >
-              Client Portal
-            </Link>
-            {user ? (
-              <div className="flex items-center gap-2">
-                <NotificationsBell />
-                {user.role === 'driver' && (
-                  <NavLink to="/driver" className={navItem}>Driver</NavLink>
-                )}
-                {user.role === 'admin' && (
-                  <NavLink to="/admin" className={navItem}>Admin</NavLink>
-                )}
-                <NavLink to="/profile" className={navItem}>Profile</NavLink>
-                <button
-                  onClick={handleLogout}
-                  className="rounded-full bg-white/10 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-white/20"
-                >
-                  Sign out
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Link to="/login" className="rounded-full px-3 py-2 text-sm font-medium text-white/80 transition-colors hover:text-white">
-                  Sign in
-                </Link>
-                <Link
-                  to="/register"
-                  className="rounded-full bg-surface px-4 py-2 text-sm font-semibold text-brand-700 shadow-sm transition-colors hover:bg-brand-50"
-                >
-                  Get started
-                </Link>
-              </div>
-            )}
-          </div>
+          {user ? (
+            <div className="hidden items-center gap-1 lg:flex">
+              <NotificationsBell />
+              {accountLinks.map((l) => (
+                <NavLink key={l.to} to={l.to} className={navItem}>
+                  {l.label}
+                </NavLink>
+              ))}
+              <button
+                onClick={handleLogout}
+                className={`flex ${CONTROL} items-center gap-2 px-4 text-sm font-medium text-white/80 transition-colors hover:bg-white/15 hover:text-white`}
+              >
+                <LogOut className="h-4 w-4" aria-hidden="true" />
+                Sign out
+              </button>
+            </div>
+          ) : (
+            <div className="hidden items-center gap-2 lg:flex">
+              <Link
+                to="/login"
+                className={`flex ${CONTROL} items-center px-4 text-sm font-medium text-white/80 transition-colors hover:bg-white/10 hover:text-white`}
+              >
+                Sign in
+              </Link>
+              <Link
+                to="/register"
+                className={`flex ${CONTROL} items-center bg-surface px-5 text-sm font-semibold text-brand-700 shadow-sm transition-colors hover:bg-gold-300`}
+              >
+                Get started
+              </Link>
+            </div>
+          )}
 
-          {/* Mobile: notifications + hamburger */}
           {user && (
             <div className="lg:hidden">
               <NotificationsBell />
             </div>
           )}
+
           <button
             onClick={() => setOpen((o) => !o)}
-            aria-label="Toggle menu"
+            aria-label={open ? 'Close menu' : 'Open menu'}
             aria-expanded={open}
-            className="grid h-10 w-10 place-items-center rounded-full text-white transition-colors hover:bg-white/10 lg:hidden"
+            className={`grid ${CONTROL} w-10 place-items-center text-white transition-colors hover:bg-white/10 lg:hidden`}
           >
-            <div className="space-y-1.5">
-              <span className={`block h-0.5 w-5 bg-surface transition-transform ${open ? 'translate-y-2 rotate-45' : ''}`} />
-              <span className={`block h-0.5 w-5 bg-surface transition-opacity ${open ? 'opacity-0' : ''}`} />
-              <span className={`block h-0.5 w-5 bg-surface transition-transform ${open ? '-translate-y-2 -rotate-45' : ''}`} />
-            </div>
+            <span className="relative block h-4 w-5">
+              <span className={`absolute left-0 block h-0.5 w-5 rounded-full bg-surface transition-all duration-200 ${open ? 'top-1.5 rotate-45' : 'top-0'}`} />
+              <span className={`absolute left-0 top-1.5 block h-0.5 w-5 rounded-full bg-surface transition-opacity duration-200 ${open ? 'opacity-0' : 'opacity-100'}`} />
+              <span className={`absolute left-0 block h-0.5 w-5 rounded-full bg-surface transition-all duration-200 ${open ? 'top-1.5 -rotate-45' : 'top-3'}`} />
+            </span>
           </button>
         </div>
       </nav>
 
       {/* Mobile drawer */}
       {open && (
-        <div className="max-h-[calc(100vh-4rem)] overflow-y-auto border-t border-white/10 bg-brand-gradient lg:hidden">
-          <div className="mx-auto max-w-7xl space-y-1 px-4 py-4 sm:px-6">
-            <button onClick={() => go('/')} className="block w-full rounded-2xl px-4 py-3 text-left text-sm font-medium text-white/90 transition-colors hover:bg-white/10">
-              Home
-            </button>
-            <button onClick={() => go('/about')} className="block w-full rounded-2xl px-4 py-3 text-left text-sm font-medium text-white/90 transition-colors hover:bg-white/10">
-              About
-            </button>
-
-            {/* Services expander */}
-            <div className="rounded-2xl transition-colors hover:bg-white/10">
-              <button
-                onClick={() => setServicesOpen((v) => !v)}
-                className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-medium text-white/90"
-              >
-                Services
-                <svg viewBox="0 0 20 20" fill="currentColor" className={`h-4 w-4 transition-transform ${servicesOpen ? 'rotate-180' : ''}`} aria-hidden="true">
-                  <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z" clipRule="evenodd" />
-                </svg>
-              </button>
-              {servicesOpen && (
-                <div className="space-y-0.5 px-2 pb-2">
-                  {services.map((s) => (
+        <div className="max-h-[calc(100dvh-4.5rem)] overflow-y-auto border-t border-white/10 bg-brand-gradient lg:hidden">
+          <div className="mx-auto max-w-7xl px-4 pb-6 pt-3 sm:px-6">
+            <p className="px-1 pb-2 pt-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/45">
+              Explore
+            </p>
+            <ul className="space-y-0.5">
+              <li>
+                <NavLink
+                  to="/"
+                  end
+                  onClick={closeAll}
+                  className={({ isActive }) =>
+                    `flex items-center rounded-xl px-4 py-3 text-sm font-medium transition-colors ${
+                      isActive ? 'bg-white/15 text-white' : 'text-white/80 hover:bg-white/10'
+                    }`
+                  }
+                >
+                  Home
+                </NavLink>
+              </li>
+              {NAV_LINKS.map((link) =>
+                link.hasMenu ? (
+                  <li key={link.to}>
                     <button
-                      key={s.slug}
-                      onClick={() => go(`/services/${s.slug}`)}
-                      className="flex w-full items-center gap-2.5 rounded-xl px-4 py-2.5 text-left text-sm text-white/75 transition-colors hover:bg-white/10 hover:text-white"
+                      onClick={() => setServicesOpen((v) => !v)}
+                      aria-expanded={servicesOpen}
+                      className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-left text-sm font-medium text-white/80 transition-colors hover:bg-white/10"
                     >
-                      <s.icon className="h-4 w-4 shrink-0 text-gold-300" />
-                      <span>{s.name}</span>
+                      {link.label}
+                      {chevron(servicesOpen)}
                     </button>
-                  ))}
-                  <button
-                    onClick={() => go('/services')}
-                    className="mt-1 flex w-full items-center justify-between rounded-xl border border-white/20 px-4 py-2.5 text-left text-sm font-semibold text-gold-300 transition-colors hover:bg-white/10"
-                  >
-                    View all services
-                    <ArrowRight className="h-4 w-4" />
-                  </button>
-                </div>
+                    {servicesOpen && (
+                      <ul className="mt-0.5 space-y-0.5 pb-1 pl-2">
+                        {services.map((s) => (
+                          <li key={s.slug}>
+                            <Link
+                              to={`/services/${s.slug}`}
+                              onClick={closeAll}
+                              className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-white/75 transition-colors hover:bg-white/10 hover:text-white"
+                            >
+                              <ServiceIcon name={s.icon} className="h-4 w-4 shrink-0 text-gold-300" />
+                              <span className="truncate">{s.name}</span>
+                            </Link>
+                          </li>
+                        ))}
+                        <li>
+                          <Link
+                            to="/services"
+                            onClick={closeAll}
+                            className="mt-1 flex items-center justify-between rounded-xl border border-white/20 px-3 py-2.5 text-sm font-semibold text-gold-300 transition-colors hover:bg-white/10"
+                          >
+                            View all services
+                            <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                          </Link>
+                        </li>
+                      </ul>
+                    )}
+                  </li>
+                ) : (
+                  <li key={link.to}>
+                    <NavLink
+                      to={link.to}
+                      onClick={closeAll}
+                      className={({ isActive }) =>
+                        `flex items-center rounded-xl px-4 py-3 text-sm font-medium transition-colors ${
+                          isActive ? 'bg-white/15 text-white' : 'text-white/80 hover:bg-white/10'
+                        }`
+                      }
+                    >
+                      {link.label}
+                    </NavLink>
+                  </li>
+                )
               )}
-            </div>
+            </ul>
 
-            <button onClick={() => go('/fleet')} className="block w-full rounded-2xl px-4 py-3 text-left text-sm font-medium text-white/90 transition-colors hover:bg-white/10">
-              Fleet
-            </button>
-            <button onClick={() => go('/contact')} className="block w-full rounded-2xl px-4 py-3 text-left text-sm font-medium text-white/90 transition-colors hover:bg-white/10">
-              Contact
-            </button>
-            <button onClick={() => go('/reservations')} className="block w-full rounded-2xl px-4 py-3 text-left text-sm font-medium text-white/90 transition-colors hover:bg-white/10">
-              Client Portal
-            </button>
             <a
               href={`tel:${content.contactPhoneHref}`}
-              className="flex w-full items-center gap-2.5 rounded-2xl px-4 py-3 text-left text-sm font-semibold text-gold-300"
+              className="mt-3 flex items-center gap-2.5 rounded-xl bg-white/10 px-4 py-3 text-sm font-semibold text-gold-300"
             >
-              <Phone className="h-4 w-4" />
+              <Phone className="h-4 w-4" aria-hidden="true" />
               {content.contactPhone}
             </a>
 
-            {user && user.role === 'driver' && (
-              <button onClick={() => go('/driver')} className="block w-full rounded-2xl px-4 py-3 text-left text-sm font-medium text-white/90 transition-colors hover:bg-white/10">
-                Driver dashboard
-              </button>
-            )}
-            {user && user.role === 'admin' && (
-              <button onClick={() => go('/admin')} className="block w-full rounded-2xl px-4 py-3 text-left text-sm font-medium text-white/90 transition-colors hover:bg-white/10">
-                Admin dashboard
-              </button>
-            )}
-            {user && (
-              <button onClick={() => go('/profile')} className="block w-full rounded-2xl px-4 py-3 text-left text-sm font-medium text-white/90 transition-colors hover:bg-white/10">
-                Profile
-              </button>
-            )}
-
-            <div className="flex items-center justify-between border-t border-white/10 pt-4">
+            <div className="mt-5 border-t border-white/10 pt-4">
+              <p className="px-1 pb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/45">
+                {user ? 'Your account' : 'Ready to ride?'}
+              </p>
               {user ? (
-                <button
-                  onClick={handleLogout}
-                  className="rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/20"
-                >
-                  Sign out ({user.name})
-                </button>
+                <ul className="space-y-0.5">
+                  {accountLinks.map((l) => (
+                    <li key={l.to}>
+                      <NavLink
+                        to={l.to}
+                        onClick={closeAll}
+                        className={({ isActive }) =>
+                          `flex items-center gap-2.5 rounded-xl px-4 py-3 text-sm font-medium transition-colors ${
+                            isActive ? 'bg-white/15 text-white' : 'text-white/80 hover:bg-white/10'
+                          }`
+                        }
+                      >
+                        <UserRound className="h-4 w-4 shrink-0 text-gold-300" aria-hidden="true" />
+                        {l.label}
+                      </NavLink>
+                    </li>
+                  ))}
+                  <li>
+                    <button
+                      onClick={handleLogout}
+                      className="mt-1 flex w-full items-center gap-2.5 rounded-xl bg-white/10 px-4 py-3 text-left text-sm font-medium text-white transition-colors hover:bg-white/20"
+                    >
+                      <LogOut className="h-4 w-4 shrink-0" aria-hidden="true" />
+                      Sign out ({user.name})
+                    </button>
+                  </li>
+                </ul>
               ) : (
-                <>
-                  <Link to="/login" onClick={() => setOpen(false)} className="rounded-full px-4 py-2 text-sm font-medium text-white/80 hover:text-white">
+                <div className="flex flex-col gap-2">
+                  <Link
+                    to="/login"
+                    onClick={closeAll}
+                    className="flex items-center justify-center rounded-xl bg-white/10 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-white/20"
+                  >
                     Sign in
                   </Link>
                   <Link
                     to="/register"
-                    onClick={() => setOpen(false)}
-                    className="rounded-full bg-surface px-4 py-2 text-sm font-semibold text-brand-700 shadow-sm"
+                    onClick={closeAll}
+                    className="flex items-center justify-center rounded-xl bg-surface px-4 py-3 text-sm font-semibold text-brand-700 shadow-sm"
                   >
                     Get started
                   </Link>
-                </>
+                  <Link
+                    to="/reservations"
+                    onClick={closeAll}
+                    className="flex items-center justify-center rounded-xl border border-white/20 px-4 py-3 text-sm font-semibold text-gold-300 transition-colors hover:bg-white/10"
+                  >
+                    Client Portal
+                  </Link>
+                </div>
               )}
             </div>
           </div>

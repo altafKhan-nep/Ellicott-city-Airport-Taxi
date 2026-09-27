@@ -108,7 +108,13 @@ const validateRegistration = ({ name, email, phone, password }) => {
 /* ---------- email helpers ---------- */
 const appUrl = () => process.env.CLIENT_ORIGIN || 'http://localhost:5173';
 
-const devLink = (link) => (process.env.NODE_ENV === 'production' ? undefined : link);
+// Returning a password-reset / verification token in the HTTP response is a
+// full account-takeover primitive, so it is opt-in via an explicit flag rather
+// than "anything that is not literally production". A forgotten NODE_ENV on a
+// public host must never leak tokens.
+const exposeDevTokens = () => process.env.EXPOSE_DEV_TOKENS === 'true';
+
+const devLink = (link) => (exposeDevTokens() ? link : undefined);
 
 const sendVerificationEmail = async (user, rawToken) => {
   const link = `${appUrl()}/verify-email?token=${rawToken}`;
@@ -133,11 +139,22 @@ export const register = async ({ name, email, phone, password, role, driverDetai
   // RBAC: public registration may only create passenger|driver — admin roles are seed/CRM-only
   const ALLOWED_PUBLIC_ROLES = ['passenger', 'driver'];
   const safeRole = ALLOWED_PUBLIC_ROLES.includes(role) ? role : 'passenger';
-  let safeDriverDetails = safeRole === 'driver' ? driverDetails : undefined;
-  if (safeDriverDetails?.vehicleType) {
+
+  // Allowlist the driver profile. Spreading client input here would let anyone
+  // self-register an "available" driver with a fabricated rating, or pin a real
+  // vehicle's plate number. Availability and stats are set by the CRM/ride flow.
+  let safeDriverDetails;
+  if (safeRole === 'driver') {
+    const d = driverDetails && typeof driverDetails === 'object' ? driverDetails : {};
+    const next = {
+      vehicleType: d.vehicleType || 'economy-sedan',
+      plateNumber: typeof d.plateNumber === 'string' ? d.plateNumber.trim().slice(0, 16) : '',
+      licenseNo: typeof d.licenseNo === 'string' ? d.licenseNo.trim().slice(0, 32) : '',
+      isAvailable: false,
+    };
     // Reject a vehicle class that is not in the admin-managed fleet.
-    const cls = await assertVehicleKey(safeDriverDetails.vehicleType);
-    safeDriverDetails = { ...safeDriverDetails, vehicleType: cls.key };
+    const cls = await assertVehicleKey(next.vehicleType);
+    safeDriverDetails = { ...next, vehicleType: cls.key };
   }
   const user = await User.create({
     name: name.trim(),
@@ -240,12 +257,16 @@ export const sendOtp = async (phone) => {
     to: phone,
     body: `Your Ellicott City Airport Taxi verification code is ${code}. It expires in 10 minutes.`,
   });
-  // In dev (no Twilio) return the code so the flow can be tested end-to-end.
-  return { devCode: isSmsConfigured() ? undefined : code };
+  // Without a working SMS gateway the code is only ever handed back when the
+  // operator explicitly opted in — otherwise anyone could claim any phone number.
+  return { devCode: exposeDevTokens() && !isSmsConfigured() ? code : undefined };
 };
 
 export const verifyOtp = async ({ phone, code, userAgent = '', ip = '' }) => {
-  if (!phone || !code) throw fail('Phone number and code are required', 400);
+  // Both fields must be plain strings: a query object like {"$ne":null} would
+  // otherwise be honoured by Mongo as an operator.
+  if (typeof phone !== 'string' || !PHONE_RE.test(phone)) throw fail('Enter a valid phone number.', 400);
+  if (typeof code !== 'string' || !/^\d{6}$/.test(code.trim())) throw fail('Enter the 6-digit code.', 400);
 
   const otp = await OtpCode.findOne({ phone });
   if (!otp || otp.expiresAt < new Date()) {

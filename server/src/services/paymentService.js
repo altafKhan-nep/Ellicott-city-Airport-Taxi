@@ -17,18 +17,21 @@ const stripeEnabled = !!stripe;
 
 const cents = (amount) => Math.round(amount * 100);
 
+// Only a finished trip can be settled. Allowing an in-flight ride lets a
+// passenger lock in a cash payment against a fare that is still editable, and
+// permanently blocks the real card charge.
+const findPayableRide = async (userId, rideId) => {
+  const ride = await Ride.findOne({ _id: rideId, passenger: userId, status: 'completed' });
+  if (!ride) throw fail('Ride not found or not yours to pay for', 404);
+  return ride;
+};
+
 const assertPayable = async (userId, rideId) => {
   const settings = await getSettings();
   if (settings.paymentsEnabled === false) {
     throw fail('Online payments are disabled by the operator. Pay by cash or contact support.', 403);
   }
-  const ride = await Ride.findOne({
-    _id: rideId,
-    passenger: userId,
-    status: { $nin: ['cancelled'] },
-  });
-  if (!ride) throw fail('Ride not found or not yours to pay for', 404);
-  return ride;
+  return findPayableRide(userId, rideId);
 };
 
 const settledPayment = async (rideId) => {
@@ -83,12 +86,7 @@ export const processPayment = async (userId, rideId, opts = {}) => {
 
   // Cash — no online charge; recorded so the driver collects at the end.
   if (method === 'cash') {
-    const ride = await Ride.findOne({
-      _id: rideId,
-      passenger: userId,
-      status: { $nin: ['cancelled'] },
-    });
-    if (!ride) throw fail('Ride not found or not yours to pay for', 404);
+    const ride = await findPayableRide(userId, rideId);
 
     const existing = await settledPayment(rideId);
     if (existing) return existing;
@@ -283,8 +281,6 @@ export const listPayments = async (userId) =>
     .sort({ createdAt: -1 })
     .limit(100)
     .populate('ride', 'pickup dropoff fare status');
-
-export const isStripeEnabled = () => stripeEnabled;
 
 // --- Refund Request flow (passenger asks, admin approves) ---
 import RefundRequest from '../models/RefundRequest.js';

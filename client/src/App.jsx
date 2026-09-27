@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
 import { useAuth } from './context/AuthContext.jsx';
+import { hasRole, ADMIN_ROLES } from './lib/roles.js';
 import Navbar from './components/layout/Navbar.jsx';
 import Footer from './components/layout/Footer.jsx';
 import { Spinner } from './components/ui/Spinner.jsx';
@@ -77,10 +78,7 @@ const RequireRole = ({ role, roles, children }) => {
   }
   if (!user) return <Navigate to="/login" replace />;
   const allowed = roles || (role ? [role] : null);
-  if (allowed) {
-    const effective = user.role === 'admin' ? ['admin','super_admin'] : [user.role];
-    if (!allowed.some(r=> effective.includes(r) || r===user.role)) return <Navigate to="/" replace />;
-  }
+  if (allowed && !hasRole(user, allowed)) return <Navigate to="/" replace />;
   return children;
 };
 
@@ -104,7 +102,7 @@ export default function App() {
     return (
       <Suspense fallback={<Fallback />}>
         <Routes>
-          <Route path="/admin" element={<RequireRole roles={['admin','super_admin','dispatcher','manager','finance','support']}><CrmShell /></RequireRole>}>
+          <Route path="/admin" element={<RequireRole roles={ADMIN_ROLES}><CrmShell /></RequireRole>}>
             <Route index element={<OverviewPage />} />
             <Route path="dispatch" element={<DispatchBoard />} />
             <Route path="operations" element={<LiveMapPage />} />
