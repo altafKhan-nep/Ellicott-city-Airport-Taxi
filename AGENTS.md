@@ -85,11 +85,13 @@ role), slate/gray → `accent`, `bg-white` → `bg-surface` (so dark mode works)
 | `.card` | Standard padded card (radius 1rem, `accent-200` border, `surface` bg, layered shadow, lifts on hover). Override padding with `card p-6` / `card p-8`. Defined in `@layer components`, so utilities win. |
 | `.panel` | Same surface with **no** padding and no hover lift — tables, dropdowns, map frames (`panel overflow-hidden`). |
 | `.card-lift` | Animation only, for image/media cards that define their own surface. |
-| `.bg-dots` | Dotted texture (dark ink) over the element's existing surface. From the Cargo theme's dotted-map background, rebuilt in CSS. |
-| `.bg-dots-soft` | The same dots **composited with** the soft wash — use this *instead of* `bg-brand-gradient-soft`, because setting `background-image` would wipe the gradient out. |
-| `.bg-dots-brand` | Dots **composited with** the blue band gradient — replaces `bg-brand-gradient` for the same reason. Uses a *light* ink, since a dark dot on a dark band measures 1.03:1, i.e. invisible. |
+| `.bg-dots` | Dotted **world map** (dark ink) over the element's existing surface. Cargo's dotted-map background, regenerated as original SVG. |
+| `.bg-dots-soft` | The same map **composited with** the soft wash — use this *instead of* `bg-brand-gradient-soft`, because setting `background-image` would wipe the gradient out. |
+| `.bg-dots-brand` | Map **composited with** the blue band gradient — replaces `bg-brand-gradient` for the same reason. Uses the *light* asset, since a dark dot on a dark band measures 1.03:1, i.e. invisible. |
 | `.phone-number` | Standard plain phone presentation: body font, weight 500, normal tracking, no transform. A phone is a value to read and tap, not a display element — never set it in `font-display` or extra-bold. |
+| `.phone-number-serif` | The one serif (Times New Roman) phone treatment, for the single headline number on Contact. Deliberately scoped — do not apply site-wide. |
 | `.bg-dots-parallax` | Opt-in `background-attachment: fixed`. Off by default: unreliable on iOS Safari and a scroll-performance cost. |
+| `lib/phone.js` | `formatPhoneDisplay()` — the only place the phone number's *display* format is decided. |
 | `lib/statusTone.js` | `rideTone()`, `payTone()`, `payAccent()`, `badgeTone()` — the only place status/payment colors are defined, so every page renders identical pills. Never re-declare a `STATUS_STYLE` map. |
 
 
@@ -723,3 +725,7 @@ io.to(`ride:${rideId}`).emit('ride:update', { ride, status });
     report a false contrast failure. Skip gradient-clipped, `font-mono` and map/attribution nodes
     in contrast audits.
 18. **Catalog writes are audited**: adding an admin `POST`/`PATCH`/`DELETE` without `audit(...)` silently shrinks the Audit Log. See the Audit Log section.
+19. **The dotted texture is a generated asset, not a CSS gradient.** `client/scripts/build-dot-world-map.mjs` writes two SVGs to `client/public/assets/` — `dot-world-map.svg` (dark ink, light surfaces) and `dot-world-map-band.svg` (light ink, blue bands). Re-run `node scripts/build-dot-world-map.mjs` after editing `LAND_BOXES`; never hand-edit the SVGs. Two constraints learned the hard way:
+    - **The ink is baked per file, not `currentColor`.** `color` is *also* the text colour, so a `text-white` utility on a dotted section silently overrides a `currentColor` ink and paints the dots solid white.
+    - **The asset lives in `public/`, not `src/assets/`.** Vite does not rewrite `url()` inside a `background-image` custom property, so a bundled `src/assets` file silently 404s in production.
+20. **Cards on a dotted band must be opaque.** A translucent panel (`bg-white/10`) lets the world map read straight through it, which looks like the map is floating in front of the card. Use `bg-surface`, or a solid `brand-900` for a dark card. The map belongs to the band *behind* the content, never on a card.

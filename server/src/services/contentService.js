@@ -27,7 +27,7 @@ export const CONTENT_DEFAULTS = {
   heroCtaLabel: 'Book your ride online',
 
   // Contact (shown site-wide: footer, navbar, contact page, auth panel)
-  contactPhone: '(410) 365-5556',
+  contactPhone: '410-365-5556',
   contactPhoneHref: '4103655556',
   contactEmail: 'chriskbonsu@gmail.com',
   contactAddress: '9019 Early April Way, Ellicott City, MD',

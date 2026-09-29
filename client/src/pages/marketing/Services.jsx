@@ -43,7 +43,7 @@ export default function Services() {
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
             <Link to={bookUrl}>
-              <Button size="lg" className="bg-surface !text-brand-900 shadow-xl hover:bg-brand-50">
+              <Button size="lg" className="shadow-xl">
                 Book a ride now
               </Button>
             </Link>
@@ -146,7 +146,7 @@ export default function Services() {
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
             <Link to="/contact">
-              <Button size="lg" className="bg-surface !text-brand-900 shadow-xl hover:bg-brand-50">
+              <Button size="lg" className="shadow-xl">
                 Get a free quote
               </Button>
             </Link>

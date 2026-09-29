@@ -195,8 +195,8 @@ export default function Home() {
           </div>
 
           {/* Get a quote card */}
-          <div className="bg-dots-brand overflow-hidden rounded-3xl text-white shadow-xl">
-            <div className="p-8 sm:p-10">
+          <div className="overflow-hidden rounded-3xl border border-brand-600 bg-brand-900 p-8 text-white shadow-xl sm:p-10">
+            <div>
               <h3 className="text-2xl font-bold">Book online or call</h3>
               <a
                 href={`tel:${content.contactPhoneHref}`}
@@ -210,7 +210,7 @@ export default function Home() {
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link to={bookUrl}>
-                  <Button size="lg" className="bg-surface !text-brand-900 shadow-lg hover:bg-brand-50">
+                  <Button size="lg" className="shadow-lg">
                     Get a free quote
                   </Button>
                 </Link>
@@ -354,18 +354,18 @@ export default function Home() {
           <div className="mt-12 grid gap-6 md:grid-cols-3">
             {content.testimonials.map((t, i) => (
               <Reveal key={t.name} delay={(i % 3) * 110} className="h-full">
-                <figure className="card-lift h-full rounded-3xl border border-white/15 bg-white/10 p-7 backdrop-blur">
-                  <div className="flex gap-0.5 text-gold-400" aria-hidden>
+                <figure className="card-lift h-full rounded-3xl border border-accent-200 bg-surface p-7">
+                  <div className="flex gap-0.5 text-gold-600" aria-hidden>
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star key={i} className="h-4 w-4 fill-current" />
                   ))}
                 </div>
-                  <blockquote className="mt-4 text-[15px] leading-relaxed text-white/90">
+                  <blockquote className="mt-4 text-[15px] leading-relaxed text-ink">
                     “{t.quote}”
                   </blockquote>
-                  <figcaption className="mt-6 border-t border-white/15 pt-4">
-                    <div className="font-semibold text-white">{t.name}</div>
-                    <div className="mt-0.5 text-sm text-white/70">{t.detail}</div>
+                  <figcaption className="mt-6 border-t border-accent-200 pt-4">
+                    <div className="font-semibold text-ink">{t.name}</div>
+                    <div className="mt-0.5 text-sm text-muted">{t.detail}</div>
                   </figcaption>
                 </figure>
               </Reveal>

@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import api from '../services/api.js';
+import { formatPhoneDisplay } from '../lib/phone.js';
 
 // Admin-managed website content.
 //
@@ -18,7 +19,7 @@ export const CONTENT_FALLBACK = {
   heroSubtitle:
     'Professional taxi, sedan and SUV service across Maryland, DC, and Virginia — airport transfers, corporate travel, weddings, events and more. Book online, pay upfront, track your driver live.',
   heroCtaLabel: 'Book your ride online',
-  contactPhone: '(410) 365-5556',
+  contactPhone: '410-365-5556',
   contactPhoneHref: '4103655556',
   contactEmail: 'chriskbonsu@gmail.com',
   contactAddress: '9019 Early April Way, Ellicott City, MD',
@@ -94,9 +95,22 @@ export function ContentProvider({ children }) {
     load();
   }, [load]);
 
+  // Normalise the number here, once, so every component that renders
+  // `content.contactPhone` shows it straight — without each call site having to
+  // remember, and regardless of how the value is stored in the database.
+  const displayContent = useMemo(
+    () => ({ ...content, contactPhone: formatPhoneDisplay(content.contactPhone) }),
+    [content],
+  );
+
   const value = useMemo(
-    () => ({ content, loading, refresh: load, telHref: content.contactPhoneHref }),
-    [content, loading, load],
+    () => ({
+      content: displayContent,
+      loading,
+      refresh: load,
+      telHref: content.contactPhoneHref,
+    }),
+    [displayContent, loading, load, content.contactPhoneHref],
   );
 
   return <ContentContext.Provider value={value}>{children}</ContentContext.Provider>;
