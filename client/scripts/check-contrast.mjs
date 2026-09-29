@@ -10,10 +10,10 @@
  */
 
 const T = {
-  // brand = Cargo charcoal, the lead surface
+  // brand = Cargo's split ramp: 50-700 blue (links/focus), 800-950 charcoal (bands)
   brand: {
-    50: '#f4f4f4', 100: '#e7e7e7', 200: '#d4d4d4', 300: '#a8a8a8', 400: '#7a7a7a',
-    500: '#6b6b6b', 600: '#525252', 700: '#3d3d3d', 800: '#333333', 900: '#262626', 950: '#1a1a1a',
+    50: '#f2f7fc', 100: '#e3eef8', 200: '#c2d9ec', 300: '#8fbcdd', 400: '#2f87bd',
+    500: '#0b6ba8', 600: '#0b60a9', 700: '#084274', 800: '#33373c', 900: '#262a2f', 950: '#1a1d21',
   },
   // signal = the only red: live ride, failed payment, map pins, route
   signal: {
@@ -21,8 +21,8 @@ const T = {
     500: '#d62f2f', 600: '#c22020', 700: '#a81c1c', 800: '#8a1a1a', 900: '#6b1515', 950: '#451010',
   },
   accent: {
-    50: '#f7f7f8', 100: '#eeeeef', 200: '#dedee2', 300: '#c4c4c9', 400: '#9a9aa2',
-    500: '#6b6b6b', 600: '#5b5b5b', 700: '#444444', 800: '#313131', 900: '#1c1c1c',
+    50: '#f7f8f9', 100: '#eff0f2', 200: '#dfe1e5', 300: '#c5c8cd', 400: '#9fa3aa',
+    500: '#666a71', 600: '#61666d', 700: '#4d5259', 800: '#3a3e44', 900: '#262a30',
   },
   // gold token name is legacy; values are the Cargo orange accent ramp
   gold: {
@@ -34,9 +34,9 @@ const T = {
     500: '#00d084', 600: '#008252', 700: '#006b43', 800: '#045233', 900: '#032b21', 950: '#01170f',
   },
   surface: '#ffffff',
-  ink: '#1c1c1c',
-  muted: '#6b6b6b',
-  paper: '#f6f4f2',   // warm off-white body — this is what makes charcoal read premium
+  ink: '#1a1d21',
+  muted: '#666a71',
+  paper: '#f0f0f1',   // Cargo's #ededed family, a shade lighter for a booking funnel
 };
 
 // Dark mode overrides live in the `html.dark` block in index.css.
@@ -45,9 +45,9 @@ const DARK = {
   paper: '#1a1a1a',
   ink: '#f7f7f8',
   muted: '#9a9aa2',
-  'brand-800': '#4a4a4a',
-  'brand-900': '#3d3d3d',
-  'brand-950': '#333333',
+  'brand-800': '#4b5057',
+  'brand-900': '#3d4248',
+  'brand-950': '#31363c',
 };
 
 const hex = (h) => {
@@ -104,7 +104,14 @@ const LIGHT = [
   ['brand-600 text on surface', 'brand-600', 'surface', 4.5],
   ['brand-800 chip label on surface', 'brand-800', 'surface', 4.5],
   ['brand-500 on paper', 'brand-500', 'paper', 4.5],
-  ['brand-700 on brand-50 (chip)', 'brand-700', 'brand-50', 4.5],
+  ['brand-700 blue link on surface', 'brand-700', 'surface', 4.5],
+  ['brand-600 blue link on surface', 'brand-600', 'surface', 4.5],
+  ['brand-500 blue on paper', 'brand-500', 'paper', 4.5],
+  ['brand-700 blue on brand-50 (chip)', 'brand-700', 'brand-50', 4.5],
+  ['white on brand-600 (solid blue button)', '#ffffff', 'brand-600', 4.5],
+  ['white on brand-700 (deep blue button)', '#ffffff', 'brand-700', 4.5],
+  ['brand-500 focus ring on surface (non-text)', 'brand-500', 'surface', 3],
+  ['brand-700 on paper', 'brand-700', 'paper', 4.5],
   ['ink body on paper', 'ink', 'paper', 4.5],
   ['ink body on surface', 'ink', 'surface', 4.5],
   ['muted secondary on paper', 'muted', 'paper', 4.5],

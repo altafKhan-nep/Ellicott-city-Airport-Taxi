@@ -34,12 +34,13 @@ pins and the route line. That mapping is deliberate and enforced by `lib/statusT
 
 | Token family | Role | Key values |
 |--------------|------|------------|
-| `brand-*` | **CHARCOAL = the lead**: nav/hero/footer bands, CTA text, links, focus rings | `brand-200 #d4d4d4`, `brand-500 #6b6b6b`, `brand-700 #3d3d3d`, `brand-800 #333333`, `brand-950 #1a1a1a` |
+| `brand-50…700` | **BLUE = the minor**: links, focus rings, chips, accent text | `brand-200 #c2d9ec`, `brand-500 #0b6ba8`, `brand-600 #0b60a9`, `brand-700 #084274` |
+| `brand-800…950` | **CHARCOAL = the major**: nav/hero/footer bands, deep surfaces | `brand-800 #33373c`, `brand-900 #262a2f`, `brand-950 #1a1d21` |
 | `gold-*` | **Orange = the only accent.** Name is legacy; the values are Cargo orange. Hero accent words, live dots, ratings, CTA gradient, `text-brand-gradient` | `gold-300 #ffa970`, `gold-400 #ff9147`, `gold-500 #ff751a`, `gold-600 #c95000`, `gold-700 #ab4500` |
 | `signal-*` | **The only red.** Functional meaning, never branding | `signal-500 #d62f2f`, `signal-600 #c22020`, `signal-700 #a81c1c` |
-| `accent-*` | Cooler grays for borders, subtle surfaces, secondary UI | `accent-200 #dedee2`, `accent-500 #6b6b6b`, `accent-800 #313131` |
+| `accent-*` | Cooler grays for borders, subtle surfaces, secondary UI | `accent-200 #dfe1e5`, `accent-500 #666a71`, `accent-800 #3a3e44` |
 | `success-*` | Cargo green — done / paid / online (also the map pickup pin) | `success-500 #00d084`, `success-600 #008252` |
-| `ink` / `muted` / `paper` | Text + the **warm** off-white body | `ink #1c1c1c`, `muted #6b6b6b`, `paper #f6f4f2` |
+| `ink` / `muted` / `paper` | Text + the light neutral body (Cargo's `#ededed` family) | `ink #1a1d21`, `muted #666a71`, `paper #f0f0f1` |
 | Fonts | `--font-sans` **and** `--font-display` = **Raleway** (Cargo uses one family). Body weight 500. | Google Fonts, in `client/index.html` |
 
 > **Why values differ from Cargo's literal hexes.** Cargo ships raw theme colors, several of which
@@ -49,8 +50,10 @@ pins and the route line. That mapping is deliberate and enforced by `lib/statusT
 > asserts every rendered combination and exits non-zero on a regression.
 
 Usage rules:
-- **Charcoal leads.** `bg-brand-gradient` (`brand-800 → 950`) is the primary surface for nav/hero/
-  footer/CTA bands. `bg-brand-gradient-soft` is the warm bone wash between bands.
+- **Charcoal leads the surfaces.** `bg-brand-gradient` (`brand-800 → 950`) is the primary surface for
+  nav/hero/footer bands. `bg-brand-gradient-soft` is the cool bone wash between bands.
+- **Blue carries the links.** Anything that reads as interactive or informational — links, focus
+  rings, chips, selected tabs — uses `brand-50 … brand-700` (the blue). Body/heading text uses `ink`.
 - **CTAs are orange, not charcoal** — a charcoal button on a charcoal band is invisible, and
   `btn-brand-gradient` uses `gold-600 → gold-800` because white text needs ≥4.5:1 (the light end of
   the accent ramp only manages ~2.7:1).
@@ -74,9 +77,9 @@ Usage rules:
 
 **Hard rule — no raw Tailwind palette colors.** Only `brand-*`, `accent-*`, `gold-*`, `success-*`,
 `signal-*`, `ink`, `muted`, `paper`, `surface` may appear in components. Never `slate-*`, `blue-*`,
-`green-*`, `red-*`, `amber-*`, `yellow-*`, `gray-*`, `orange-*`. Semantic mapping: charcoal → `brand`,
-orange → `gold` (the accent role), red-as-signal → `signal`, green → `success`,
-blue/slate/gray → `accent`, `bg-white` → `bg-surface` (so dark mode works).
+`green-*`, `red-*`, `amber-*`, `yellow-*`, `gray-*`, `orange-*`. Semantic mapping: charcoal → `brand` (800-950), blue → `brand`
+(50-700), orange → `gold` (the accent role), red-as-signal → `signal`, green →
+`success`, slate/gray → `accent`, `bg-white` → `bg-surface` (so dark mode works).
 
 **Shared surfaces & tones (use these, never re-declare):**
 | Utility / module | Use for |
@@ -699,10 +702,11 @@ io.to(`ride:${rideId}`).emit('ride:update', { ride, status });
 15. **Audit new colors before shipping them.** Run `npm run check:contrast` (client) after any
     `@theme` value change. A theme's raw hexes are tuned for large graphics, not body text —
     Cargo's own `#00D084` green is 1.9:1 on a light tint. Keep the hue, re-tune the lightness.
-16. **Measure a theme's real identity by rendered AREA, not by CSS hit count.** Cargo's blue
-    `#0B60A9` appears 121× in its stylesheets yet occupies 0.0% of the page — that is WordPress
-    plugin CSS, not the theme. Area-weighted sampling showed 99.8% neutral. Chasing occurrence
-    counts would have produced the wrong brand.
+16. **Measure a theme's identity by rendered AREA across SEVERAL pages, not by CSS hit count.**
+    Cargo's blue `#0B60A9` looks like plugin CSS on the homepage (0% of area) but is genuinely the
+    theme's most-used *text* color on `/transport-company/` (124 uses, ~7% of area). Sampling one
+    page would have produced the wrong palette; sampling a representative set is what surfaced the
+    real major/minor split.
 17. **Gradient-clipped text reads as `color: transparent`.** `.text-brand-gradient` paints from its
     own background, so any tool that reads `getComputedStyle(el).color` sees transparent and will
     report a false contrast failure. Skip gradient-clipped, `font-mono` and map/attribution nodes
