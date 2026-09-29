@@ -10,10 +10,10 @@
  */
 
 const T = {
-  // brand = Cargo's split ramp: 50-700 blue (links/focus), 800-950 charcoal (bands)
+  // brand = MAJOR: Cargo blue #0B60A9, deep #084274 for bands
   brand: {
     50: '#f2f7fc', 100: '#e3eef8', 200: '#c2d9ec', 300: '#8fbcdd', 400: '#2f87bd',
-    500: '#0b6ba8', 600: '#0b60a9', 700: '#084274', 800: '#33373c', 900: '#262a2f', 950: '#1a1d21',
+    500: '#0b6ba8', 600: '#0b60a9', 700: '#08487e', 800: '#084274', 900: '#063050', 950: '#04203a',
   },
   // signal = the only red: live ride, failed payment, map pins, route
   signal: {
@@ -21,22 +21,22 @@ const T = {
     500: '#d62f2f', 600: '#c22020', 700: '#a81c1c', 800: '#8a1a1a', 900: '#6b1515', 950: '#451010',
   },
   accent: {
-    50: '#f7f8f9', 100: '#eff0f2', 200: '#dfe1e5', 300: '#c5c8cd', 400: '#9fa3aa',
-    500: '#666a71', 600: '#61666d', 700: '#4d5259', 800: '#3a3e44', 900: '#262a30',
+    50: '#f5f5f5', 100: '#ededed', 200: '#cccccc', 300: '#b4b4b4', 400: '#999999',
+    500: '#6b6b6b', 600: '#5b5b5b', 700: '#444444', 800: '#313131', 900: '#1a1d21',
   },
-  // gold token name is legacy; values are the Cargo orange accent ramp
+  // gold token name is legacy; values are Cargo's light blue accent ramp
   gold: {
-    50: '#fff0e5', 100: '#ffddc7', 200: '#ffbc8f', 300: '#ffa970', 400: '#ff9147',
-    500: '#ff751a', 600: '#c95000', 700: '#ab4500', 800: '#9e3f00', 900: '#803300', 950: '#522100',
+    50: '#eef5fc', 100: '#dceaf8', 200: '#bcd7f0', 300: '#8fbcdd', 400: '#a5cce6',
+    500: '#3d8fc9', 600: '#0b6ba8', 700: '#08487e', 800: '#063a5e', 900: '#04263f', 950: '#021829',
   },
   success: {
     50: '#e6fbf3', 100: '#c2f5e1', 200: '#86eac5', 300: '#4ddca8', 400: '#1fd08e',
     500: '#00d084', 600: '#008252', 700: '#006b43', 800: '#045233', 900: '#032b21', 950: '#01170f',
   },
   surface: '#ffffff',
-  ink: '#1a1d21',
-  muted: '#666a71',
-  paper: '#f0f0f1',   // Cargo's #ededed family, a shade lighter for a booking funnel
+  ink: '#333333',
+  muted: '#6b6b6b',
+  paper: '#f2f2f2',   // light neutral; Cargo's #EDEDED is the section band (accent-100)
 };
 
 // Dark mode overrides live in the `html.dark` block in index.css.
@@ -45,9 +45,9 @@ const DARK = {
   paper: '#1a1a1a',
   ink: '#f7f7f8',
   muted: '#9a9aa2',
-  'brand-800': '#4b5057',
-  'brand-900': '#3d4248',
-  'brand-950': '#31363c',
+  'brand-800': '#0e5189',
+  'brand-900': '#0a3f6b',
+  'brand-950': '#07304f',
 };
 
 const hex = (h) => {

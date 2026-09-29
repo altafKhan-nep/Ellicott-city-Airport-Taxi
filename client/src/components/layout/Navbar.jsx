@@ -22,7 +22,7 @@ const NAV_LINKS = [
 const CONTROL = 'h-10 shrink-0 rounded-full';
 
 const navItem = ({ isActive }) =>
-  `relative flex ${CONTROL} items-center px-4 text-sm font-medium transition-colors ${
+  `font-ui relative flex ${CONTROL} items-center px-4 text-sm font-semibold transition-colors ${
     isActive ? 'bg-white/15 text-white' : 'text-white/75 hover:bg-white/10 hover:text-white'
   }`;
 
@@ -137,7 +137,7 @@ export default function Navbar() {
                   aria-expanded={servicesOpen}
                   aria-haspopup="true"
                   onClick={() => setServicesOpen((v) => !v)}
-                  className={`flex ${CONTROL} items-center gap-1.5 px-4 text-sm font-medium transition-colors ${
+                  className={`font-ui flex ${CONTROL} items-center gap-1.5 px-4 text-sm font-semibold transition-colors ${
                     servicesOpen
                       ? 'bg-white/15 text-white'
                       : 'text-white/75 hover:bg-white/10 hover:text-white'

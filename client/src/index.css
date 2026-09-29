@@ -19,17 +19,15 @@
  * component classes never change. You change VALUES, never class names.
  */
 @theme {
+  /* Cargo uses TWO families: Raleway for headings + body (170 elements) and
+     Lato for menus, nav and small UI (168 elements). --font-ui mirrors that. */
   --font-sans: 'Raleway', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-display: 'Raleway', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-ui: 'Lato', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 
-  /* brand-* = Cargo's two real brand colors, split by ROLE, exactly as the
-     theme uses them:
-       50-700  MINOR  = Cargo blue #0B60A9 / #084274 -> links, focus rings,
-                       chips, accent text. Blue is Cargo's most-used text color.
-       800-950 MAJOR  = Cargo charcoal #33373C -> #1A1D21 -> the nav/hero/footer
-                       bands and deep surfaces (18.6% of the theme's area).
-     Both carry a faint cool tint: a pure gray reads flat, the cool cast is
-     what makes charcoal read premium. */
+  /* brand-* = MAJOR — Cargo BLUE #0B60A9. Extracted from /transport-company/:
+     96 text uses, 16 backgrounds, 9 borders, plus the deep #084274 for bands.
+     This is the colour the theme is actually built on. */
   --color-brand-50: #f2f7fc;
   --color-brand-100: #e3eef8;
   --color-brand-200: #c2d9ec;
@@ -37,10 +35,10 @@
   --color-brand-400: #2f87bd;
   --color-brand-500: #0b6ba8;
   --color-brand-600: #0b60a9;
-  --color-brand-700: #084274;
-  --color-brand-800: #33373c;
-  --color-brand-900: #262a2f;
-  --color-brand-950: #1a1d21;
+  --color-brand-700: #08487e;
+  --color-brand-800: #084274;
+  --color-brand-900: #063050;
+  --color-brand-950: #04203a;
 
   /* signal-* = the ONLY red in the system. Functional meaning, never branding:
      in-progress ride, failed payment, weak password, live map pins, route. */
@@ -56,33 +54,33 @@
   --color-signal-900: #6b1515;
   --color-signal-950: #451010;
 
-  /* accent-* = supporting slate — borders, subtle surfaces, secondary UI */
-  --color-accent-50: #f7f8f9;
-  --color-accent-100: #eff0f2;
-  --color-accent-200: #dfe1e5;
-  --color-accent-300: #c5c8cd;
-  --color-accent-400: #9fa3aa;
-  --color-accent-500: #666a71;
-  --color-accent-600: #61666d;
-  --color-accent-700: #4d5259;
-  --color-accent-800: #3a3e44;
-  --color-accent-900: #262a30;
+  /* accent-* = Cargo's neutral family — borders #CCCCCC, muted #666, and the
+     charcoal section band #313131. */
+  --color-accent-50: #f5f5f5;
+  --color-accent-100: #ededed;
+  --color-accent-200: #cccccc;
+  --color-accent-300: #b4b4b4;
+  --color-accent-400: #999999;
+  --color-accent-500: #6b6b6b;
+  --color-accent-600: #5b5b5b;
+  --color-accent-700: #444444;
+  --color-accent-800: #313131;
+  --color-accent-900: #1a1d21;
 
-  /* gold-* = the ACCENT role, now Cargo orange (#ff6900, hue 24).
-     The token name is intentionally kept: ~30 components reference gold-300 /
-     gold-400 for on-red highlights, and renaming would mean editing all of
-     them. The values below are the orange ramp. */
-  --color-gold-50: #fff0e5;
-  --color-gold-100: #ffddc7;
-  --color-gold-200: #ffbc8f;
-  --color-gold-300: #ffa970;
-  --color-gold-400: #ff9147;
-  --color-gold-500: #ff751a;
-  --color-gold-600: #c95000;
-  --color-gold-700: #ab4500;
-  --color-gold-800: #9e3f00;
-  --color-gold-900: #803300;
-  --color-gold-950: #522100;
+  /* gold-* : legacy token name, now Cargo's LIGHT BLUE accent ramp (the
+     #2995F1 / #8fbcdd family). It carries the accent words and live dots that
+     sit ON the deep blue band, and the "waiting/pending" status chips. */
+  --color-gold-50: #eef5fc;
+  --color-gold-100: #dceaf8;
+  --color-gold-200: #bcd7f0;
+  --color-gold-300: #8fbcdd;
+  --color-gold-400: #a5cce6;
+  --color-gold-500: #3d8fc9;
+  --color-gold-600: #0b6ba8;
+  --color-gold-700: #08487e;
+  --color-gold-800: #063a5e;
+  --color-gold-900: #04263f;
+  --color-gold-950: #021829;
 
   /* success-* = Cargo green (#00d084), darkened for text roles so status
      pills clear AA on their own tints. Also the single source of truth for
@@ -100,9 +98,9 @@
   --color-success-950: #01170f;
 
   --color-surface: #ffffff;
-  --color-ink: #1a1d21;
-  --color-muted: #666a71;
-  --color-paper: #f0f0f1;
+  --color-ink: #333333;
+  --color-muted: #6b6b6b;
+  --color-paper: #f2f2f2;
 }
 
 html.dark {
@@ -113,9 +111,9 @@ html.dark {
   /* The lead charcoal now forms full-bleed bands. In dark mode the deep end
      would sit on top of the near-black page, so lift the band steps to read
      as elevated charcoal against it. */
-  --color-brand-800: #4b5057;
-  --color-brand-900: #3d4248;
-  --color-brand-950: #31363c;
+  --color-brand-800: #0e5189;
+  --color-brand-900: #0a3f6b;
+  --color-brand-950: #07304f;
 }
 .dark body {
   background: var(--color-paper);
@@ -154,6 +152,16 @@ h2 {
 }
 
 /* ---- Brand gradient helpers ---- */
+/* Cargo mixes two dark bands: the blue #084274 family and a charcoal #313131
+   section band. `bg-brand-gradient` is the blue one; this is the charcoal. */
+.bg-band-charcoal {
+  background: linear-gradient(150deg, var(--color-accent-800) 0%, var(--color-accent-900) 100%);
+}
+
+/* Cargo's light section band (#EDEDED). */
+.bg-band-light {
+  background: var(--color-accent-100);
+}
 /* The band is the lead: Cargo charcoal. A charcoal CTA on a charcoal band
    would vanish, so CTAs use the orange accent instead. */
 .bg-brand-gradient {
@@ -166,17 +174,15 @@ h2 {
 }
 
 .btn-brand-gradient {
-  /* Deep orange: white text needs >=4.5:1, and the light end of the accent ramp
-     only manages ~2.7:1. gold-600 -> gold-800 clears it. */
-  background: linear-gradient(180deg, var(--color-gold-600) 0%, var(--color-gold-800) 100%);
-  box-shadow: 0 1px 2px rgba(60, 24, 0, 0.28), 0 10px 26px -12px rgba(158, 63, 0, 0.5);
+  background: linear-gradient(180deg, var(--color-brand-500) 0%, var(--color-brand-700) 100%);
+  box-shadow: 0 1px 2px rgba(4, 32, 58, 0.28), 0 10px 26px -12px rgba(8, 66, 116, 0.5);
 }
 .btn-brand-gradient:hover {
-  background: linear-gradient(180deg, var(--color-gold-500) 0%, var(--color-gold-700) 100%);
+  background: linear-gradient(180deg, var(--color-brand-400) 0%, var(--color-brand-600) 100%);
 }
 
 .text-brand-gradient {
-  background: linear-gradient(120deg, var(--color-gold-600), var(--color-gold-700));
+  background: linear-gradient(120deg, var(--color-brand-600), var(--color-brand-800));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
