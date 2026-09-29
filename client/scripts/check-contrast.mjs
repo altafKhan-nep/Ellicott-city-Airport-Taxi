@@ -211,6 +211,27 @@ const run = (title, pairs, mode) => {
 run('LIGHT MODE', LIGHT, 'light');
 run('DARK MODE', DARK_PAIRS, 'dark');
 
+// The hero "Get a quick quote" card is an opaque brand-950 panel. Its inner
+// text sits directly on that navy, so the card gets its own pair list — the
+// band pairs above do not cover it.
+console.log('\n=== QUICK QUOTE CARD (opaque brand-950) ===');
+// Translucent white is composited over the CARD, not over white — compositing
+// white onto white would measure as pure white and hide a real failure.
+const CARD_BG = get('brand-950', 'light');
+const QUOTE_CARD_PAIRS = [
+  ['heading white on the quote card', '#ffffff', 'brand-950', 4.5],
+  ['subtitle white/70 on the quote card', composite(0.7, CARD_BG), 'brand-950', 4.5],
+  ['footnote white/60 on the quote card', composite(0.6, CARD_BG), 'brand-950', 4.5],
+  ['row label white/70 on the quote card', composite(0.7, CARD_BG), 'brand-950', 4.5],
+  ['drivers-online gold-300 on brand-800 chip', 'gold-300', 'brand-800', 4.5],
+  ['total label white on the brand-600 bar', '#ffffff', 'brand-600', 4.5],
+  ['amount white on the brand-800 total cell', '#ffffff', 'brand-800', 4.5],
+  ['distance value white on the brand-600 thumb', '#ffffff', 'brand-600', 4.5],
+  ['slider track white/40 on the quote card', composite(0.4, CARD_BG), 'brand-950', 3],
+  ['round-trip toggle off-state white/40 on the quote card', composite(0.4, CARD_BG), 'brand-950', 3],
+];
+run('QUOTE CARD', QUOTE_CARD_PAIRS, 'light');
+
 console.log('\n=== TRANSLUCENT NAV TEXT ON THE CHARCOAL BAND ===');
 for (const alpha of [0.75, 0.8, 0.9, 1]) {
   const bgHex = T.brand[800];

@@ -193,7 +193,7 @@ export default function Navbar() {
         <div className="ml-auto flex items-center gap-2">
           <a
             href={`tel:${content.contactPhoneHref}`}
-            className={`hidden ${CONTROL} items-center gap-2 px-4 text-sm font-semibold text-gold-300 transition-colors hover:bg-white/10 xl:flex`}
+            className={`phone-number hidden ${CONTROL} items-center gap-2 px-4 text-sm text-gold-300 transition-colors hover:bg-white/10 xl:flex`}
           >
             <Phone className="h-4 w-4" aria-hidden="true" />
             {content.contactPhone}
@@ -333,7 +333,7 @@ export default function Navbar() {
 
             <a
               href={`tel:${content.contactPhoneHref}`}
-              className="mt-3 flex items-center gap-2.5 rounded-xl bg-white/10 px-4 py-3 text-sm font-semibold text-gold-300"
+              className="phone-number mt-3 flex items-center gap-2.5 rounded-xl bg-white/10 px-4 py-3 text-sm text-gold-300"
             >
               <Phone className="h-4 w-4" aria-hidden="true" />
               {content.contactPhone}

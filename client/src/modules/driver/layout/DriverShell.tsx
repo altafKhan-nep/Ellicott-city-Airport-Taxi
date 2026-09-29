@@ -89,7 +89,7 @@ export default function DriverShell() {
           {!collapsed && <div className="min-w-0 flex-1"><p className="truncate font-display text-sm font-semibold">{driver?.name}</p><p className="truncate text-xs text-muted">{driver?.driverDetails?.vehicleType || 'Driver'} • {driver?.driverDetails?.plateNumber || '—'}</p></div>}
           <button onClick={logout} className="grid h-8 w-8 place-items-center rounded-full bg-accent-50 hover:bg-accent-100 dark:bg-white/5"><LogOut className="h-4 w-4" /></button>
         </div>
-        {!collapsed && <div className="mt-3 flex items-center justify-between text-xs"><a href={`tel:${content.contactPhoneHref}`} className="inline-flex items-center gap-1 font-semibold text-brand-700"><Phone className="h-3 w-3" />{content.contactPhone}</a><Link to="/" className="text-muted hover:text-ink">← Website</Link></div>}
+        {!collapsed && <div className="mt-3 flex items-center justify-between text-xs"><a href={`tel:${content.contactPhoneHref}`} className="phone-number inline-flex items-center gap-1 text-brand-700 "><Phone className="h-3 w-3" />{content.contactPhone}</a><Link to="/" className="text-muted hover:text-ink">← Website</Link></div>}
       </div>
     </div>
   );

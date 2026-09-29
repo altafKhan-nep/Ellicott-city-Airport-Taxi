@@ -59,7 +59,7 @@ export default function ServiceDetail() {
             </Link>
             <a
               href={`tel:${content.contactPhoneHref}`}
-              className="inline-flex items-center gap-2 rounded-full border border-white/30 px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-white/10"
+              className="phone-number inline-flex items-center gap-2 rounded-full border border-white/30 px-6 py-3 text-base text-white transition-colors hover:bg-white/10 "
             >
               <Phone className="h-4 w-4" />
               {content.contactPhone}

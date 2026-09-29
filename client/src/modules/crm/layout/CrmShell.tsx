@@ -71,7 +71,7 @@ export default function CrmShell() {
           <div className="relative mt-4 flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-2 backdrop-blur">
             <span className="h-2 w-2 animate-pulse rounded-full bg-gold-400" />
             <span className="text-xs font-medium text-white/85">24/7 Live Operations</span>
-            <a href={`tel:${content.contactPhoneHref}`} className="ml-auto hidden items-center gap-1 text-xs font-semibold text-gold-300 sm:flex"><Phone className="h-3 w-3" /> {content.contactPhone}</a>
+            <a href={`tel:${content.contactPhoneHref}`} className="phone-number ml-auto hidden items-center gap-1 text-xs text-gold-300 sm:flex "><Phone className="h-3 w-3" /> {content.contactPhone}</a>
           </div>
         )}
       </div>

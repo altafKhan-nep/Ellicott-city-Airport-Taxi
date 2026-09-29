@@ -138,7 +138,7 @@ export default function About() {
               <div className="mt-6 flex flex-wrap gap-3">
                 <a
                   href={`tel:${content.contactPhoneHref}`}
-                  className="inline-flex items-center gap-2 rounded-full bg-surface px-6 py-3 text-base font-semibold text-brand-900 shadow-sm transition-colors hover:bg-brand-50"
+                  className="phone-number inline-flex items-center gap-2 rounded-full bg-surface px-6 py-3 text-base text-brand-900 shadow-sm transition-colors hover:bg-brand-50 "
                 >
                   <Phone className="h-4 w-4" />
                   {content.contactPhone}

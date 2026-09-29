@@ -278,27 +278,53 @@ html.dark {
     background-repeat: no-repeat, no-repeat;
   }
 
-  /* Phone numbers. Standard, plain presentation: body font, regular weight,
-     normal tracking. A phone number is a value to be read and tapped, not a
-     display element, so it must not be set in the display face or in
-     extra-bold with tightened tracking. */
-  .phone-number {
-    font-family: var(--font-sans);
-    font-weight: 500;
-    letter-spacing: normal;
-    font-variant-numeric: tabular-nums;
-    text-transform: none;
+  /* The quick-quote distance slider. `appearance: none` is required before the
+     thumb can be styled in WebKit and Firefox. */
+  .quote-range::-webkit-slider-thumb {
+    appearance: none;
+    height: 1.25rem;
+    width: 1.25rem;
+    border-radius: 9999px;
+    background: var(--color-brand-500);
+    border: 2px solid #ffffff;
+    box-shadow: 0 1px 4px rgb(0 0 0 / 0.4);
+    cursor: pointer;
   }
 
-  /* The single headline phone number, set in a serif face. Deliberately
-     scoped to one element: it is a brand accent, not the site default, so it
-     must not be inherited by the other ~15 places the number appears. */
-  .phone-number-serif {
-    font-family: 'Times New Roman', Times, serif;
+  .quote-range::-moz-range-thumb {
+    height: 1.25rem;
+    width: 1.25rem;
+    border: 2px solid #ffffff;
+    border-radius: 9999px;
+    background: var(--color-brand-500);
+    box-shadow: 0 1px 4px rgb(0 0 0 / 0.4);
+    cursor: pointer;
+  }
+
+  .quote-range:focus-visible::-webkit-slider-thumb {
+    outline: 2px solid var(--color-gold-300);
+    outline-offset: 2px;
+  }
+
+  .quote-range:focus-visible::-moz-range-thumb {
+    outline: 2px solid var(--color-gold-300);
+    outline-offset: 2px;
+  }
+
+  /* Phone numbers. Deliberately NOT the brand face. Raleway's geometric digits
+     read as "wavy" at UI sizes, and a phone number is a value to read and tap,
+     not a display element — so it is set in the plain neutral system stack, at
+     regular weight, with lining tabular figures so the digits sit on one flat
+     baseline. Never set it in `font-display`, extra-bold, or a serif. */
+  .phone-number {
+    font-family:
+      -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
+      Arial, sans-serif;
     font-weight: 500;
     letter-spacing: normal;
     font-variant-numeric: lining-nums tabular-nums;
     text-transform: none;
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
   }
 
   /* Opt-in parallax. Cargo attaches the background with `fixed`, which drifts

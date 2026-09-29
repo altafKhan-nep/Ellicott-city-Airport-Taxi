@@ -78,7 +78,7 @@ export default function Contact() {
                   </p>
                   <a
                     href={`tel:${content.contactPhoneHref}`}
-                    className="mt-4 inline-flex items-center gap-2 rounded-full bg-surface px-6 py-3 text-sm font-semibold text-brand-800 shadow-sm hover:bg-brand-50"
+                    className="phone-number mt-4 inline-flex items-center gap-2 rounded-full bg-surface px-6 py-3 text-sm text-brand-800 shadow-sm hover:bg-brand-50 "
                   >
                     <Phone className="h-4 w-4" />
                     {content.contactPhone}
@@ -137,7 +137,7 @@ export default function Contact() {
               <h3 className="text-base font-bold text-ink">Call or email</h3>
               <a
                 href={`tel:${content.contactPhoneHref}`}
-                className="phone-number-serif mt-4 block text-[22px] text-brand-900 hover:underline"
+                className="phone-number mt-4 block text-xl font-semibold text-brand-900 hover:underline"
               >
                 {content.contactPhone}
               </a>

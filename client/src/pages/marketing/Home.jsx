@@ -1,4 +1,4 @@
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ShieldCheck, Receipt, Search, Star, Phone, MapPin, Flag, Check, ArrowRight } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
@@ -9,6 +9,7 @@ import { useMediaQuery } from '../../hooks/useMediaQuery.js';
 import { useWebGLSupport } from '../../components/three/useWebGLSupport.js';
 import { useCatalog } from '../../context/CatalogContext.jsx';
 import ServiceIcon from '../../components/ui/ServiceIcon.jsx';
+import { estimateQuote, formatMoney } from '../../lib/quote.js';
 
 // Lazy-loaded so the WebGL/three bundle only downloads when the taxi actually renders.
 const HeroTaxiScene = lazy(() => import('../../components/three/HeroTaxiScene.jsx'));
@@ -19,6 +20,21 @@ const TRUST = [
   { icon: Search, label: 'Background-checked drivers' },
   { icon: Star, label: 'Rated after every ride' },
 ];
+
+/** Label on the left, control on the right — the quick-quote row layout. */
+function QuoteRow({ label, htmlFor, children }) {
+  return (
+    <div className="grid grid-cols-1 items-center gap-2 sm:grid-cols-[7.5rem_1fr] sm:gap-4">
+      <label
+        htmlFor={htmlFor}
+        className="text-xs font-semibold uppercase tracking-wider text-white/70"
+      >
+        {label}
+      </label>
+      {children}
+    </div>
+  );
+}
 
 const STEPS = [
   { n: '01', t: 'Book your ride', d: 'Set your pickup and dropoff on the web or app. See the price upfront before you confirm — no meter surprises.' },
@@ -37,7 +53,16 @@ export default function Home() {
   const webgl = useWebGLSupport();
   const showTaxi = !isMobile && webgl;
 
-  const { featuredServices: featured } = useCatalog();
+  const { featuredServices: featured, fleet } = useCatalog();
+
+  // Quick-quote widget state. Every control here maps to a real field on the
+  // Ride model (pickup, dropoff, vehicleType, passengerCount) and a real input
+  // on the booking form — nothing is invented for the card.
+  const [vehicleKey, setVehicleKey] = useState('executive-sedan');
+  const [passengers, setPassengers] = useState(1);
+  const [miles, setMiles] = useState(0);
+  const seatCap = fleet.find((v) => v.key === vehicleKey)?.seats || 4;
+  const quote = estimateQuote(miles);
 
   return (
     <div>
@@ -93,42 +118,134 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Quick quote card */}
+            {/* Quick quote card — a real, working estimate widget.
+                Opaque navy: a translucent panel would let the dotted world map
+                read through it and look like it was floating in front. */}
             <div className="relative z-10">
-              <div className="rounded-3xl bg-surface p-6 text-ink shadow-2xl sm:p-8">
-                <h3 className="text-xl font-bold">Plan your trip</h3>
-                <p className="mt-1 text-sm text-muted">
-                  Live fare estimate · real-time availability
+              <div className="rounded-3xl border border-brand-700 bg-brand-950 p-6 text-white shadow-2xl sm:p-8">
+                <h3 className="text-2xl font-extrabold tracking-tight uppercase">
+                  Get a quick quote
+                </h3>
+                <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-white/70">
+                  <span>Real-time availability</span>
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-800 px-2.5 py-0.5 text-xs font-semibold text-gold-300">
+                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-gold-300" />
+                    Drivers online
+                  </span>
                 </p>
 
-                <div className="mt-6 space-y-4">
-                  <div className="flex items-center gap-3 rounded-full border border-accent-200 bg-accent-50 px-4 py-3">
-                    <MapPin className="h-4 w-4 text-brand-600" />
-                    <span className="text-sm text-muted">Pickup — where are you?</span>
-                  </div>
-                  <div className="flex items-center gap-3 rounded-full border border-accent-200 bg-accent-50 px-4 py-3">
-                    <Flag className="h-4 w-4 text-brand-600" />
-                    <span className="text-sm text-muted">Dropoff — where to?</span>
-                  </div>
+                <div className="mt-6 space-y-3">
+                  {/* Label left, control right — the reference layout. */}
+                  <QuoteRow label="Pickup" htmlFor="qq-pickup">
+                    <Link
+                      to={bookUrl}
+                      id="qq-pickup"
+                      className="flex w-full items-center gap-2.5 rounded-xl bg-white px-4 py-3 text-left text-sm font-medium text-ink transition-colors hover:bg-accent-100"
+                    >
+                      <MapPin className="h-4 w-4 shrink-0 text-brand-600" />
+                      Where are you?
+                    </Link>
+                  </QuoteRow>
+
+                  <QuoteRow label="Dropoff" htmlFor="qq-dropoff">
+                    <Link
+                      to={bookUrl}
+                      id="qq-dropoff"
+                      className="flex w-full items-center gap-2.5 rounded-xl bg-white px-4 py-3 text-left text-sm font-medium text-ink transition-colors hover:bg-accent-100"
+                    >
+                      <Flag className="h-4 w-4 shrink-0 text-brand-600" />
+                      Where to?
+                    </Link>
+                  </QuoteRow>
+
+                  <QuoteRow label="Vehicle" htmlFor="qq-vehicle">
+                    <select
+                      id="qq-vehicle"
+                      value={vehicleKey}
+                      onChange={(e) => {
+                        const next = e.target.value;
+                        setVehicleKey(next);
+                        // Real product rule: you cannot book more riders than
+                        // the chosen class seats.
+                        const cls = fleet.find((v) => v.key === next);
+                        const cap = cls?.seats || 4;
+                        setPassengers((p) => Math.min(p, cap));
+                      }}
+                      className="w-full cursor-pointer rounded-xl border-0 bg-white px-4 py-3 text-sm font-medium text-ink focus:ring-2 focus:ring-brand-500"
+                    >
+                      {fleet.map((v) => (
+                        <option key={v.key} value={v.key}>
+                          {v.label} — up to {v.seats ?? 4}
+                        </option>
+                      ))}
+                    </select>
+                  </QuoteRow>
+
+                  <QuoteRow label="Riders">
+                    <div className="flex w-full items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setPassengers((p) => Math.max(1, p - 1))}
+                        disabled={passengers <= 1}
+                        aria-label="One fewer rider"
+                        className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-lg font-bold leading-none text-brand-700 transition-colors hover:bg-accent-100 disabled:opacity-40"
+                      >
+                        −
+                      </button>
+                      <span className="min-w-[3.5rem] text-center text-base font-bold text-white tabular-nums">
+                        {passengers}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setPassengers((p) => Math.min(seatCap, p + 1))}
+                        disabled={passengers >= seatCap}
+                        aria-label="One more rider"
+                        className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-lg font-bold leading-none text-brand-700 transition-colors hover:bg-accent-100 disabled:opacity-40"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </QuoteRow>
+
+                  <QuoteRow label="Dist (miles)">
+                    <div className="flex w-full items-center gap-3">
+                      {/* The value rides the thumb, like the reference. */}
+                      <span
+                        aria-hidden="true"
+                        className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand-600 text-xs font-bold text-white tabular-nums"
+                      >
+                        {miles}
+                      </span>
+                      <input
+                        type="range"
+                        min="0"
+                        max="120"
+                        step="1"
+                        value={miles}
+                        aria-label="Trip distance in miles"
+                        onChange={(e) => setMiles(Number(e.target.value))}
+                        className="quote-range h-2 w-full cursor-pointer appearance-none rounded-full bg-white/40 accent-brand-500"
+                      />
+                    </div>
+                  </QuoteRow>
                 </div>
 
-                <div className="mt-4 rounded-2xl bg-brand-gradient-soft px-5 py-4">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium text-brand-800">Live availability</span>
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-surface px-3 py-1 text-xs font-semibold text-brand-700 shadow-sm">
-                      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand-500" />
-                      Drivers online
-                    </span>
-                  </div>
-                </div>
-
-                <Link to={bookUrl} className="mt-6 block">
-                  <Button size="lg" className="w-full py-3.5">
-                    Get a fare estimate
-                  </Button>
+                {/* The total bar is the CTA — it goes to the real booking flow. */}
+                <Link
+                  to={bookUrl}
+                  className="mt-6 flex items-stretch overflow-hidden rounded-xl bg-brand-600 transition-colors hover:bg-brand-700"
+                >
+                  <span className="flex-1 px-5 py-3.5 text-right text-sm font-bold uppercase tracking-wider text-white">
+                    Estimated total
+                  </span>
+                  <span className="min-w-[7.5rem] bg-brand-800 px-5 py-3.5 text-center text-lg font-extrabold text-white tabular-nums">
+                    {formatMoney(quote.total)}
+                  </span>
                 </Link>
-                <p className="mt-3 text-center text-xs text-muted">
-                  No sign-up needed to preview the price.
+                <p className="mt-2.5 text-center text-xs text-white/60">
+                  {miles === 0
+                    ? 'Drag the distance slider for an instant estimate.'
+                    : 'Standard rate estimate. Your fare is confirmed from the exact route and vehicle at booking.'}
                 </p>
               </div>
             </div>
@@ -422,7 +539,7 @@ export default function Home() {
             </Link>
             <a
               href={`tel:${content.contactPhoneHref}`}
-              className="inline-flex items-center gap-2 rounded-full bg-surface px-6 py-3 text-base font-semibold text-brand-800 shadow-sm transition-colors hover:bg-brand-50"
+              className="phone-number inline-flex items-center gap-2 rounded-full bg-surface px-6 py-3 text-base text-brand-800 shadow-sm transition-colors hover:bg-brand-50 "
             >
               <Phone className="h-4 w-4" />
               {content.contactPhone}

@@ -43,7 +43,7 @@ export default function Fleet() {
             </Link>
             <a
               href={`tel:${content.contactPhoneHref}`}
-              className="inline-flex items-center gap-2 rounded-full border border-white/30 px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-white/10"
+              className="phone-number inline-flex items-center gap-2 rounded-full border border-white/30 px-6 py-3 text-base text-white transition-colors hover:bg-white/10 "
             >
               <Phone className="h-4 w-4" />
               {content.contactPhone}
@@ -120,7 +120,7 @@ export default function Fleet() {
               </p>
             </div>
             <a href={`tel:${content.contactPhoneHref}`}>
-              <Button size="lg" className="bg-surface !text-brand-900 shadow-lg hover:bg-brand-50">
+              <Button size="lg" className="phone-number bg-surface !text-brand-900 shadow-lg hover:bg-brand-50">
                 Call {content.contactPhone}
               </Button>
             </a>

@@ -170,7 +170,7 @@ export default function Privacy() {
             <address className="mt-3 space-y-1 text-sm not-italic text-muted">
               <p>9019 Early April Way, Ellicott City, MD</p>
               <p>
-                <a className="font-semibold text-brand-700 hover:underline" href={`tel:${content.contactPhoneHref}`}>
+                <a className="phone-number text-brand-700 hover:underline" href={`tel:${content.contactPhoneHref}`}>
                   {content.contactPhone}
                 </a>
               </p>
