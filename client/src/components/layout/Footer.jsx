@@ -43,6 +43,8 @@ export default function Footer() {
             <li><Link to="/fleet" className="transition-colors hover:text-white">Fleet</Link></li>
             <li><Link to="/contact" className="transition-colors hover:text-white">Contact</Link></li>
             <li><Link to="/careers" className="transition-colors hover:text-white">Careers</Link></li>
+            {/* Play Store requires a public privacy policy URL */}
+            <li><Link to="/privacy" className="transition-colors hover:text-white">Privacy Policy</Link></li>
             <li><Link to="/reservations" className="transition-colors hover:text-white">Client Portal</Link></li>
           </ul>
         </div>
