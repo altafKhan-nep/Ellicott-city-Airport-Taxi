@@ -38,7 +38,7 @@ const strengthOf = (pw) => {
 const STRENGTH_LABEL = ['', 'Weak', 'Fair', 'Good', 'Strong'];
 const STRENGTH_TONE = [
   '',
-  'bg-brand-500',
+  'bg-signal-500',
   'bg-gold-500',
   'bg-success-500',
   'bg-success-600',

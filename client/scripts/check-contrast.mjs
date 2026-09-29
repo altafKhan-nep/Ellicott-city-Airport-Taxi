@@ -1,19 +1,22 @@
 /**
- * Contrast guard for the Cargo-derived palette in `src/index.css`.
+ * Contrast guard for the design tokens in `src/index.css`.
  *
- * The theme supplies literal colours, several of which FAIL WCAG AA when used
- * as text (Cargo's #00D084 green is 1.9:1 on a light tint; its #727272 gray is
- * 4.49:1). We therefore keep Cargo's hue identity but re-tune lightness per
- * role. This script asserts every combination the UI actually renders, so a
- * future colour tweak cannot quietly regress accessibility.
+ * LEAD = charcoal, ACCENT = orange, and red survives ONLY as `signal-*` for
+ * things that mean live/active/failed. The theme's raw hexes are not usable as
+ * text (Cargo's #00D084 is 1.9:1 on a light tint, #FF6900 is 2.89:1 on white),
+ * so every role here is the lightest value that still clears its bar.
  *
- * Run: node scripts/check-contrast.mjs
- * Add to CI/pre-commit if the palette is ever changed again.
+ * Run: npm run check:contrast   (exits non-zero on any regression)
  */
 
-// Must mirror the @theme block in src/index.css.
 const T = {
+  // brand = Cargo charcoal, the lead surface
   brand: {
+    50: '#f4f4f4', 100: '#e7e7e7', 200: '#d4d4d4', 300: '#a8a8a8', 400: '#7a7a7a',
+    500: '#6b6b6b', 600: '#525252', 700: '#3d3d3d', 800: '#333333', 900: '#262626', 950: '#1a1a1a',
+  },
+  // signal = the only red: live ride, failed payment, map pins, route
+  signal: {
     50: '#fdeeee', 100: '#fbdada', 200: '#f5b3b3', 300: '#ee8a8a', 400: '#e05050',
     500: '#d62f2f', 600: '#c22020', 700: '#a81c1c', 800: '#8a1a1a', 900: '#6b1515', 950: '#451010',
   },
@@ -21,10 +24,10 @@ const T = {
     50: '#f7f7f8', 100: '#eeeeef', 200: '#dedee2', 300: '#c4c4c9', 400: '#9a9aa2',
     500: '#6b6b6b', 600: '#5b5b5b', 700: '#444444', 800: '#313131', 900: '#1c1c1c',
   },
-  // Token name is "gold" for backwards compatibility; values are Cargo orange.
+  // gold token name is legacy; values are the Cargo orange accent ramp
   gold: {
     50: '#fff0e5', 100: '#ffddc7', 200: '#ffbc8f', 300: '#ffa970', 400: '#ff9147',
-    500: '#ff751a', 600: '#c95000', 700: '#bc4c00', 800: '#9e3f00', 900: '#803300', 950: '#522100',
+    500: '#ff751a', 600: '#c95000', 700: '#ab4500', 800: '#9e3f00', 900: '#803300', 950: '#522100',
   },
   success: {
     50: '#e6fbf3', 100: '#c2f5e1', 200: '#86eac5', 300: '#4ddca8', 400: '#1fd08e',
@@ -33,10 +36,19 @@ const T = {
   surface: '#ffffff',
   ink: '#1c1c1c',
   muted: '#6b6b6b',
-  paper: '#f7f7f8',
+  paper: '#f6f4f2',   // warm off-white body — this is what makes charcoal read premium
 };
 
-const DARK = { surface: '#313131', paper: '#1c1c1c', ink: '#f7f7f8', muted: '#9a9aa2' };
+// Dark mode overrides live in the `html.dark` block in index.css.
+const DARK = {
+  surface: '#2f2f2f',
+  paper: '#1a1a1a',
+  ink: '#f7f7f8',
+  muted: '#9a9aa2',
+  'brand-800': '#4a4a4a',
+  'brand-900': '#3d3d3d',
+  'brand-950': '#333333',
+};
 
 const hex = (h) => {
   const s = h.replace('#', '');
@@ -64,36 +76,59 @@ const get = (name, mode) => {
   throw new Error(`Unknown token: ${name}`);
 };
 
-// Composite a translucent foreground (e.g. text-white/75) over its backdrop.
-const composite = (whiteAlpha, bg) => {
-  const a = whiteAlpha;
+// Composite a translucent white foreground over its backdrop.
+const composite = (alpha, bg) => {
   const w = hex('#ffffff');
   const b = hex(bg);
-  return `#${b.map((v, i) => Math.round(w[i] * a + v * (1 - a)).toString(16).padStart(2, '0')).join('')}`;
+  return `#${b.map((v, i) => Math.round(w[i] * alpha + v * (1 - alpha)).toString(16).padStart(2, '0')).join('')}`;
 };
 
 // [label, foreground, background, minimum]
 const LIGHT = [
-  ['white text on red band (nav/hero/footer)', '#ffffff', 'brand-800', 4.5],
-  ['gold-300 accent word on red band', 'gold-300', 'brand-800', 4.5],
-  ['gold-400 live dot on red band (graphic)', 'gold-400', 'brand-800', 3],
-  ['gold-300 on brand-900 (band mid)', 'gold-300', 'brand-900', 4.5],
-  ['gold-300 on brand-950 (band deep)', 'gold-300', 'brand-950', 4.5],
-  ['brand-700 text on surface (links, CTA)', 'brand-700', 'surface', 4.5],
+  // --- the charcoal band (nav / hero / footer) ---
+  ['white on brand-800 (band start)', '#ffffff', 'brand-800', 4.5],
+  ['white on brand-900 (band mid)', '#ffffff', 'brand-900', 4.5],
+  ['white on brand-950 (band deep)', '#ffffff', 'brand-950', 4.5],
+  ['gold-300 accent word on band', 'gold-300', 'brand-800', 4.5],
+  ['gold-300 on brand-900', 'gold-300', 'brand-900', 4.5],
+  ['gold-300 on brand-950', 'gold-300', 'brand-950', 4.5],
+  ['gold-400 live dot on band (graphic)', 'gold-400', 'brand-800', 3],
+
+  // --- the orange CTA (sits ON the band, so white text must clear 4.5) ---
+  ['white on gold-600 (CTA gradient start)', '#ffffff', 'gold-600', 4.5],
+  ['white on gold-800 (CTA gradient end)', '#ffffff', 'gold-800', 4.5],
+  ['white on gold-700 (CTA hover)', '#ffffff', 'gold-700', 4.5],
+
+  // --- charcoal on light surfaces ---
+  ['brand-700 link on surface', 'brand-700', 'surface', 4.5],
   ['brand-600 text on surface', 'brand-600', 'surface', 4.5],
-  ['brand-500 text on paper', 'brand-500', 'paper', 4.5],
+  ['brand-800 chip label on surface', 'brand-800', 'surface', 4.5],
+  ['brand-500 on paper', 'brand-500', 'paper', 4.5],
+  ['brand-700 on brand-50 (chip)', 'brand-700', 'brand-50', 4.5],
   ['ink body on paper', 'ink', 'paper', 4.5],
   ['ink body on surface', 'ink', 'surface', 4.5],
   ['muted secondary on paper', 'muted', 'paper', 4.5],
   ['muted secondary on surface', 'muted', 'surface', 4.5],
   ['accent-500 on paper', 'accent-500', 'paper', 4.5],
   ['accent-700 heading on paper', 'accent-700', 'paper', 4.5],
-  ['gold-600 text on surface (orange on white)', 'gold-600', 'surface', 4.5],
+  ['brand-200 card border on surface (non-text)', 'brand-200', 'surface', 1.3],
+  ['brand-500 focus ring on surface (non-text)', 'brand-500', 'surface', 3],
+
+  // --- orange accent text on light ---
+  ['gold-600 stat/accent text on surface', 'gold-600', 'surface', 4.5],
   ['gold-700 on gold-50 chip', 'gold-700', 'gold-50', 4.5],
-  ['brand-600 on brand-50 (soft wash)', 'brand-600', 'brand-50', 4.5],
+  ['gold-700 on gold-100 chip', 'gold-700', 'gold-100', 4.5],
+
+  // --- the signal red (semantic only) ---
+  ['signal-700 on signal-50 (in-progress pill)', 'signal-700', 'signal-50', 4.5],
+  ['signal-700 on signal-50 (failed payment pill)', 'signal-700', 'signal-50', 4.5],
+  ['signal-500 on surface (failed dot, graphic)', 'signal-500', 'surface', 3],
+  ['white on signal-600 (map pin glyph)', '#ffffff', 'signal-600', 4.5],
+  ['white on signal-700 (dropoff pin glyph)', '#ffffff', 'signal-700', 4.5],
+
+  // --- success ---
   ['success-600 on success-50 (status pill)', 'success-600', 'success-50', 4.5],
   ['success-700 on success-100', 'success-700', 'success-100', 4.5],
-  ['accent-200 card border on surface (non-text)', 'accent-200', 'surface', 1.3],
 ];
 
 const DARK_PAIRS = [
@@ -101,16 +136,21 @@ const DARK_PAIRS = [
   ['muted on paper', 'muted', 'paper', 4.5],
   ['ink on surface', 'ink', 'surface', 4.5],
   ['muted on surface', 'muted', 'surface', 4.5],
-  ['brand-300 readable red on surface', 'brand-300', 'surface', 4.5],
-  ['gold-400 orange on surface', 'gold-400', 'surface', 4.5],
+  ['white on lifted brand-800 (band, dark)', '#ffffff', 'brand-800', 4.5],
+  ['white on lifted brand-900 (band, dark)', '#ffffff', 'brand-900', 4.5],
+  ['white on lifted brand-950 (band, dark)', '#ffffff', 'brand-950', 4.5],
+  ['gold-300 accent word on dark band', 'gold-300', 'brand-800', 4.5],
+  ['gold-400 on dark band', 'gold-400', 'brand-800', 4.5],
+  ['brand-300 on surface (readable charcoal)', 'brand-300', 'surface', 4.5],
   ['accent-400 muted on paper', 'accent-400', 'paper', 4.5],
+  ['signal-200 on signal-900 (dark error pill)', 'signal-200', 'signal-900', 4.5],
 ];
 
 let failures = 0;
 const run = (title, pairs, mode) => {
   console.log(`\n=== ${title} ===`);
   for (const [label, fg, bg, need] of pairs) {
-    const bgHex = mode === 'dark' && DARK[bg] ? DARK[bg] : get(bg, mode);
+    const bgHex = get(bg, mode);
     const fgHex = fg.startsWith('#') ? fg : get(fg, mode);
     const r = ratio(fgHex, bgHex);
     const pass = r >= need;
@@ -122,11 +162,10 @@ const run = (title, pairs, mode) => {
 run('LIGHT MODE', LIGHT, 'light');
 run('DARK MODE', DARK_PAIRS, 'dark');
 
-console.log('\n=== TRANSLUCENT NAV TEXT ON THE RED BAND ===');
+console.log('\n=== TRANSLUCENT NAV TEXT ON THE CHARCOAL BAND ===');
 for (const alpha of [0.75, 0.8, 0.9, 1]) {
   const bgHex = T.brand[800];
-  const c = composite(alpha, bgHex);
-  const r = ratio(c, bgHex);
+  const r = ratio(composite(alpha, bgHex), bgHex);
   const pass = r >= 4.5;
   if (!pass) failures += 1;
   console.log(`  ${pass ? 'ok  ' : 'FAIL'} ${r.toFixed(2).padStart(5)}:1  white/${alpha * 100} on brand-800`);

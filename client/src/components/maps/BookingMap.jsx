@@ -3,6 +3,7 @@ import L from 'leaflet';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { MapViewSelector, MAP_VIEWS } from './MapViewSelector.jsx';
 import { PIN_FLAG, UBER_SEDAN, UBER_SUV, UBER_VAN } from './pinIcons.js';
+import { ROUTE_RED } from '../../lib/mapColors.js';
 
 const pickupIcon = L.divIcon({
   className: '',
@@ -179,7 +180,7 @@ export function BookingMap({ center, pickup, dropoff, route, drivers = [], userP
             />
             <Polyline
               positions={routePositions}
-              pathOptions={{ color: '#c22020', weight: 5, opacity: 0.9, lineCap: 'round' }}
+              pathOptions={{ color: ROUTE_RED, weight: 5, opacity: 0.9, lineCap: 'round' }}
             />
           </>
         )}

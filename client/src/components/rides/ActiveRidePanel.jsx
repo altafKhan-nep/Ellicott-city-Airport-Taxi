@@ -4,6 +4,7 @@ import L from 'leaflet';
 import { MapViewSelector, MAP_VIEWS } from '../maps/MapViewSelector.jsx';
 import { PIN_FLAG, PIN_USER, UBER_SEDAN } from '../maps/pinIcons.js';
 import { Button } from '../ui/Button.jsx';
+import { ROUTE_RED } from '../../lib/mapColors.js';
 
 const pickupIcon = L.divIcon({
   className: '',
@@ -117,7 +118,7 @@ export default function ActiveRidePanel({ ride, driverPos, passengerPos, onStatu
                 />
                 <Polyline
                   positions={routePositions}
-                  pathOptions={{ color: '#c22020', weight: 5, opacity: 0.9, lineCap: 'round' }}
+                  pathOptions={{ color: ROUTE_RED, weight: 5, opacity: 0.9, lineCap: 'round' }}
                 />
               </>
             )}

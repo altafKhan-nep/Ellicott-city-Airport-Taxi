@@ -6,6 +6,7 @@ import { Phone, MessageCircle, Navigation, MapPin, Flag } from 'lucide-react';
 import { updateRideStatus } from '../../../../services/rideService.js';
 import { useState, useRef } from 'react';
 import RideChat from '../../../../components/rides/RideChat.jsx';
+import { ROUTE_RED } from '../../../../lib/mapColors.js';
 
 const dropoffFlagIcon = L.divIcon({
   className: '',
@@ -111,7 +112,7 @@ export default function CurrentRidePage() {
               <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
               <Marker position={[active.pickup.lat, active.pickup.lng]} icon={pickupIcon}><Popup>Pickup</Popup></Marker>
               <Marker position={[active.dropoff.lat, active.dropoff.lng]} icon={dropoffFlagIcon}><Popup>Dropoff</Popup></Marker>
-              <Polyline positions={[[active.pickup.lat,active.pickup.lng],[active.dropoff.lat,active.dropoff.lng]] as any} pathOptions={{color:'#c22020', weight:5, opacity:0.9}} />
+              <Polyline positions={[[active.pickup.lat,active.pickup.lng],[active.dropoff.lat,active.dropoff.lng]] as any} pathOptions={{color:ROUTE_RED, weight:5, opacity:0.9}} />
             </MapContainer>
             <div className="flex items-center gap-2 bg-surface px-4 py-2.5 text-xs dark:bg-accent-900 border-t border-accent-200 dark:border-white/10">
               <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-success-500" /> Pickup</span>

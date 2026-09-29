@@ -3,40 +3,51 @@
 
 /*
  * RideTaxi Design Tokens
- * Palette + type derived from the "Cargo" WordPress theme (Bold Themes),
- * then re-tuned per role so every combination clears WCAG AA.
- *   - Cargo Red #DD3333 (deep #C22020) = MAIN BRAND: nav, hero, footer, bands, CTAs
- *   - Cargo Charcoal #313131 / #444444 = neutral contrast + secondary UI
- *   - Cargo Orange #FF6900 (hue 24) = the former gold accent role: premium
- *     highlights, live dots, hero accent words on the red band
- *   - Cargo Green #00D084 = functional "done / paid / online" (also the map pin)
+ * LEAD = Cargo charcoal #313131 (near-black). ACCENT = Cargo orange #FF6900.
+ * RED IS NO LONGER A BRAND COLOR — it survives only as `signal-*`, a
+ * functional red for things that mean "live / active / failed" (the in-progress
+ * ride, a failed payment, map pins, the route line). Branding, bands, CTAs and
+ * links are charcoal + orange.
  *
- * WHY THE VALUES DIFFER SLIGHTLY FROM CARGO'S RAW HEXES
- * Cargo ships literal theme colours, several of which fail AA when used as
- * body text (its #00D084 green is 1.9:1 on a light tint; its #727272 gray is
- * 4.49:1). We keep Cargo's hue identity but darken each role to the lightest
- * value that still clears 4.5:1. Every pair below is asserted by
- * `client/scripts/check-contrast.mjs` — run it before editing any value here.
+ * Derived from the "Cargo" WordPress theme (Bold Themes), re-tuned per role so
+ * every combination clears WCAG AA — Cargo's raw #00D084 (1.9:1 on a light
+ * tint), #727272 (4.49:1) and #FF6900 (2.89:1 on white) all fail as text.
+ * Run `npm run check:contrast` before changing any value here; it asserts every
+ * combination the UI actually renders and exits non-zero on a regression.
  *
- * Keep token NAMES stable (brand-*, accent-*, gold-*, success-*) so component
- * classes never change. You change VALUES, never class names.
+ * Keep token NAMES stable (brand-*, accent-*, gold-*, success-*, signal-*) so
+ * component classes never change. You change VALUES, never class names.
  */
 @theme {
   --font-sans: 'Raleway', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-display: 'Raleway', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 
-  /* brand-* = Cargo red scale (#dd3333 primary, #c22020 hover/deep) */
-  --color-brand-50: #fdeeee;
-  --color-brand-100: #fbdada;
-  --color-brand-200: #f5b3b3;
-  --color-brand-300: #ee8a8a;
-  --color-brand-400: #e05050;
-  --color-brand-500: #d62f2f;
-  --color-brand-600: #c22020;
-  --color-brand-700: #a81c1c;
-  --color-brand-800: #8a1a1a;
-  --color-brand-900: #6b1515;
-  --color-brand-950: #451010;
+  /* brand-* = Cargo CHARCOAL — the lead surface. Bands, CTA text, links. */
+  --color-brand-50: #f4f4f4;
+  --color-brand-100: #e7e7e7;
+  --color-brand-200: #d4d4d4;
+  --color-brand-300: #a8a8a8;
+  --color-brand-400: #7a7a7a;
+  --color-brand-500: #6b6b6b;
+  --color-brand-600: #525252;
+  --color-brand-700: #3d3d3d;
+  --color-brand-800: #333333;
+  --color-brand-900: #262626;
+  --color-brand-950: #1a1a1a;
+
+  /* signal-* = the ONLY red in the system. Functional meaning, never branding:
+     in-progress ride, failed payment, weak password, live map pins, route. */
+  --color-signal-50: #fdeeee;
+  --color-signal-100: #fbdada;
+  --color-signal-200: #f5b3b3;
+  --color-signal-300: #ee8a8a;
+  --color-signal-400: #e05050;
+  --color-signal-500: #d62f2f;
+  --color-signal-600: #c22020;
+  --color-signal-700: #a81c1c;
+  --color-signal-800: #8a1a1a;
+  --color-signal-900: #6b1515;
+  --color-signal-950: #451010;
 
   /* accent-* = Cargo charcoal neutrals (#313131 / #444444 / #727272) */
   --color-accent-50: #f7f7f8;
@@ -61,7 +72,7 @@
   --color-gold-400: #ff9147;
   --color-gold-500: #ff751a;
   --color-gold-600: #c95000;
-  --color-gold-700: #bc4c00;
+  --color-gold-700: #ab4500;
   --color-gold-800: #9e3f00;
   --color-gold-900: #803300;
   --color-gold-950: #522100;
@@ -84,14 +95,20 @@
   --color-surface: #ffffff;
   --color-ink: #1c1c1c;
   --color-muted: #6b6b6b;
-  --color-paper: #f7f7f8;
+  --color-paper: #f6f4f2;
 }
 
 html.dark {
-  --color-paper: #1c1c1c;
+  --color-paper: #1a1a1a;
   --color-ink: #f7f7f8;
   --color-muted: #9a9aa2;
-  --color-surface: #313131;
+  --color-surface: #2f2f2f;
+  /* The lead charcoal now forms full-bleed bands. In dark mode the deep end
+     would sit on top of the near-black page, so lift the band steps to read
+     as elevated charcoal against it. */
+  --color-brand-800: #4a4a4a;
+  --color-brand-900: #3d3d3d;
+  --color-brand-950: #333333;
 }
 .dark body {
   background: var(--color-paper);
@@ -129,25 +146,30 @@ h2 {
   letter-spacing: 0.01em;
 }
 
-/* ---- Brand gradient helpers (premium surfaces) ---- */
+/* ---- Brand gradient helpers ---- */
+/* The band is the lead: Cargo charcoal. A charcoal CTA on a charcoal band
+   would vanish, so CTAs use the orange accent instead. */
 .bg-brand-gradient {
-  background: linear-gradient(150deg, var(--color-brand-800) 0%, var(--color-brand-900) 55%, var(--color-brand-950) 100%);
+  background:
+    linear-gradient(150deg, var(--color-brand-800) 0%, var(--color-brand-900) 55%, var(--color-brand-950) 100%);
 }
 
 .bg-brand-gradient-soft {
-  background: linear-gradient(135deg, #ffffff 0%, #fdf3f3 55%, #f9e7e7 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #f8f6f4 55%, #f0ece9 100%);
 }
 
 .btn-brand-gradient {
-  background: linear-gradient(180deg, var(--color-brand-500) 0%, var(--color-brand-700) 100%);
-  box-shadow: 0 1px 2px rgba(69, 16, 16, 0.3), 0 10px 24px -12px rgba(194, 32, 32, 0.55);
+  /* Deep orange: white text needs >=4.5:1, and the light end of the accent ramp
+     only manages ~2.7:1. gold-600 -> gold-800 clears it. */
+  background: linear-gradient(180deg, var(--color-gold-600) 0%, var(--color-gold-800) 100%);
+  box-shadow: 0 1px 2px rgba(26, 26, 26, 0.3), 0 10px 24px -12px rgba(158, 63, 0, 0.55);
 }
 .btn-brand-gradient:hover {
-  background: linear-gradient(180deg, var(--color-brand-400) 0%, var(--color-brand-600) 100%);
+  background: linear-gradient(180deg, var(--color-gold-500) 0%, var(--color-gold-700) 100%);
 }
 
 .text-brand-gradient {
-  background: linear-gradient(120deg, var(--color-brand-700), var(--color-brand-500));
+  background: linear-gradient(120deg, var(--color-gold-600), var(--color-gold-700));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -228,7 +250,7 @@ h2 {
 }
 
 .map-pin-pickup {
-  background: var(--color-brand-600); /* red = pickup */
+  background: var(--color-signal-600); /* red = pickup (functional signal) */
 }
 
 /* Circular green start marker (pickup) */
@@ -250,11 +272,11 @@ h2 {
 }
 
 .map-pin-dropoff {
-  background: var(--color-brand-700); /* red = destination */
+  background: var(--color-signal-700); /* red = destination (functional signal) */
 }
 
 .map-pin-driver {
-  background: var(--color-brand-600);
+  background: var(--color-signal-600);
   animation: pin-pulse 1.6s infinite;
 }
 
@@ -308,14 +330,14 @@ h2 {
 /* Nearby idle vehicles on the booking map */
 .map-pin-vehicle {
   background: #ffffff;
-  border: 2px solid var(--color-brand-600);
+  border: 2px solid var(--color-brand-700);
   width: 32px;
   height: 32px;
 }
 
 .map-pin-vehicle span {
   font-size: 15px;
-  color: var(--color-brand-600);
+  color: var(--color-brand-700);
 }
 
 /* Lucide SVG icons inside map pins */

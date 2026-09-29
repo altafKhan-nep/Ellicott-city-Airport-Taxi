@@ -23,6 +23,7 @@ import PaymentModal from '../../components/rides/PaymentModal.jsx';
 import EditRideModal from '../../components/rides/EditRideModal.jsx';
 import RatingModal from '../../components/rides/RatingModal.jsx';
 import RideChat from '../../components/rides/RideChat.jsx';
+import { ROUTE_RED } from '../../lib/mapColors.js';
 
 const uberDriverIcon = (heading = 0) => L.divIcon({
   className: '',
@@ -241,14 +242,14 @@ export default function RideTracking() {
                   />
                   <Polyline
                     positions={driverRoute.map((p) => [p.lat, p.lng])}
-                    pathOptions={{ color: '#c22020', weight: 5, opacity: 0.9, lineCap: 'round', dashArray: '8 10' }}
+                    pathOptions={{ color: ROUTE_RED, weight: 5, opacity: 0.9, lineCap: 'round', dashArray: '8 10' }}
                   />
                 </>
               )}
               {driverRoute.length === 0 && route.length > 0 && (
                 <>
                   <Polyline positions={route.map((p) => [p.lat, p.lng])} pathOptions={{ color: '#ffffff', weight: 9, opacity: 0.7, lineCap: 'round' }} />
-                  <Polyline positions={route.map((p) => [p.lat, p.lng])} pathOptions={{ color: '#c22020', weight: 5, opacity: 0.9, lineCap: 'round' }} />
+                  <Polyline positions={route.map((p) => [p.lat, p.lng])} pathOptions={{ color: ROUTE_RED, weight: 5, opacity: 0.9, lineCap: 'round' }} />
                 </>
               )}
             </MapContainer>
