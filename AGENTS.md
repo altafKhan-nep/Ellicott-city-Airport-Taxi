@@ -37,7 +37,7 @@ bands, CTAs, buttons, links and focus rings.
 | `signal-*` | **The only red.** Functional meaning, never branding | `signal-500 #d62f2f`, `signal-600 #c22020`, `signal-700 #a81c1c` |
 | `accent-*` | Cargo's neutral family: borders `#CCCCCC`, muted `#666`, charcoal section band `#313131`, light band `#EDEDED` | `accent-100 #ededed`, `accent-200 #cccccc`, `accent-500 #6b6b6b`, `accent-800 #313131` |
 | `success-*` | Cargo green `#00D084` — done / paid / online (also the map pickup pin) | `success-500 #00d084`, `success-600 #008252` |
-| `ink` / `muted` / `paper` | Body text `#333333`, muted, light neutral body | `ink #333333`, `muted #6b6b6b`, `paper #f2f2f2` |
+| `ink` / `muted` / `paper` | Body text `#333333`, muted, light neutral body | `ink #333333`, `muted #61656b`, `paper #f2f2f2` |
 | Fonts | **Raleway** (headings + body, 170 elements) **and Lato** (menus / small UI, 168 elements) | Google Fonts, in `client/index.html` |
 
 Cargo uses **two families**: `--font-sans`/`--font-display` = Raleway, and `--font-ui` = Lato, applied
@@ -85,6 +85,9 @@ role), slate/gray → `accent`, `bg-white` → `bg-surface` (so dark mode works)
 | `.card` | Standard padded card (radius 1rem, `accent-200` border, `surface` bg, layered shadow, lifts on hover). Override padding with `card p-6` / `card p-8`. Defined in `@layer components`, so utilities win. |
 | `.panel` | Same surface with **no** padding and no hover lift — tables, dropdowns, map frames (`panel overflow-hidden`). |
 | `.card-lift` | Animation only, for image/media cards that define their own surface. |
+| `.bg-dots` | Dotted texture over the element's existing surface. From the Cargo theme's dotted-map background, rebuilt in CSS. |
+| `.bg-dots-soft` | The same dots **composited with** the soft wash — use this *instead of* `bg-brand-gradient-soft`, because setting `background-image` would wipe the gradient out. |
+| `.bg-dots-parallax` | Opt-in `background-attachment: fixed`. Off by default: unreliable on iOS Safari and a scroll-performance cost. |
 | `lib/statusTone.js` | `rideTone()`, `payTone()`, `payAccent()`, `badgeTone()` — the only place status/payment colors are defined, so every page renders identical pills. Never re-declare a `STATUS_STYLE` map. |
 
 

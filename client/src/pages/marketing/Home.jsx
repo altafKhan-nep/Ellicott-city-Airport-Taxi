@@ -227,7 +227,8 @@ export default function Home() {
       </section>
 
       {/* ============ FEATURED SERVICES ============ */}
-      <section className="bg-brand-gradient-soft py-20">
+      {/* Dots composited with the soft wash — see bg-dots-soft in index.css */}
+      <section className="bg-dots-soft py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
@@ -306,7 +307,8 @@ export default function Home() {
       </section>
 
       {/* ============ HOW IT WORKS ============ */}
-      <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
+      {/* Dotted texture on the how-it-works band */}
+      <section className="bg-dots mx-auto max-w-7xl px-4 py-20 sm:px-6">
         <div className="mx-auto max-w-2xl text-center">
           <span className="text-xs font-semibold uppercase tracking-widest text-brand-600">
             Simple &amp; swift booking

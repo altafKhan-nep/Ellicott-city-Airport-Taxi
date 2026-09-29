@@ -99,7 +99,7 @@
 
   --color-surface: #ffffff;
   --color-ink: #333333;
-  --color-muted: #6b6b6b;
+  --color-muted: #61656b;
   --color-paper: #f2f2f2;
 }
 
@@ -194,7 +194,71 @@ h2 {
 }
 
 /* ---- One card surface for every page (light + dark) ---- */
+/*
+ * Dotted texture — adapted from the "Cargo" WordPress theme, which uses a
+ * 2500x1438 PNG of black dots to form a dotted world map at 8% opacity.
+ *
+ * Reproduced in CSS rather than shipped as an image: a world map cannot be
+ * drawn with a gradient, but the *texture* is a plain dot grid, and CSS is
+ * ~200 bytes, crisp at any zoom, needs no request, and cannot go blurry the
+ * way a scaled background image does.
+ *
+ * Two deliberate deviations from the reference, both for correctness:
+ *   1. Opacity 6%, not 8%. At 8% the darkest dot pixel drops `text-muted`
+ *      body copy to 3.99:1 — below WCAG AA. 6% is the strongest value that
+ *      keeps every text role legal on every surface it can land on. This is
+ *      asserted by scripts/check-contrast.mjs.
+ *   2. Dot radius 3px (6px across) instead of a scaled 18px source dot, at
+ *      Cargo's exact 22px pitch. Chunkier dots read as a polka-dot pattern
+ *      rather than a refined field.
+ *
+ * On a dark band a black dot is invisible, so the ink is a variable and dark
+ * mode swaps it for a light one. That keeps the utility safe to use anywhere
+ * instead of only on light sections.
+ */
+:root {
+  --dot-color: rgb(28 29 33 / 0.06);
+  --dot-pitch: 22px;
+  --dot-radius: 3px;
+  --dot-grid: radial-gradient(
+    circle,
+    var(--dot-color) 0 var(--dot-radius),
+    transparent var(--dot-radius)
+  );
+}
+
+html.dark {
+  --dot-color: rgb(247 248 250 / 0.07);
+}
+
 @layer components {
+  /* Dots over whatever surface the element already has. */
+  .bg-dots {
+    background-image: var(--dot-grid);
+    background-size: var(--dot-pitch) var(--dot-pitch);
+    background-repeat: repeat;
+  }
+
+  /* Dots composited WITH the soft wash. `background-image` replaces any value
+     already set, so a gradient on the same element would be wiped out unless
+     the dot layer is declared alongside it here. */
+  .bg-dots-soft {
+    background-image: var(--dot-grid),
+      linear-gradient(135deg, #ffffff 0%, #f7f8f9 55%, #eef0f2 100%);
+    background-size: var(--dot-pitch) var(--dot-pitch), 100% 100%;
+    background-repeat: repeat, no-repeat;
+  }
+
+  /* Opt-in parallax. Cargo attaches the background with `fixed`, which drifts
+     against the scroll. Kept separate and off by default: `background-attachment:
+     fixed` is unreliable on iOS Safari and is a known scroll-performance cost. */
+  .bg-dots-parallax {
+    background-image: var(--dot-grid);
+    background-size: var(--dot-pitch) var(--dot-pitch);
+    background-repeat: repeat;
+    background-attachment: fixed;
+  }
+
   .card {
     border-radius: 1rem;
     border: 1px solid var(--color-accent-200);

@@ -35,7 +35,7 @@ const T = {
   },
   surface: '#ffffff',
   ink: '#333333',
-  muted: '#6b6b6b',
+  muted: '#61656b',   // darkened to give the dotted texture room to breathe
   paper: '#f2f2f2',   // light neutral; Cargo's #EDEDED is the section band (accent-100)
 };
 
@@ -68,7 +68,23 @@ const ratio = (a, b) => {
   return (hi + 0.05) / (lo + 0.05);
 };
 
+// A dotted surface is the surface with the darkest dot pixel painted on it:
+// --dot-color is ink at 6%, so bg becomes ink*0.06 + surface*0.94.
+const DOT_ALPHA = 0.06;
+const COMPOSITES = {
+  'dot-paper': '#f2f2f2',
+  'dot-soft': '#eef0f2',
+  'dot-white': '#ffffff',
+};
+
+const dotSurface = (surface) => {
+  const s = hex(surface);
+  const i = hex(T.ink);
+  return `#${s.map((v, k) => Math.round(i[k] * DOT_ALPHA + v * (1 - DOT_ALPHA)).toString(16).padStart(2, '0')).join('')}`;
+};
+
 const get = (name, mode) => {
+  if (COMPOSITES[name]) return dotSurface(COMPOSITES[name]);
   const [scale, step] = name.split('-');
   if (step && T[scale]) return T[scale][step];
   if (mode === 'dark' && DARK[name]) return DARK[name];
@@ -136,6 +152,20 @@ const LIGHT = [
   // --- success ---
   ['success-600 on success-50 (status pill)', 'success-600', 'success-50', 4.5],
   ['success-700 on success-100', 'success-700', 'success-100', 4.5],
+
+  // --- over the dotted texture (.bg-dots / .bg-dots-soft) ------------------
+  // Worst case is the darkest pixel of a dot: ink at 6% over the surface.
+  ['ink on dotted paper', 'ink', 'dot-paper', 4.5],
+  ['muted on dotted paper', 'muted', 'dot-paper', 4.5],
+  ['brand-700 link on dotted paper', 'brand-700', 'dot-paper', 4.5],
+  ['ink on dotted soft wash', 'ink', 'dot-soft', 4.5],
+  ['muted on dotted soft wash', 'muted', 'dot-soft', 4.5],
+  ['brand-700 link on dotted soft wash', 'brand-700', 'dot-soft', 4.5],
+  ['brand-600 on dotted soft wash', 'brand-600', 'dot-soft', 4.5],
+  // accent-500 is a status DOT + border, never text, so the non-text 3:1 bar
+  // applies rather than 4.5:1.
+  ['accent-500 dot on dotted paper (non-text)', 'accent-500', 'dot-paper', 3],
+  ['accent-500 dot on dotted soft (non-text)', 'accent-500', 'dot-soft', 3],
 ];
 
 const DARK_PAIRS = [
