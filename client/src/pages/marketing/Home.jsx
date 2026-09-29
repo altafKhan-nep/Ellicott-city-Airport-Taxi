@@ -42,7 +42,7 @@ export default function Home() {
   return (
     <div>
       {/* ============ HERO ============ */}
-      <section className="bg-brand-gradient relative overflow-hidden text-white">
+      <section className="bg-dots-brand relative overflow-hidden text-white">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-white/5 blur-3xl" />
           <div className="absolute -bottom-40 left-1/3 h-96 w-96 rounded-full bg-gold-500/15 blur-3xl" />
@@ -68,13 +68,13 @@ export default function Home() {
 
               <div className="mt-8 flex flex-wrap items-center gap-4">
                 <Link to={bookUrl}>
-                  <Button size="lg" className="bg-surface !text-brand-900 shadow-xl hover:bg-brand-50">
+                  <Button size="lg" className="shadow-xl">
                     {content.heroCtaLabel}
                   </Button>
                 </Link>
                 <a
                   href={`tel:${content.contactPhoneHref}`}
-                  className="inline-flex items-center gap-2 rounded-full border border-white/30 px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-white/10"
+                  className="phone-number inline-flex items-center gap-2 px-1 py-1 text-base text-white/90 transition-colors hover:text-white"
                 >
                   <Phone className="h-4 w-4" />
                   {content.contactPhone}
@@ -161,7 +161,7 @@ export default function Home() {
       </section>
 
       {/* ============ WELCOME / ABOUT BLURB ============ */}
-      <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
+      <section className="bg-dots mx-auto max-w-7xl px-4 py-20 sm:px-6">
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <div>
             <span className="text-xs font-semibold uppercase tracking-widest text-brand-600">
@@ -195,12 +195,12 @@ export default function Home() {
           </div>
 
           {/* Get a quote card */}
-          <div className="overflow-hidden rounded-3xl bg-brand-gradient text-white shadow-xl">
+          <div className="bg-dots-brand overflow-hidden rounded-3xl text-white shadow-xl">
             <div className="p-8 sm:p-10">
               <h3 className="text-2xl font-bold">Book online or call</h3>
               <a
                 href={`tel:${content.contactPhoneHref}`}
-                className="mt-2 block text-3xl font-extrabold tracking-tight text-gold-300"
+                className="phone-number mt-2 block text-lg text-gold-300 hover:underline"
               >
                 {content.contactPhone}
               </a>
@@ -335,7 +335,7 @@ export default function Home() {
       </section>
 
       {/* ============ TESTIMONIALS ============ */}
-      <section className="bg-brand-gradient py-20 text-white">
+      <section className="bg-dots-brand py-20 text-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="mx-auto max-w-2xl text-center">
             <span className="text-xs font-semibold uppercase tracking-widest text-gold-300">
@@ -375,7 +375,7 @@ export default function Home() {
       </section>
 
       {/* ============ SERVICE AREAS ============ */}
-      <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
+      <section className="bg-dots mx-auto max-w-7xl px-4 py-20 sm:px-6">
         <div className="mx-auto max-w-2xl text-center">
           <span className="text-xs font-semibold uppercase tracking-widest text-brand-600">
             Locally based

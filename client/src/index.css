@@ -217,18 +217,27 @@ h2 {
  * instead of only on light sections.
  */
 :root {
-  --dot-color: rgb(28 29 33 / 0.06);
+  /* Two inks, because a dark dot is invisible on a dark surface. */
+  --dot-ink: rgb(28 29 33 / 0.06);        /* on light surfaces */
+  --dot-ink-band: rgb(255 255 255 / 0.04); /* on the blue bands — 4% is the
+                                                strongest value that keeps the
+                                                gold-300 accent text legal */
   --dot-pitch: 22px;
   --dot-radius: 3px;
   --dot-grid: radial-gradient(
     circle,
-    var(--dot-color) 0 var(--dot-radius),
+    var(--dot-ink) 0 var(--dot-radius),
+    transparent var(--dot-radius)
+  );
+  --dot-grid-band: radial-gradient(
+    circle,
+    var(--dot-ink-band) 0 var(--dot-radius),
     transparent var(--dot-radius)
   );
 }
 
 html.dark {
-  --dot-color: rgb(247 248 250 / 0.07);
+  --dot-ink: rgb(247 248 250 / 0.07);
 }
 
 @layer components {
@@ -247,6 +256,34 @@ html.dark {
       linear-gradient(135deg, #ffffff 0%, #f7f8f9 55%, #eef0f2 100%);
     background-size: var(--dot-pitch) var(--dot-pitch), 100% 100%;
     background-repeat: repeat, no-repeat;
+  }
+
+  /* Dots composited WITH the blue band gradient. Declared as its own class
+     rather than layered on .bg-brand-gradient because that uses the
+     `background` shorthand, which sets background-image — adding a second
+     background-image would wipe the gradient out. */
+  .bg-dots-brand {
+    background-image: var(--dot-grid-band),
+      linear-gradient(
+        150deg,
+        var(--color-brand-800) 0%,
+        var(--color-brand-900) 55%,
+        var(--color-brand-950) 100%
+      );
+    background-size: var(--dot-pitch) var(--dot-pitch), 100% 100%;
+    background-repeat: repeat, no-repeat;
+  }
+
+  /* Phone numbers. Standard, plain presentation: body font, regular weight,
+     normal tracking. A phone number is a value to be read and tapped, not a
+     display element, so it must not be set in the display face or in
+     extra-bold with tightened tracking. */
+  .phone-number {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    letter-spacing: normal;
+    font-variant-numeric: tabular-nums;
+    text-transform: none;
   }
 
   /* Opt-in parallax. Cargo attaches the background with `fixed`, which drifts

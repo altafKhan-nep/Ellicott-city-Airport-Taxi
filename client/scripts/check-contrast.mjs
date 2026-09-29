@@ -72,19 +72,22 @@ const ratio = (a, b) => {
 // --dot-color is ink at 6%, so bg becomes ink*0.06 + surface*0.94.
 const DOT_ALPHA = 0.06;
 const COMPOSITES = {
-  'dot-paper': '#f2f2f2',
+  'dot-paper': '#f2f2f2',   // light surfaces: ink at 6%
   'dot-soft': '#eef0f2',
   'dot-white': '#ffffff',
+  'dot-band': '#084274',    // blue bands: white at 4% lightens instead
 };
 
-const dotSurface = (surface) => {
-  const s = hex(surface);
-  const i = hex(T.ink);
-  return `#${s.map((v, k) => Math.round(i[k] * DOT_ALPHA + v * (1 - DOT_ALPHA)).toString(16).padStart(2, '0')).join('')}`;
+const DOT_BAND_ALPHA = 0.04;
+const dotSurface = (name) => {
+  const s = hex(COMPOSITES[name]);
+  const c = name === 'dot-band' ? hex('#ffffff') : hex(T.ink);
+  const a = name === 'dot-band' ? DOT_BAND_ALPHA : DOT_ALPHA;
+  return `#${s.map((v, k) => Math.round(c[k] * a + v * (1 - a)).toString(16).padStart(2, '0')).join('')}`;
 };
 
 const get = (name, mode) => {
-  if (COMPOSITES[name]) return dotSurface(COMPOSITES[name]);
+  if (COMPOSITES[name]) return dotSurface(name);
   const [scale, step] = name.split('-');
   if (step && T[scale]) return T[scale][step];
   if (mode === 'dark' && DARK[name]) return DARK[name];
@@ -166,6 +169,15 @@ const LIGHT = [
   // applies rather than 4.5:1.
   ['accent-500 dot on dotted paper (non-text)', 'accent-500', 'dot-paper', 3],
   ['accent-500 dot on dotted soft (non-text)', 'accent-500', 'dot-soft', 3],
+
+  // --- over the blue band (.bg-dots-brand) ---------------------------------
+  // A white dot at 4% LIGHTENS the band, so it is white text contrast that
+  // erodes here, not the accent. 5%+ breaks gold-300; 4% is the cap.
+  ['white on dotted band', '#ffffff', 'dot-band', 4.5],
+  ['white/90 on dotted band (composited)', '#ebebeb', 'dot-band', 4.5],
+  ['gold-300 accent on dotted band', 'gold-300', 'dot-band', 4.5],
+  ['white on the CTA gradient (hero button)', '#ffffff', 'brand-500', 4.5],
+  ['white on the CTA gradient end', '#ffffff', 'brand-700', 4.5],
 ];
 
 const DARK_PAIRS = [

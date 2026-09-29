@@ -135,7 +135,7 @@ export default function Contact() {
           <div className="space-y-5 lg:col-span-2">
             <div className="card p-8">
               <h3 className="text-base font-bold text-ink">Call or email</h3>
-              <a href={`tel:${content.contactPhoneHref}`} className="mt-4 block text-2xl font-extrabold text-brand-900">
+              <a href={`tel:${content.contactPhoneHref}`} className="phone-number mt-4 block text-lg text-brand-900 hover:underline">
                 {content.contactPhone}
               </a>
               <a href={`mailto:${content.contactEmail}`} className="mt-1 block text-sm text-brand-700 underline-offset-2 hover:underline">

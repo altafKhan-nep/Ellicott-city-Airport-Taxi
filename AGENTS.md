@@ -85,8 +85,10 @@ role), slate/gray → `accent`, `bg-white` → `bg-surface` (so dark mode works)
 | `.card` | Standard padded card (radius 1rem, `accent-200` border, `surface` bg, layered shadow, lifts on hover). Override padding with `card p-6` / `card p-8`. Defined in `@layer components`, so utilities win. |
 | `.panel` | Same surface with **no** padding and no hover lift — tables, dropdowns, map frames (`panel overflow-hidden`). |
 | `.card-lift` | Animation only, for image/media cards that define their own surface. |
-| `.bg-dots` | Dotted texture over the element's existing surface. From the Cargo theme's dotted-map background, rebuilt in CSS. |
+| `.bg-dots` | Dotted texture (dark ink) over the element's existing surface. From the Cargo theme's dotted-map background, rebuilt in CSS. |
 | `.bg-dots-soft` | The same dots **composited with** the soft wash — use this *instead of* `bg-brand-gradient-soft`, because setting `background-image` would wipe the gradient out. |
+| `.bg-dots-brand` | Dots **composited with** the blue band gradient — replaces `bg-brand-gradient` for the same reason. Uses a *light* ink, since a dark dot on a dark band measures 1.03:1, i.e. invisible. |
+| `.phone-number` | Standard plain phone presentation: body font, weight 500, normal tracking, no transform. A phone is a value to read and tap, not a display element — never set it in `font-display` or extra-bold. |
 | `.bg-dots-parallax` | Opt-in `background-attachment: fixed`. Off by default: unreliable on iOS Safari and a scroll-performance cost. |
 | `lib/statusTone.js` | `rideTone()`, `payTone()`, `payAccent()`, `badgeTone()` — the only place status/payment colors are defined, so every page renders identical pills. Never re-declare a `STATUS_STYLE` map. |
 

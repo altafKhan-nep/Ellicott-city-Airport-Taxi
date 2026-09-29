@@ -62,7 +62,7 @@ export default function AuthLayout({ title, highlight, subtitle, children, foote
             className="flex items-center gap-3 pt-2 transition-opacity hover:opacity-90"
           >
             <Phone className="h-5 w-5 text-gold-300" />
-            <span className="font-display text-2xl font-bold tracking-tight">{content.contactPhone}</span>
+            <span className="phone-number text-lg text-white/90">{content.contactPhone}</span>
           </a>
         </div>
       </aside>
