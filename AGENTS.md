@@ -122,6 +122,7 @@ ride-booking/
 │   │   └── services/        # api.js, authService.js, socketService.js, rideService.js, paymentService.js, notificationService.js, userService.js, adminService.js, settingsService.js
 │   └── public/              # sw.js (web-push service worker)
 ├── server/                  # Express backend
+│   ├── app.js               # Passenger (cPanel/shared hosting) entry shim
 │   ├── src/
 │   │   ├── controllers/     # Route handlers
 │   │   ├── models/          # Mongoose schemas (User, Ride, Location, RefreshToken, OtpCode, Payment, Notification, AppSetting)
@@ -587,11 +588,17 @@ Driver positions are seeded near Howard County, MD (~39.20, -76.85). "Nearby dri
 
 | Target | What to do |
 |--------|------------|
-| **Vercel** (client) | `client/vercel.json` already rewrites all paths to `/index.html` for the SPA. Point the project at `client/`, or set the root directory accordingly. Set `VITE_*` build vars. |
-| **Render** (server) | No Render config is committed. Use `npm start` from `server/` (or `render.yaml` if one is added) and set every env var from `server/.env.example` as a **secret**. `PORT` is supplied by Render — do not hardcode it. |
-| **MongoDB Atlas** | Atlas is **not** deployed from this repo. Create the cluster, add the IP allowlist for Render, and set `MONGO_URI` as a Render secret. The database name must stay `ellicottaxi`. |
+| **Vercel** (client) | `client/vercel.json` pins framework/build/output and rewrites all paths to `/index.html` for the SPA. Point the project at `client/`, and set `VITE_API_URL` + `VITE_STRIPE_PUBLISHABLE_KEY` as build vars. |
+| **Render** (server) | `render.yaml` is a ready blueprint: `rootDir: server`, `npm ci` + `npm start`, `/api/health` health check, 20 secrets declared `sync: false`. `PORT` is supplied by Render — do not hardcode it. |
+| **Interserver** (client) | `./scripts/build-interserver.sh <API_URL>` builds and zips the SPA with the API URL baked in. Upload to `public_html`; the SPA fallback ships as `client/public/.htaccess`. Full guide: `docs/DEPLOY-INTERSERVER.md`. |
+| **Interserver shared** (server) | cPanel → Setup Node.js App, root `server`, startup `app.js` (a Passenger shim that imports `src/index.js`). Live tracking is degraded here — see the guide's Decision table. |
+| **MongoDB Atlas** | Atlas is **not** deployed from this repo, and shared hosting has no MongoDB at all. Create the cluster, add the IP allowlist, and set `MONGO_URI` as a secret. The database name must stay `ellicottaxi`. |
 
 Required in production: `NODE_ENV=production`, `MONGO_URI`, `JWT_ACCESS_SECRET` (32+ chars, random), `CLIENT_ORIGIN`, `TRUST_PROXY=true`, plus `REDIS_URL` and the third-party keys you actually use. **Never** set `EXPOSE_DEV_TOKENS`.
+
+> **`VITE_*` variables are inlined at BUILD time.** Changing the API host is not a
+> restart — it is a rebuild + re-upload. This is the single most common deploy
+> mistake: the API moves, the client is not rebuilt, and every request 404s.
 
 ## CORS and the mobile app
 
