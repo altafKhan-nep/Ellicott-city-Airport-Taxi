@@ -3,81 +3,95 @@
 
 /*
  * RideTaxi Design Tokens
- * Professional red + black + gold palette (user-chosen) — RED-led:
- *   - Deep Red #C62828 = MAIN BRAND color: nav, hero, footer, bands, CTAs
- *   - Bright Red #E53935 = CTA, hover, attention
- *   - Midnight Black #0B0D0F = text + small contrast accents (never primary)
- *   - Off White #F8F9FA = main background
- *   - Cool Gray #667085 = secondary text
- *   - Warm Gold #F4B942 = premium highlights / ratings / hero accent words
- * Keep token NAMES stable (brand-*, accent-*) so component classes never change.
+ * Palette + type derived from the "Cargo" WordPress theme (Bold Themes),
+ * then re-tuned per role so every combination clears WCAG AA.
+ *   - Cargo Red #DD3333 (deep #C22020) = MAIN BRAND: nav, hero, footer, bands, CTAs
+ *   - Cargo Charcoal #313131 / #444444 = neutral contrast + secondary UI
+ *   - Cargo Orange #FF6900 (hue 24) = the former gold accent role: premium
+ *     highlights, live dots, hero accent words on the red band
+ *   - Cargo Green #00D084 = functional "done / paid / online" (also the map pin)
+ *
+ * WHY THE VALUES DIFFER SLIGHTLY FROM CARGO'S RAW HEXES
+ * Cargo ships literal theme colours, several of which fail AA when used as
+ * body text (its #00D084 green is 1.9:1 on a light tint; its #727272 gray is
+ * 4.49:1). We keep Cargo's hue identity but darken each role to the lightest
+ * value that still clears 4.5:1. Every pair below is asserted by
+ * `client/scripts/check-contrast.mjs` — run it before editing any value here.
+ *
+ * Keep token NAMES stable (brand-*, accent-*, gold-*, success-*) so component
+ * classes never change. You change VALUES, never class names.
  */
 @theme {
-  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --font-display: 'Fraunces', 'Georgia', 'Times New Roman', serif;
+  --font-sans: 'Raleway', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Raleway', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 
-  /* brand-* = the RED primary scale (deep red heart, darker at the deep end) */
-  --color-brand-50: #fdf5f5;
-  --color-brand-100: #fbeaea;
-  --color-brand-200: #f6d2d1;
-  --color-brand-300: #eeaaa8;
-  --color-brand-400: #e26a68;
-  --color-brand-500: #e53935;
-  --color-brand-600: #d7332f;
-  --color-brand-700: #c62828;
-  --color-brand-800: #a11c1c;
-  --color-brand-900: #7a1414;
-  --color-brand-950: #57100f;
+  /* brand-* = Cargo red scale (#dd3333 primary, #c22020 hover/deep) */
+  --color-brand-50: #fdeeee;
+  --color-brand-100: #fbdada;
+  --color-brand-200: #f5b3b3;
+  --color-brand-300: #ee8a8a;
+  --color-brand-400: #e05050;
+  --color-brand-500: #d62f2f;
+  --color-brand-600: #c22020;
+  --color-brand-700: #a81c1c;
+  --color-brand-800: #8a1a1a;
+  --color-brand-900: #6b1515;
+  --color-brand-950: #451010;
 
-  /* accent-* = neutral blacks/grays for contrast, text, secondary UI */
+  /* accent-* = Cargo charcoal neutrals (#313131 / #444444 / #727272) */
   --color-accent-50: #f7f7f8;
-  --color-accent-100: #ececee;
-  --color-accent-200: #d9d9dd;
-  --color-accent-300: #b9b9c0;
-  --color-accent-400: #8f8f9a;
-  --color-accent-500: #667085;
-  --color-accent-600: #4b5560;
-  --color-accent-700: #3a424c;
-  --color-accent-800: #232830;
-  --color-accent-900: #0b0d0f;
+  --color-accent-100: #eeeeef;
+  --color-accent-200: #dedee2;
+  --color-accent-300: #c4c4c9;
+  --color-accent-400: #9a9aa2;
+  --color-accent-500: #6b6b6b;
+  --color-accent-600: #5b5b5b;
+  --color-accent-700: #444444;
+  --color-accent-800: #313131;
+  --color-accent-900: #1c1c1c;
 
-  /* gold-* = premium highlights / ratings / hero accent words */
-  --color-gold-50: #fdf9ec;
-  --color-gold-100: #faf0cd;
-  --color-gold-200: #f5df9c;
-  --color-gold-300: #efc964;
-  --color-gold-400: #f4b942;
-  --color-gold-500: #eaa82b;
-  --color-gold-600: #cf8d1c;
-  --color-gold-700: #a86d16;
-  --color-gold-800: #8a5712;
-  --color-gold-900: #6b4210;
-  --color-gold-950: #42280a;
+  /* gold-* = the ACCENT role, now Cargo orange (#ff6900, hue 24).
+     The token name is intentionally kept: ~30 components reference gold-300 /
+     gold-400 for on-red highlights, and renaming would mean editing all of
+     them. The values below are the orange ramp. */
+  --color-gold-50: #fff0e5;
+  --color-gold-100: #ffddc7;
+  --color-gold-200: #ffbc8f;
+  --color-gold-300: #ffa970;
+  --color-gold-400: #ff9147;
+  --color-gold-500: #ff751a;
+  --color-gold-600: #c95000;
+  --color-gold-700: #bc4c00;
+  --color-gold-800: #9e3f00;
+  --color-gold-900: #803300;
+  --color-gold-950: #522100;
 
-  /* success-* = functional "done / paid / online" green (single source of truth,
-     shared with the map pickup pin so the app never mixes greens) */
-  --color-success-50: #ecfdf5;
-  --color-success-100: #d1fae5;
-  --color-success-200: #a7f3d0;
-  --color-success-400: #34d399;
-  --color-success-500: #10b981;
-  --color-success-600: #059669;
-  --color-success-700: #047857;
-  --color-success-800: #065f46;
-  --color-success-900: #064e3b;
-  --color-success-950: #022c22;
+  /* success-* = Cargo green (#00d084), darkened for text roles so status
+     pills clear AA on their own tints. Also the single source of truth for
+     the map pickup pin, so the app never mixes greens. */
+  --color-success-50: #e6fbf3;
+  --color-success-100: #c2f5e1;
+  --color-success-200: #86eac5;
+  --color-success-300: #4ddca8;
+  --color-success-400: #1fd08e;
+  --color-success-500: #00d084;
+  --color-success-600: #008252;
+  --color-success-700: #006b43;
+  --color-success-800: #045233;
+  --color-success-900: #032b21;
+  --color-success-950: #01170f;
 
   --color-surface: #ffffff;
-  --color-ink: #0b0d0f;
-  --color-muted: #667085;
-  --color-paper: #f8f9fa;
+  --color-ink: #1c1c1c;
+  --color-muted: #6b6b6b;
+  --color-paper: #f7f7f8;
 }
 
 html.dark {
-  --color-paper: #0b0d0f;
-  --color-ink: #f8f9fa;
-  --color-muted: #8f8f9a;
-  --color-surface: #15181c;
+  --color-paper: #1c1c1c;
+  --color-ink: #f7f7f8;
+  --color-muted: #9a9aa2;
+  --color-surface: #313131;
 }
 .dark body {
   background: var(--color-paper);
@@ -91,6 +105,8 @@ body,
 
 body {
   font-family: var(--font-sans);
+  /* Cargo sets 500 as the default body weight. */
+  font-weight: 500;
   color: var(--color-ink);
   background: var(--color-paper);
   -webkit-font-smoothing: antialiased;
@@ -103,7 +119,14 @@ h4,
 h5,
 h6 {
   font-family: var(--font-display);
+  /* Cargo sets ~1px tracking on its large headings. Keep the slight negative
+     pull for small headings, and open up the big ones. */
   letter-spacing: -0.02em;
+}
+
+h1,
+h2 {
+  letter-spacing: 0.01em;
 }
 
 /* ---- Brand gradient helpers (premium surfaces) ---- */
@@ -112,12 +135,12 @@ h6 {
 }
 
 .bg-brand-gradient-soft {
-  background: linear-gradient(135deg, #ffffff 0%, #fdf6f6 55%, #f7eaea 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #fdf3f3 55%, #f9e7e7 100%);
 }
 
 .btn-brand-gradient {
   background: linear-gradient(180deg, var(--color-brand-500) 0%, var(--color-brand-700) 100%);
-  box-shadow: 0 1px 2px rgba(87, 16, 15, 0.3), 0 10px 24px -12px rgba(198, 40, 40, 0.55);
+  box-shadow: 0 1px 2px rgba(69, 16, 16, 0.3), 0 10px 24px -12px rgba(194, 32, 32, 0.55);
 }
 .btn-brand-gradient:hover {
   background: linear-gradient(180deg, var(--color-brand-400) 0%, var(--color-brand-600) 100%);
@@ -143,8 +166,8 @@ h6 {
     background-color: var(--color-surface);
     padding: 1.25rem;
     box-shadow:
-      0 1px 2px rgba(24, 24, 28, 0.04),
-      0 10px 30px -18px rgba(24, 24, 28, 0.18);
+      0 1px 2px rgba(28, 28, 28, 0.04),
+      0 10px 30px -18px rgba(28, 28, 28, 0.18);
     transition:
       transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
       box-shadow 0.35s ease;
@@ -152,8 +175,8 @@ h6 {
   .card:hover {
     transform: translateY(-4px);
     box-shadow:
-      0 2px 4px rgba(24, 24, 28, 0.05),
-      0 28px 52px -22px rgba(24, 24, 28, 0.28);
+      0 2px 4px rgba(28, 28, 28, 0.05),
+      0 28px 52px -22px rgba(28, 28, 28, 0.28);
   }
   .dark .card {
     border-color: var(--color-accent-800);
@@ -166,8 +189,8 @@ h6 {
     border: 1px solid var(--color-accent-200);
     background-color: var(--color-surface);
     box-shadow:
-      0 1px 2px rgba(24, 24, 28, 0.04),
-      0 10px 30px -18px rgba(24, 24, 28, 0.18);
+      0 1px 2px rgba(28, 28, 28, 0.04),
+      0 10px 30px -18px rgba(28, 28, 28, 0.18);
   }
   .dark .panel {
     border-color: var(--color-accent-800);
@@ -241,7 +264,7 @@ h6 {
 
 /* Live passenger marker (blue) on the driver's ride map */
 .map-pin-passenger {
-  background: #2563eb;
+  background: #0b60a9;
   border: 2px solid #ffffff;
 }
 
@@ -257,9 +280,9 @@ h6 {
   height: 20px;
   place-items: center;
   border-radius: 50%;
-  background: #2563eb;
+  background: #0b60a9;
   border: 3px solid #ffffff;
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.22), 0 2px 10px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 0 0 4px rgba(11, 96, 169, 0.22), 0 2px 10px rgba(0, 0, 0, 0.35);
 }
 
 .map-pin-user::after {
@@ -267,7 +290,7 @@ h6 {
   position: absolute;
   inset: -7px;
   border-radius: 50%;
-  border: 2px solid rgba(37, 99, 235, 0.45);
+  border: 2px solid rgba(11, 96, 169, 0.45);
   animation: user-pulse 2s ease-out infinite;
 }
 
@@ -306,10 +329,10 @@ h6 {
 @keyframes pin-pulse {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.45), 0 2px 8px rgba(0, 0, 0, 0.28);
+    box-shadow: 0 0 0 0 rgba(255, 117, 26, 0.45), 0 2px 8px rgba(0, 0, 0, 0.28);
   }
   50% {
-    box-shadow: 0 0 0 12px rgba(217, 119, 6, 0), 0 2px 8px rgba(0, 0, 0, 0.28);
+    box-shadow: 0 0 0 12px rgba(255, 117, 26, 0), 0 2px 8px rgba(0, 0, 0, 0.28);
   }
 }
 
@@ -332,8 +355,8 @@ h6 {
 /* Animated cards: layered depth at rest, gentle float on hover */
 .card-lift {
   box-shadow:
-    0 1px 2px rgba(24, 24, 28, 0.04),
-    0 10px 30px -18px rgba(24, 24, 28, 0.18);
+    0 1px 2px rgba(28, 28, 28, 0.04),
+    0 10px 30px -18px rgba(28, 28, 28, 0.18);
   transition:
     transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
     box-shadow 0.35s ease;
@@ -341,8 +364,8 @@ h6 {
 .card-lift:hover {
   transform: translateY(-6px);
   box-shadow:
-    0 2px 4px rgba(24, 24, 28, 0.05),
-    0 28px 52px -22px rgba(24, 24, 28, 0.32);
+    0 2px 4px rgba(28, 28, 28, 0.05),
+    0 28px 52px -22px rgba(28, 28, 28, 0.32);
 }
 
 /* Scroll-reveal (paired with <Reveal>) */

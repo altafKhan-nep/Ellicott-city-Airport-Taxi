@@ -234,8 +234,8 @@ export default function PaymentModal({ ride, onClose, onPaid }) {
                         variables: {
                           colorPrimary: '#d7332f',
                           colorBackground: '#ffffff',
-                          colorText: '#0b0d0f',
-                          fontFamily: 'Inter, system-ui, sans-serif',
+                          colorText: '#1c1c1c',
+                          fontFamily: 'Raleway, system-ui, sans-serif',
                           spacingUnit: '3px',
                           borderRadius: '10px',
                           tabBorderRadius: '10px',

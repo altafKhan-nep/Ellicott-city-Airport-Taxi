@@ -18,7 +18,7 @@ export const MAP_VIEWS = [
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
     subdomains: 'abcd',
     swatch: (
-      <span className="block h-9 w-9 rounded-lg bg-[#16181d] [background-image:linear-gradient(#2a2e36,#2a2e36),linear-gradient(#2a2e36,#2a2e36),linear-gradient(#2a2e36,#2a2e36),linear-gradient(#2a2e36,#2a2e36),linear-gradient(#2a2e36,#2a2e36),linear-gradient(#2a2e36,#2a2e36),linear-gradient(#2a2e36,#2a2e36),linear-gradient(#2a2e36,#2a2e36)] [background-size:100%_5px,100%_5px,100%_5px,100%_5px,100%_5px,100%_5px,100%_5px,100%_5px] [background-position:0_4px,0_16px,0_28px,4px_0,16px_0,28px_0,0_24px,22px_8px] [background-repeat:no-repeat]" />
+      <span className="block h-9 w-9 rounded-lg bg-[#1c1c1c] [background-image:linear-gradient(#313131,#313131),linear-gradient(#313131,#313131),linear-gradient(#313131,#313131),linear-gradient(#313131,#313131),linear-gradient(#313131,#313131),linear-gradient(#313131,#313131),linear-gradient(#313131,#313131),linear-gradient(#313131,#313131)] [background-size:100%_5px,100%_5px,100%_5px,100%_5px,100%_5px,100%_5px,100%_5px,100%_5px] [background-position:0_4px,0_16px,0_28px,4px_0,16px_0,28px_0,0_24px,22px_8px] [background-repeat:no-repeat]" />
     ),
   },
   {

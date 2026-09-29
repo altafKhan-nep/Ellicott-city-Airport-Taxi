@@ -4,36 +4,36 @@ const svgWrap = (body, size) =>
   `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 32 32" fill="none" aria-hidden="true">${body}</svg>`;
 
 // Top-down sedan: rounded rectangle body, windshield, roof, wheels, heading chevron
-const uberSedan = (color = '#0b0d0f') => svgWrap(`
+const uberSedan = (color = '#1c1c1c') => svgWrap(`
   <g filter="url(#s)">
   <rect x="9" y="4" width="14" height="24" rx="3.5" fill="${color}" stroke="white" stroke-width="1.2"/>
   <rect x="10.5" y="7" width="11" height="6" rx="1" fill="white" opacity="0.95"/>
   <rect x="10.5" y="19" width="11" height="4" rx="1" fill="white" opacity="0.9"/>
-  <circle cx="10" cy="10" r="1.2" fill="#1a1a1a"/><circle cx="22" cy="10" r="1.2" fill="#1a1a1a"/>
-  <circle cx="10" cy="22" r="1.2" fill="#1a1a1a"/><circle cx="22" cy="22" r="1.2" fill="#1a1a1a"/>
+  <circle cx="10" cy="10" r="1.2" fill="#333333"/><circle cx="22" cy="10" r="1.2" fill="#333333"/>
+  <circle cx="10" cy="22" r="1.2" fill="#333333"/><circle cx="22" cy="22" r="1.2" fill="#333333"/>
   <path d="M16 2.5 L18 5.5 H14 Z" fill="${color}" stroke="white" stroke-width="0.8"/>
   </g>
   <defs><filter id="s" x="0" y="0" width="32" height="32" filterUnits="userSpaceOnUse"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.25"/></filter></defs>
 `, 32);
 
-const uberSuv = (color = '#0b0d0f') => svgWrap(`
+const uberSuv = (color = '#1c1c1c') => svgWrap(`
   <g filter="url(#s)">
   <rect x="8" y="3" width="16" height="26" rx="3" fill="${color}" stroke="white" stroke-width="1.2"/>
   <rect x="9.5" y="7" width="13" height="7" rx="1.2" fill="white" opacity="0.95"/>
   <rect x="9.5" y="19.5" width="13" height="4.5" rx="1" fill="white" opacity="0.9"/>
-  <circle cx="9.5" cy="10" r="1.3" fill="#1a1a1a"/><circle cx="22.5" cy="10" r="1.3" fill="#1a1a1a"/>
-  <circle cx="9.5" cy="22.5" r="1.3" fill="#1a1a1a"/><circle cx="22.5" cy="22.5" r="1.3" fill="#1a1a1a"/>
+  <circle cx="9.5" cy="10" r="1.3" fill="#333333"/><circle cx="22.5" cy="10" r="1.3" fill="#333333"/>
+  <circle cx="9.5" cy="22.5" r="1.3" fill="#333333"/><circle cx="22.5" cy="22.5" r="1.3" fill="#333333"/>
   <path d="M16 1.5 L19 5 H13 Z" fill="${color}" stroke="white" stroke-width="0.8"/>
   </g>
   <defs><filter id="s" x="0" y="0" width="32" height="32"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.25"/></filter></defs>
 `, 32);
 
-const uberVan = (color = '#0b0d0f') => svgWrap(`
+const uberVan = (color = '#1c1c1c') => svgWrap(`
   <g filter="url(#s)">
   <rect x="7" y="2" width="18" height="28" rx="2.5" fill="${color}" stroke="white" stroke-width="1.2"/>
   <rect x="9" y="6" width="14" height="14" rx="1" fill="white" opacity="0.92"/>
-  <circle cx="9" cy="9" r="1.2" fill="#1a1a1a"/><circle cx="23" cy="9" r="1.2" fill="#1a1a1a"/>
-  <circle cx="9" cy="23" r="1.2" fill="#1a1a1a"/><circle cx="23" cy="23" r="1.2" fill="#1a1a1a"/>
+  <circle cx="9" cy="9" r="1.2" fill="#333333"/><circle cx="23" cy="9" r="1.2" fill="#333333"/>
+  <circle cx="9" cy="23" r="1.2" fill="#333333"/><circle cx="23" cy="23" r="1.2" fill="#333333"/>
   <path d="M16 1 L19 4.5 H13 Z" fill="${color}" stroke="white" stroke-width="0.8"/>
   </g>
   <defs><filter id="s" x="0" y="0" width="32" height="32"><feDropShadow dx="0" dy="2" stdDeviation="2.2" flood-opacity="0.28"/></filter></defs>
@@ -65,7 +65,7 @@ export const PIN_USER = svg(
 );
 
 // Uber top-down exports — heading-rotatable via CSS transform
-export const UBER_SEDAN = uberSedan('#0b0d0f');
-export const UBER_SUV = uberSuv('#0b0d0f');
-export const UBER_VAN = uberVan('#0b0d0f');
+export const UBER_SEDAN = uberSedan('#1c1c1c');
+export const UBER_SUV = uberSuv('#1c1c1c');
+export const UBER_VAN = uberVan('#1c1c1c');
 export const UBER_SEDAN_GOLD = uberSedan('#a11c1c');

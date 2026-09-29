@@ -179,7 +179,7 @@ export function BookingMap({ center, pickup, dropoff, route, drivers = [], userP
             />
             <Polyline
               positions={routePositions}
-              pathOptions={{ color: '#c62828', weight: 5, opacity: 0.9, lineCap: 'round' }}
+              pathOptions={{ color: '#c22020', weight: 5, opacity: 0.9, lineCap: 'round' }}
             />
           </>
         )}

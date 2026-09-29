@@ -17,30 +17,59 @@ cd server && npm run dev    # http://localhost:5001
 
 > **macOS gotcha**: Port `5000` is often taken by ControlCenter/AirPlay. The backend defaults to **5001**. If you change it, also update `client/vite.config.js` proxy targets.
 
-## Design System (professional red + black + gold — user-chosen, RED-led)
+## Design System (Cargo palette — red / charcoal / orange, RED-led)
 
 All design tokens live in `client/src/index.css` inside the Tailwind `@theme` block.
-**Keep token NAMES stable** (`brand-*`, `accent-*`) — component classes reference them by name,
-so you change a color value, never a class.
+**Keep token NAMES stable** (`brand-*`, `accent-*`, `gold-*`, `success-*`) — ~40 components
+reference them by name, so you change a color *value*, never a class.
+
+The palette is derived from the **Cargo** WordPress theme (Bold Themes), re-tuned per role.
+Typeface is **Raleway** throughout (Cargo uses a single family).
 
 | Token family | Role | Key values |
 |--------------|------|------------|
-| `brand-*` | **RED = primary brand**: nav/hero/footer bands, CTAs, live dots, red accent text | `brand-500 #e53935`, `brand-600 #d7332f`, `brand-700 #c62828`, `brand-800 #a11c1c`, `brand-950 #57100f` |
-| `accent-*` | Neutral blacks/grays = contrast + secondary UI (never primary) | `accent-400 #8f8f9a`, `accent-500 #667085`, `accent-900 #0b0d0f` |
-| `gold-*` | Warm gold = premium highlights / ratings / hero accent words on red | `gold-300 #efc964`, `gold-400 #f4b942`, `gold-500 #eaa82b` |
-| `success-*` | Functional green = done / paid / online / confirmed (single green for UI **and** the map pickup pin) | `success-500 #10b981`, `success-600 #059669`, `success-700 #047857` |
-| `ink` / `muted` | Text on off-white paper | `ink #0b0d0f`, `muted #667085`, `paper #f8f9fa` |
-| Fonts | `--font-display` = **Fraunces** (serif, headings — elegant editorial), `--font-sans` = **Inter** (body, highly readable) | Google Fonts, loaded in `client/index.html` |
+| `brand-*` | **RED = primary brand**: nav/hero/footer bands, CTAs, live dots, red accent text | `brand-500 #d62f2f`, `brand-600 #c22020`, `brand-700 #a81c1c`, `brand-800 #8a1a1a`, `brand-950 #451010` |
+| `accent-*` | Cargo charcoal neutrals = contrast + secondary UI (never primary) | `accent-400 #9a9aa2`, `accent-500 #6b6b6b`, `accent-800 #313131`, `accent-900 #1c1c1c` |
+| `gold-*` | **The accent role — now Cargo orange** (hue 24). Premium highlights / ratings / hero accent words on red. *Token name is legacy; the values are orange.* | `gold-300 #ffa970`, `gold-400 #ff9147`, `gold-500 #ff751a`, `gold-600 #c95000` |
+| `success-*` | Cargo green = done / paid / online / confirmed (single green for UI **and** the map pickup pin) | `success-500 #00d084`, `success-600 #008252`, `success-700 #006b43` |
+| `ink` / `muted` | Text on off-white paper | `ink #1c1c1c`, `muted #6b6b6b`, `paper #f7f7f8` |
+| Fonts | `--font-sans` **and** `--font-display` = **Raleway** (one family, as Cargo does). Body weight 500. | Google Fonts, loaded in `client/index.html` |
+
+> **Why the values differ from Cargo's literal hexes.** Cargo ships raw theme colors, several of
+> which FAIL WCAG AA as text — its `#00D084` green is 1.9:1 on a light tint, `#727272` is 4.49:1,
+> `#FF6900` is 2.89:1 on white. We keep Cargo's *hue identity* and darken each role to the
+> lightest value that still clears 4.5:1. **Run `npm run check:contrast` before changing any
+> color value here** — it asserts all 27 rendered combinations and exits non-zero on a regression.
 
 Usage rules:
-- **Red leads**: `bg-brand-gradient` (deep red) is the primary surface for nav/hero/footer/CTA bands. CTAs use `btn-brand-gradient` (bright→deep red). `bg-brand-gradient-soft` (warm off-white wash) is the body background between bands. `text-brand-gradient` (red) highlights words/stats on light sections.
-- **Gold accents on red**: hero accent words, live dots, stat numbers and phone numbers on red bands use `text-gold-300` / `bg-gold-400` (not red) so they pop against the red.
-- **Black is a contrast accent only** — body headings (`ink`), dark icons, map pins; never a surface color.
+- **Red leads**: `bg-brand-gradient` (deep red, `brand-800 → 950`) is the primary surface for
+  nav/hero/footer/CTA bands. CTAs use `btn-brand-gradient`. `bg-brand-gradient-soft` (warm
+  off-white wash) is the body background between bands. `text-brand-gradient` highlights
+  words/stats on light sections.
+- **Orange accents on red** (was "gold on red"): hero accent words, live dots, stat numbers and
+  phone numbers on red bands use `text-gold-300` / `bg-gold-400` so they pop against the red.
+  Both are the orange ramp — read `gold-*` as "the accent role", not literal gold.
+- **Charcoal is a contrast accent only** — body headings (`ink`), dark icons, map pins; never a
+  surface color (except the dark-mode overrides).
 - Pills everywhere (Uber-style touch targets): `rounded-full` inputs (`input-pill`), buttons, chips.
-- Functional map colors are the ONLY allowed exceptions to the palette: pickup = circular green `map-pin-start` (`success-500`), dropoff = red `map-pin-dropoff` (brand-700), driver = pulsing red `map-pin-driver` (brand-600), idle vehicles = `map-pin-vehicle` (white circle + black border). Route polyline is brand red `#c62828` (white casing) hardcoded in `BookingMap.jsx` and `RideTracking.jsx`.
-- Depth comes from layered shadows: `.card-lift` (resting 2-layer shadow, float on hover) — no heavy borders.
+- Functional map colors are the ONLY allowed exceptions to the palette: pickup = circular green
+  `map-pin-start` (`success-500`), dropoff = red `map-pin-dropoff` (brand-700), driver = pulsing
+  red `map-pin-driver` (brand-600), idle vehicles = `map-pin-vehicle`. Route polyline is brand red
+  `#c22020` (white casing) hardcoded in `BookingMap.jsx` / `RideTracking.jsx` / `LiveMapPage.tsx`
+  / `ActiveRidePanel.jsx` / `CurrentRidePage.tsx` — Leaflet `pathOptions` need a raw hex. The
+  "you are here" dot uses Cargo blue `#0b60a9` (not a brand color: it must not read as pickup).
+- Depth comes from layered shadows: `.card-lift` (resting 2-layer shadow, float on hover) — no
+  heavy borders.
+- The 3D hero taxi keeps its **glossy black** paint and white/red lights (it is a physical object,
+  not a brand surface); only the taillight tracks `brand-600`. Never recolor the body.
+- Type scale is Tailwind's default (`text-xs`…`text-6xl`). **Do not copy Cargo's 13px body** —
+  it fails readability for a booking funnel; `text-sm` (14px) is our floor for UI text.
 
-**Hard rule — no raw Tailwind palette colors.** Only `brand-*`, `accent-*`, `gold-*`, `success-*`, `ink`, `muted`, `paper`, `surface` may appear in components. Never `slate-*`, `blue-*`, `green-*`, `red-*`, `amber-*`, `yellow-*`, `gray-*`. Semantic mapping used across the app: red → `brand`, green → `success`, yellow/amber → `gold`, blue/slate/gray → `accent`, `bg-white` → `bg-surface` (so dark mode works).
+**Hard rule — no raw Tailwind palette colors.** Only `brand-*`, `accent-*`, `gold-*`, `success-*`,
+`ink`, `muted`, `paper`, `surface` may appear in components. Never `slate-*`, `blue-*`, `green-*`,
+`red-*`, `amber-*`, `yellow-*`, `gray-*`, `orange-*`. Semantic mapping: red → `brand`, green →
+`success`, yellow/amber/orange → `gold` (the accent role), blue/slate/gray → `accent`,
+`bg-white` → `bg-surface` (so dark mode works).
 
 **Shared surfaces & tones (use these, never re-declare):**
 | Utility / module | Use for |
@@ -657,4 +686,11 @@ io.to(`ride:${rideId}`).emit('ride:update', { ride, status });
 11. **Lowercase JSX tags are DOM, not components**: `<icon />` where `icon` is a prop holding a component renders a literal `<icon>` element and logs "unrecognized tag". Always alias it — `const Icon = icon;` then `<Icon />`. Same class of bug for catalog strings: render them through `ui/ServiceIcon.jsx` (`<s.icon />` silently produced `<s>` with an unknown attribute).
 12. **One role vocabulary**: import `ADMIN_ROLES` / `hasRole` from `client/src/lib/roles.js` for guards *and* nav. An earlier guard allowed 6 CRM roles while the navbar only linked `role === 'admin'`, so a dispatcher could reach the CRM by URL but had no way to navigate there.
 13. **Hash tabs must listen to the URL**: `ContentPage` seeds its tab from `location.hash` on mount, `pushState`s on click, and subscribes to `hashchange`/`popstate`. Without those listeners a deep link opened on an already-mounted page kept the old tab and browser back did nothing.
-14. **Catalog writes are audited**: adding an admin `POST`/`PATCH`/`DELETE` without `audit(...)` silently shrinks the Audit Log. See the Audit Log section.
+14. **Audit new colors before shipping them.** Run `npm run check:contrast` (client) after any
+    `@theme` value change. A theme's raw hexes are tuned for large graphics, not body text —
+    Cargo's own `#00D084` green is 1.9:1 on a light tint. Keep the hue, re-tune the lightness.
+15. **Gradient-clipped text reads as `color: transparent`.** `.text-brand-gradient` paints from its
+    own background, so any tool that reads `getComputedStyle(el).color` sees transparent and will
+    report a false contrast failure. Skip gradient-clipped, `font-mono` and map/attribution nodes
+    in contrast audits.
+16. **Catalog writes are audited**: adding an admin `POST`/`PATCH`/`DELETE` without `audit(...)` silently shrinks the Audit Log. See the Audit Log section.

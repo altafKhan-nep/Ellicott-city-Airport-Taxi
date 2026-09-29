@@ -101,7 +101,7 @@ export default function CrmShell() {
   );
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa] text-ink dark:bg-accent-900 dark:text-white">
+    <div className="min-h-screen bg-paper text-ink dark:bg-accent-900 dark:text-white">
       <aside className={`fixed inset-y-0 left-0 z-[1001] hidden border-r border-accent-200 bg-surface shadow-sm transition-all dark:border-accent-800 dark:bg-accent-900 lg:block ${collapsed ? 'w-20' : 'w-72'}`}>
         {SidebarInner}
         <button onClick={() => setCollapsed(v => !v)} className="absolute -right-3 top-24 grid h-7 w-7 place-items-center rounded-full border border-accent-200 bg-surface text-xs shadow-md hover:bg-accent-50 dark:border-accent-700 dark:bg-accent-800">{collapsed ? '›' : '‹'}</button>

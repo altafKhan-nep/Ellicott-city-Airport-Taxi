@@ -59,9 +59,12 @@ const LENS = new THREE.MeshStandardMaterial({
   roughness: 0.05,
   metalness: 0.2,
 });
+// Taillight is the only brand-reactive material on the car: it tracks the
+// current brand red so the hero 3D taxi never contradicts the palette. The
+// body paint stays glossy black (see AGENTS.md).
 const TAIL = new THREE.MeshStandardMaterial({
-  color: '#e53935',
-  emissive: '#ff3b30',
+  color: '#c22020',
+  emissive: '#d62f2f',
   emissiveIntensity: 2.2,
   roughness: 0.3,
 });
@@ -90,10 +93,10 @@ function makeDecalTexture(flip = false) {
   ctx.shadowColor = 'rgba(0,0,0,0.45)';
   ctx.shadowBlur = 10;
   ctx.fillStyle = '#ffffff';
-  ctx.font = '700 58px Inter, system-ui, sans-serif';
+  ctx.font = '700 58px Raleway, system-ui, sans-serif';
   ctx.fillText('Ellicott City', 256, 62);
   ctx.shadowBlur = 5;
-  ctx.font = '600 30px Inter, system-ui, sans-serif';
+  ctx.font = '600 30px Raleway, system-ui, sans-serif';
   ctx.fillStyle = '#e6e6e8';
   ctx.fillText('Airport Taxi', 256, 112);
   const tex = new THREE.CanvasTexture(c);
@@ -113,7 +116,7 @@ function makeSignTexture() {
   ctx.shadowColor = '#ffffff';
   ctx.shadowBlur = 14;
   ctx.fillStyle = '#ffffff';
-  ctx.font = '800 36px Inter, system-ui, sans-serif';
+  ctx.font = '800 36px Raleway, system-ui, sans-serif';
   ctx.fillText('TAXI', 128, 34);
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
