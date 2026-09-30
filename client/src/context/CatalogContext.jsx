@@ -16,11 +16,13 @@ const FALLBACK_FLEET = VEHICLES.map((v, i) => ({
   capacity: v.capacity,
   seats: v.seats,
   bags: v.bags,
-  // Carry the real photo, not an empty string. An empty image silently drops
-  // every vehicle to a generic icon whenever the API is unavailable.
+  // Carry the real copy, not empty strings/arrays. Dropping `tagline` and
+  // `features` made every vehicle description vanish whenever the API was
+  // unreachable — which is exactly what a deployed site hits when
+  // VITE_API_URL is unset, since the client then calls /api on its own origin.
   image: v.image,
-  tagline: '',
-  features: [],
+  tagline: v.tagline,
+  features: v.features,
   icon: 'car',
   active: true,
   sortOrder: i,
@@ -34,8 +36,11 @@ const FALLBACK_SERVICES = SERVICES.map((s, i) => ({
   tagline: s.tagline,
   summary: s.summary,
   features: s.features,
-  icon: '',
-  featured: false,
+  // `icon` is a NAME string for ServiceIcon, and `featured` drives the Home
+  // band. Both were hardcoded to '' / false here, which blanked every service
+  // icon and emptied the featured band whenever the API was unreachable.
+  icon: s.icon,
+  featured: s.featured,
   active: true,
   sortOrder: i,
 }));
