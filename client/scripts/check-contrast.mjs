@@ -232,6 +232,30 @@ const QUOTE_CARD_PAIRS = [
 ];
 run('QUOTE CARD', QUOTE_CARD_PAIRS, 'light');
 
+// `btn-brand-gradient` sets a background-IMAGE, which paints over the
+// background-COLOR that `bg-surface` sets. So a button styled
+// `bg-surface !text-brand-900` ends up dark text on the blue gradient at
+// 1.45:1 — invisible. Assert the primary CTA's real pairing instead.
+console.log('\n=== PRIMARY CTA ON THE BLUE GRADIENT ===');
+const CTA_PAIRS = [
+  ['white on the gradient start', '#ffffff', 'brand-500', 4.5],
+  ['white on the gradient end', '#ffffff', 'brand-700', 4.5],
+];
+run('PRIMARY CTA', CTA_PAIRS, 'light');
+
+// Informational only — these two MUST stay far below 4.5:1. They are printed,
+// never counted as failures, so the gate still passes. If a future change ever
+// makes the inverted chip readable, this note becomes wrong.
+console.log('\n  (the inverted-chip trap — expected to FAIL, not gated):');
+for (const [label, fg, bg] of [
+  ['brand-900 on gradient start', 'brand-900', 'brand-500'],
+  ['brand-900 on gradient end', 'brand-900', 'brand-700'],
+]) {
+  console.log(
+    `  n/a  ${ratio(get(fg, 'light'), get(bg, 'light')).toFixed(2).padStart(5)}:1  ${label}`
+  );
+}
+
 console.log('\n=== TRANSLUCENT NAV TEXT ON THE CHARCOAL BAND ===');
 for (const alpha of [0.75, 0.8, 0.9, 1]) {
   const bgHex = T.brand[800];

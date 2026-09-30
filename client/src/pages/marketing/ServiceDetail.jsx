@@ -53,7 +53,7 @@ export default function ServiceDetail() {
           <p className="mt-5 max-w-2xl text-lg leading-relaxed text-white/80">{service.summary}</p>
           <div className="mt-8 flex flex-wrap gap-4">
             <Link to={bookUrl}>
-              <Button size="lg" className="bg-surface !text-brand-900 shadow-xl hover:bg-brand-50">
+              <Button size="lg" className="shadow-xl">
                 Book this service
               </Button>
             </Link>

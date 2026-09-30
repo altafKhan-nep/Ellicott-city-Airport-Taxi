@@ -13,10 +13,12 @@ const FALLBACK_FLEET = VEHICLES.map((v, i) => ({
   key: v.id,
   label: v.label,
   desc: v.desc,
-  capacity: v.desc,
-  seats: 4,
-  bags: 2,
-  image: '',
+  capacity: v.capacity,
+  seats: v.seats,
+  bags: v.bags,
+  // Carry the real photo, not an empty string. An empty image silently drops
+  // every vehicle to a generic icon whenever the API is unavailable.
+  image: v.image,
   tagline: '',
   features: [],
   icon: 'car',

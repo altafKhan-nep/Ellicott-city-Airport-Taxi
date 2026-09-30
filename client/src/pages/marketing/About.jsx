@@ -77,7 +77,7 @@ export default function About() {
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
             <Link to={bookUrl}>
-              <Button size="lg" className="bg-surface !text-brand-900 shadow-xl hover:bg-brand-50">
+              <Button size="lg" className="shadow-xl">
                 Secure your ride
               </Button>
             </Link>
@@ -194,7 +194,7 @@ export default function About() {
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
             <Link to={bookUrl}>
-              <Button size="lg" className="bg-surface !text-brand-900 shadow-xl hover:bg-brand-50">
+              <Button size="lg" className="shadow-xl">
                 Book now
               </Button>
             </Link>

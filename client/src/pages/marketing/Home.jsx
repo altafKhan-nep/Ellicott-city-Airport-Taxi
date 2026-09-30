@@ -394,16 +394,25 @@ export default function Home() {
       </section>
 
       {/* ============ IMAGE BAND ============ */}
-      <section className="relative overflow-hidden">
+      {/* The band lets the image set its own height (`w-full`, no fixed h-*, no
+          object-cover). A fixed short band plus object-cover cropped the roof
+          and the wheels off the car. The scrim is desktop-only and sits on top
+          of the image; on small screens the copy moves below it so it is never
+          squeezed over the photo. */}
+      <section className="relative overflow-hidden bg-brand-950">
         <img
           src="/images/ececutive-sedan.png"
           alt="Ellicott City Airport Taxi executive sedan"
-          className="h-72 w-full object-cover sm:h-96"
+          className="block w-full"
           loading="lazy"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-brand-950/80 via-brand-900/40 to-transparent" />
-        <div className="absolute inset-0 flex items-center">
-          <div className="mx-auto w-full max-w-7xl px-4 sm:px-6">
+        <div className="pointer-events-none absolute inset-0 hidden bg-gradient-to-r from-brand-950 from-5% via-brand-950/80 to-transparent md:block" />
+        {/* The source photo has a white studio background, so its bottom margin
+            would otherwise read as a bright strip under the car. Fade it into
+            the band. */}
+        <div className="pointer-events-none absolute inset-0 hidden bg-gradient-to-t from-brand-950 via-brand-950/45 to-transparent md:block" />
+        <div className="relative bg-brand-950 px-4 py-10 sm:px-6 md:absolute md:inset-0 md:flex md:items-center md:bg-transparent md:py-0">
+          <div className="mx-auto w-full max-w-7xl">
             <div className="max-w-lg">
               <h2 className="text-2xl font-bold text-white sm:text-3xl">
                 Professional chauffeurs. Immaculate vehicles. Every single time.

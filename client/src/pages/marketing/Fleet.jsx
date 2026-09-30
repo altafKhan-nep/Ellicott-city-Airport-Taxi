@@ -37,7 +37,7 @@ export default function Fleet() {
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
             <Link to={bookUrl}>
-              <Button size="lg" className="bg-surface !text-brand-900 shadow-xl hover:bg-brand-50">
+              <Button size="lg" className="shadow-xl">
                 Book a vehicle now
               </Button>
             </Link>
@@ -120,7 +120,7 @@ export default function Fleet() {
               </p>
             </div>
             <a href={`tel:${content.contactPhoneHref}`}>
-              <Button size="lg" className="phone-number bg-surface !text-brand-900 shadow-lg hover:bg-brand-50">
+              <Button size="lg" className="phone-number shadow-lg">
                 Call {content.contactPhone}
               </Button>
             </a>
