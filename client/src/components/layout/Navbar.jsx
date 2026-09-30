@@ -1,6 +1,6 @@
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
-import { Phone, ArrowRight, ChevronDown, CarFront, LogOut, UserRound } from 'lucide-react';
+import { Phone, ArrowRight, ChevronDown, LogOut, UserRound } from 'lucide-react';
 import { useContent } from '../../context/ContentContext.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useCatalog } from '../../context/CatalogContext.jsx';
@@ -111,10 +111,21 @@ export default function Navbar() {
   return (
     <header className="bg-brand-gradient sticky top-0 z-[1001] shadow-lg shadow-brand-950/20">
       <nav className="mx-auto flex h-[72px] max-w-7xl items-center gap-3 px-4 sm:px-6">
-        {/* Brand */}
+        {/* Brand — the real logo mark on a white plate. The mark (car + plane +
+            tower) is the graphic-only crop of the full lockup: at navbar height
+            the wordmark would be ~28px wide and illegible, so the name stays as
+            live text beside it. The plate is required because the artwork has a
+            dark car and a white ground — on the navy band it would vanish. */}
         <Link to="/" onClick={closeAll} className="group flex shrink-0 items-center gap-2.5" aria-label="Ellicott City Airport Taxi — home">
-          <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white/10 ring-1 ring-white/15 transition-colors group-hover:bg-white/15">
-            <CarFront className="h-5 w-5 text-gold-300" aria-hidden="true" />
+          <span className="grid h-11 shrink-0 place-items-center rounded-xl bg-white px-2 shadow-sm transition-transform group-hover:scale-[1.03]">
+            <img
+              src="/images/logo-mark.png"
+              alt=""
+              aria-hidden="true"
+              className="h-7 w-auto"
+              width={451}
+              height={224}
+            />
           </span>
           <span className="flex flex-col leading-none">
             <span className="font-display text-[15px] font-semibold tracking-tight text-white sm:text-base">
