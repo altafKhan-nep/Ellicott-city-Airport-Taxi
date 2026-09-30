@@ -18,13 +18,18 @@ export default function AuthLayout({ title, highlight, subtitle, children, foote
         <div className="pointer-events-none absolute -bottom-32 -left-16 h-80 w-80 rounded-full bg-gold-500/15 blur-3xl" />
 
         <div className="relative">
-          <Link to="/" className="inline-flex items-center gap-2.5">
-            <span className="grid h-10 w-10 place-items-center rounded-xl bg-white text-base font-bold text-brand-800">
-              E
-            </span>
-            <span className="font-display text-xl font-bold leading-none tracking-tight">
-              Ellicott City <span className="text-gold-300">Airport Taxi</span>
-            </span>
+          <Link
+            to="/"
+            aria-label="Ellicott City Airport Taxi — home"
+            className="inline-block rounded-2xl bg-white p-3 shadow-lg ring-1 ring-black/5"
+          >
+            <img
+              src="/images/logo-full.png"
+              alt="Ellicott City Airport Taxi"
+              className="w-36"
+              width={527}
+              height={344}
+            />
           </Link>
           <p className="mt-3 text-[11px] font-medium uppercase tracking-[0.2em] text-white/50">
             Ellicott City · Maryland

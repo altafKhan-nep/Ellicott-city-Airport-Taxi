@@ -10,10 +10,23 @@ export default function Footer() {
     <footer className="mt-auto bg-brand-gradient text-white">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-4">
         <div>
-          <div className="text-lg font-bold text-white">
-            Ellicott City <span className="text-gold-300">Airport Taxi</span>
-          </div>
-          <p className="mt-3 text-sm leading-relaxed text-white/75">
+          {/* The real logo is a full lockup whose wordmark is dark navy, so it
+              cannot sit directly on the navy band — it needs a light plate. */}
+          <Link
+            to="/"
+            aria-label="Ellicott City Airport Taxi — home"
+            className="inline-block rounded-2xl bg-white p-3 shadow-lg ring-1 ring-black/5"
+          >
+            <img
+              src="/images/logo-full.png"
+              alt="Ellicott City Airport Taxi"
+              className="w-40"
+              loading="lazy"
+              width={527}
+              height={344}
+            />
+          </Link>
+          <p className="mt-4 text-sm leading-relaxed text-white/75">
             {content.tagline} {content.hours}
           </p>
           <div className="mt-4 flex gap-3">
