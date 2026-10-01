@@ -56,10 +56,61 @@ export const rides = asyncHandler(async (req, res) => {
 });
 
 // GET /api/admin/drivers
-export const drivers = asyncHandler(async (req, res) => {
-  const drivers = await User.find({ role: 'driver' }).select('-password');
-  res.json({ drivers });
-});
+  export const drivers = asyncHandler(async (req, res) => {
+    // ?status=pending|verified|rejected|none filters the review queue.
+    const filter = { role: 'driver' };
+    const status = safeFilterValue(req.query.status);
+    if (status) {
+      if (!['none', 'pending', 'verified', 'rejected'].includes(status)) {
+        return res.status(400).json({ message: 'Invalid status filter' });
+      }
+      filter['driverDetails.verificationStatus'] = status;
+    }
+    const drivers = await User.find(filter).select('-password');
+    res.json({ drivers });
+  });
+
+  // PATCH /api/admin/drivers/:id/verify { status: 'verified' | 'rejected', note }
+  //
+  // Approving makes the driver bookable; rejecting requires a note so the
+  // driver knows what to fix. Every decision records who reviewed it and when.
+  export const verifyDriver = asyncHandler(async (req, res) => {
+    const status = safeFilterValue(req.body.status);
+    if (!['verified', 'rejected'].includes(status)) {
+      return res.status(400).json({ message: 'Status must be verified or rejected' });
+    }
+    const note = safeFilterValue(req.body.note || '').slice(0, 500);
+    if (status === 'rejected' && !note) {
+      return res.status(400).json({ message: 'A note is required when rejecting' });
+    }
+
+    const driver = await User.findOne({ _id: req.params.id, role: 'driver' });
+    if (!driver) return res.status(404).json({ message: 'Driver not found' });
+
+    if (driver.driverDetails?.verificationStatus === status) {
+      return res.status(409).json({ message: `Driver is already ${status}` });
+    }
+
+    driver.driverDetails = driver.driverDetails || {};
+    driver.driverDetails.verificationStatus = status;
+    driver.driverDetails.verificationReviewedAt = new Date();
+    driver.driverDetails.verificationReviewedBy = req.user._id;
+    driver.driverDetails.verificationNote = note;
+    // A rejected driver must not stay on duty.
+    if (status === 'rejected') driver.driverDetails.isAvailable = false;
+    await driver.save();
+
+    // Tell the driver the outcome.
+    await notify(driver._id, {
+      type: 'account',
+      title: status === 'verified' ? 'You are verified' : 'Verification update',
+      message: status === 'verified'
+        ? 'Your driver account has been approved. You can now go online.'
+        : `Your driver account was not approved. ${note}`,
+    });
+
+    res.json({ driver });
+  });
 
 // PATCH /api/admin/rides/:id/driver { driverId } - assign a driver to a ride,
 // or { driverId: null } to remove the assigned driver and return to the board.

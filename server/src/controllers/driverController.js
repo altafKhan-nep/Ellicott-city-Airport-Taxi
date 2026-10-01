@@ -26,7 +26,15 @@ export const driverEta = asyncHandler(async (req, res) => {
 });
 
 // PATCH /api/drivers/availability { isAvailable: boolean }
+//
+// Only a verified driver may go online. Without this a self-registered driver
+// could accept rides before an admin had looked at their documents.
 export const setAvailability = asyncHandler(async (req, res) => {
+  if (req.body.isAvailable && req.user.driverDetails?.verificationStatus !== 'verified') {
+    return res.status(403).json({
+      message: 'Your driver account is not verified yet. An admin must approve it before you can go online.',
+    });
+  }
   const driver = await driverService.updateAvailability(req.user._id, req.body.isAvailable);
   res.json({ driver });
 });

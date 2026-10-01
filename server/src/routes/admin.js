@@ -15,6 +15,7 @@ router.get('/rides', admin.rides);
 router.patch('/rides/:id/driver', audit('rides.assignDriver', { targetType: 'Ride' }), admin.assignDriver);
 router.get('/drivers', admin.drivers);
 router.patch('/drivers/:id', audit('drivers.update', { targetType: 'User' }), admin.toggleDriver);
+router.post('/drivers/:id/verify', audit('drivers.verify', { targetType: 'User' }), admin.verifyDriver);
 router.get('/users', admin.users);
 router.patch('/users/:id/suspend', audit('users.suspend', { targetType: 'User' }), admin.suspendUser);
 router.patch('/users/:id/unsuspend', audit('users.unsuspend', { targetType: 'User' }), admin.unsuspendUser);

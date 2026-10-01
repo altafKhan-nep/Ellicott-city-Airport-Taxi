@@ -21,3 +21,15 @@ export const changePassword = asyncHandler(async (req, res) => {
   await userService.changePassword(req.user._id, req.body);
   res.json({ success: true });
 });
+
+export const getDriverDetails = asyncHandler(async (req, res) => {
+  res.json({ driver: await userService.getDriverDetails(req.user._id) });
+});
+
+export const updateDriverDetails = asyncHandler(async (req, res) => {
+  res.json({ driver: await userService.updateDriverDetails(req.user._id, req.body) });
+});
+
+export const updatePassengerProfile = asyncHandler(async (req, res) => {
+  res.json({ user: await userService.updatePassengerProfile(req.user._id, req.body) });
+});
