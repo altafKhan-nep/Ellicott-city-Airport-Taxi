@@ -101,12 +101,14 @@ export const rides = asyncHandler(async (req, res) => {
     await driver.save();
 
     // Tell the driver the outcome.
-    await notify(driver._id, {
+    await notify({
+      user: driver._id,
       type: 'account',
       title: status === 'verified' ? 'You are verified' : 'Verification update',
       message: status === 'verified'
         ? 'Your driver account has been approved. You can now go online.'
         : `Your driver account was not approved. ${note}`,
+      io: ioOf(req),
     });
 
     res.json({ driver });
