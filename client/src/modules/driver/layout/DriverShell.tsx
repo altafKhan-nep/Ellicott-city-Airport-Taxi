@@ -116,6 +116,22 @@ export default function DriverShell() {
         </motion.div>
       )}
       <main className={`${collapsed ? 'lg:pl-20' : 'lg:pl-72'} transition-all`}>
+        {driver?.driverDetails?.verificationStatus !== 'verified' && (
+          <div className="mx-auto max-w-[1600px] px-4 pt-4 sm:px-6 lg:px-8 lg:pt-6">
+            <div className="flex items-start gap-3 rounded-2xl border border-gold-200 bg-gold-50 px-4 py-3 dark:border-gold-800 dark:bg-gold-950">
+              <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gold-100 text-gold-700 dark:bg-gold-900 dark:text-gold-300">
+                <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true">
+                  <path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 6a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 6zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                </svg>
+              </span>
+              <p className="text-sm leading-snug text-gold-800 dark:text-gold-200">
+                <span className="font-semibold">Verification required.</span> Your driver
+                account is not verified yet, so you cannot go online. An admin must
+                approve your documents first.
+              </p>
+            </div>
+          </div>
+        )}
         <div className="mx-auto max-w-[1600px] p-4 sm:p-6 lg:p-8">
           <Outlet />
         </div>

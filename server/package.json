@@ -9,7 +9,8 @@
     "start": "node src/index.js",
     "seed": "node src/seed/index.js",
     "lint": "eslint src",
-    "seed:rides": "node seed-demo-rides.mjs"
+    "seed:rides": "node seed-demo-rides.mjs",
+    "migrate:drivers": "node src/scripts/verify-existing-drivers.mjs"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
