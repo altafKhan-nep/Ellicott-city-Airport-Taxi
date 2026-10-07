@@ -258,6 +258,11 @@ cd server && npm run seed       # Seed test data
 
 ## Testing
 
+> `docs/ERRORS_RESOLVED.md` is the record of every defect found in this project,
+> what caused it, and which test now guards it. Read it before adding a field to
+> a schema or touching the catalog fallback — those are the two areas with a
+> proven track record of breaking silently.
+
 There are three layers, and they exist because of specific failures rather than
 because testing is conventional here.
 
