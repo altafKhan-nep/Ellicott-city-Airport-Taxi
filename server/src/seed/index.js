@@ -39,6 +39,11 @@ const users = [
       plateNumber: 'ABC-123',
       licenseNo: 'DL-88213',
       isAvailable: true,
+      // Seeded drivers are pre-verified. The verification workflow defaults this
+      // to 'none', and setAvailability() returns 403 unless it is 'verified', so
+      // without this every seeded driver is locked out of going online and the
+      // documented dev flow (seed -> login as alex@...) silently breaks.
+      verificationStatus: 'verified',
     },
   },
   {
@@ -54,6 +59,7 @@ const users = [
       plateNumber: 'XYZ-789',
       licenseNo: 'DL-99102',
       isAvailable: true,
+      verificationStatus: 'verified',
     },
   },
 ];

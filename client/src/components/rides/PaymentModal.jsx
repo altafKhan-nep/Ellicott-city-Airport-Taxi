@@ -6,6 +6,7 @@ import { payRide, createPaymentIntent } from '../../services/paymentService.js';
 import { getPublicSettings } from '../../services/settingsService.js';
 import { Input } from '../../components/ui/Input.jsx';
 import { Button } from '../../components/ui/Button.jsx';
+import { formatPhoneDisplay } from '../../lib/phone.js';
 
 const STRIPE_PK = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '';
 
@@ -34,7 +35,9 @@ export default function PaymentModal({ ride, onClose, onPaid }) {
     getPublicSettings()
       .then(({ data }) => {
         setDisabled(data.settings?.paymentsEnabled === false);
-        setSupportPhone(data.settings?.supportPhone || '');
+        // Normalise on render for the same reason as contactPhone: a value
+        // saved with parentheses must still display straight.
+        setSupportPhone(formatPhoneDisplay(data.settings?.supportPhone || ''));
       })
       .catch(() => {});
   }, []);

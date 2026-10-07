@@ -29,7 +29,12 @@ const MILES_TO_KM = 1.60934;
  * @returns {{ km: number, minutes: number, total: number }}
  */
 export function estimateQuote(miles) {
-  const km = Math.max(0, miles) * MILES_TO_KM;
+  // Coerce defensively: this feeds a money value, and `Math.max(0, NaN)` is NaN,
+  // which would render as "$NaN" on the card. The slider only ever emits numbers,
+  // but a quote must never be able to display a non-number.
+  const n = Number(miles);
+  const safeMiles = Number.isFinite(n) ? Math.max(0, n) : 0;
+  const km = safeMiles * MILES_TO_KM;
   const minutes = (km / AVG_SPEED_KMH) * 60;
   const total = RATE.base + km * RATE.perKm + minutes * RATE.perMin;
   return {

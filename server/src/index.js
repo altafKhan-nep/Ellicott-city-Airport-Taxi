@@ -1,3 +1,5 @@
+import { fileURLToPath } from "url";
+import { resolve } from "path";
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
@@ -150,11 +152,30 @@ initSocket(io);
 
 const PORT = process.env.PORT || 5001;
 
-connectDB().then(async () => {
+export { app, server, start };
+
+/**
+ * Connect, seed the catalog, and start listening.
+ *
+ * Only invoked when this file is the entrypoint. Tests import `app` directly
+ * against their own in-memory Mongo, so importing this module must NOT bind a
+ * port or open a second database connection — which is why the boot sits behind
+ * the `isDirectRun` check rather than running on import.
+ */
+async function start() {
+  await connectDB();
   // Fleet classes + service offerings are admin-managed; seed once into an
   // empty collection so a fresh install is usable.
   await ensureCatalogDefaults().catch((e) => console.error('Catalog seed failed:', e.message));
   server.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
   });
-});
+}
+
+// `node src/index.js` behaves exactly as before; importing it does not boot.
+const isDirectRun =
+  process.argv[1] && resolve(fileURLToPath(import.meta.url)) === resolve(process.argv[1]);
+
+if (isDirectRun) start();
+
+export default app;

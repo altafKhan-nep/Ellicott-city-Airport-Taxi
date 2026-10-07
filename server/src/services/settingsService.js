@@ -10,7 +10,8 @@ const DEFAULTS = {
   // Toggles
   paymentsEnabled: true,
   // Support info shown in the app
-  supportPhone: '(410) 365-5556',
+  // Same format as contentService.contactPhone: straight digits, no parens.
+  supportPhone: '410-365-5556',
   supportEmail: 'chriskbonsu@gmail.com',
 };
 

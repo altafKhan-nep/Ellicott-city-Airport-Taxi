@@ -9,7 +9,10 @@
     "preview": "vite preview",
     "lint": "eslint src",
     "check:contrast": "node scripts/check-contrast.mjs",
-    "check:catalog": "node scripts/check-catalog-fallback.mjs"
+    "check:catalog": "node scripts/check-catalog-fallback.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@react-three/drei": "^9.122.0",
@@ -30,6 +33,7 @@
     "three": "^0.169.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/vite": "^4.0.0",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
@@ -39,6 +43,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "tailwindcss": "^4.0.0",
     "typescript": "^7.0.2",
-    "vite": "^7.3.6"
+    "vite": "^7.3.6",
+    "vitest": "^4.1.11"
   }
 }
