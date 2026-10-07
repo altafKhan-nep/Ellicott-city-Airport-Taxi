@@ -246,12 +246,50 @@ cd client && npm run build      # Production build
 cd client && npm run lint       # ESLint
 cd client && npm run check:contrast   # WCAG gate on every rendered colour pair
 cd client && npm run check:catalog    # client catalog fallback vs server defaults
+cd client && npm test           # unit tests (phone, quote, catalog fallback)
+cd client && npm run test:e2e   # Playwright smoke tests (needs the API on :5001)
 
 # Backend
 cd server && npm run dev        # Start with nodemon
-cd server && npm run start      # Production
+cd server && npm start          # Production
+cd server && npm test           # API integration tests (in-memory Mongo)
 cd server && npm run seed       # Seed test data
 ```
+
+## Testing
+
+There are three layers, and they exist because of specific failures rather than
+because testing is conventional here.
+
+| Command | What it covers | Why it exists |
+|---------|----------------|---------------|
+| `server: npm test` | 44 API tests against a **real** MongoDB (`mongodb-memory-server`) | The bugs that bit us were schema/data bugs, which mocks cannot catch — see below |
+| `client: npm test` | 25 unit tests: `lib/phone.js`, `lib/quote.js`, catalog fallback | These are the pure functions that carry money and phone formatting |
+| `client: npm run test:e2e` | 22 browser tests across the **web ↔ API seam** | Pages degraded quietly rather than crashing; the assertions cover the degraded path too |
+| `client: npm run check:catalog` | client fallback vs server defaults | Diffs the two lists field by field; exits non-zero on drift |
+
+**Why the server tests use a real database.** The driver-verification workflow
+added a field defaulting to `'none'` and, correctly, refused to let unverified
+drivers go online. That locked out every driver who already existed — including
+both seeded accounts — and it was only noticed because the person running the
+seed got locked out. A mocked model would have passed that change happily.
+`server/tests/driverVerification.test.js` and `server/tests/seed.test.js` exist
+purely to pin that, and the seed test runs the **real seed script** as a child
+process so it tests the documented setup rather than a reconstruction of it.
+
+**`src/index.js` exports `app` and boots only when run directly** (guarded by
+`isDirectRun`). Importing it in a test neither binds a port nor opens a second
+database connection; `node src/index.js` is unchanged.
+
+**Always run the seed test after touching the seed or the User schema.** Adding a
+field with a default has broken this project once already, and the migration that
+papered over it (`npm run migrate:drivers`) is a manual step nothing enforces.
+
+**CI** (`.github/workflows/ci.yml`) runs the static gates first, then the server
+tests, client tests, and finally the browser suite against a real API and a
+`mongodb:7` service container. The API runs with `NODE_ENV=development` there
+because `assertEnv()` deliberately refuses a localhost `MONGO_URI` in production;
+the production boot guards are covered by `server/tests/env.test.js` instead.
 
 ## Data Models
 
